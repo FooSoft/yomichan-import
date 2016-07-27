@@ -24,6 +24,41 @@ package main
 
 import "io"
 
+type edictKanjiElement struct {
+	Expression  string   `xml:"keb"`
+	Information []string `xml:"ke_inf"`
+	Priority    []string `xml:"ke_pri"`
+}
+
+type edictReadingElement struct {
+	Reading      string   `xml:"reb"`
+	NoKanji      string   `xml:"re_nokanji"`
+	Restrictions []string `xml:"re_restr"`
+	Information  []string `xml:"re_inf"`
+	Priority     []string `xml:"re_pri"`
+}
+
+type edictSense struct {
+	RestrictKanji   []string `xml:"stagk"`
+	RestrictReading []string `xml:"stagr"`
+	References      []string `xml:"xref"`
+	Antonyms        []string `xml:"ant"`
+	PartOfSpeech    []string `xml:"pos"`
+	Field           []string `xml:"field"`
+	Misc            []string `xml:"misc"`
+	SourceLanguage  []string `xml:"lsource"`
+	Dialect         []string `xml:"dial"`
+	Information     []string `xml:"s_inf"`
+	Glossary        []string `xml:"gloss"`
+}
+
+type edictEntry struct {
+	Sequence int                   `xml:"ent_seq"`
+	Kanji    []edictKanjiElement   `xml:"k_ele"`
+	Reading  []edictReadingElement `xml:"r_ele"`
+	Sense    []edictSense          `xml:"sense"`
+}
+
 func processEdict(reader io.Reader, writer io.Writer) error {
 	return nil
 }
