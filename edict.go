@@ -97,6 +97,43 @@ type edictReading struct {
 	Priority []string `xml:"re_pri"`
 }
 
+type edictSource struct {
+	Content string `xml:",chardata"`
+
+	// The xml:lang attribute defines the language(s) from which
+	// a loanword is drawn.  It will be coded using the three-letter language
+	// code from the ISO 639-2 standard. When absent, the value "eng" (i.e.
+	// English) is the default value. The bibliographic (B) codes are used.
+	Language string `xml:"lang,attr"`
+
+	// The ls_type attribute indicates whether the lsource element
+	// fully or partially describes the source word or phrase of the
+	// loanword. If absent, it will have the implied value of "full".
+	// Otherwise it will contain "part".
+	Type string `xml:"ls_type,attr"`
+
+	// The ls_wasei attribute indicates that the Japanese word
+	// has been constructed from words in the source language, and
+	// not from an actual phrase in that language. Most commonly used to
+	// indicate "waseieigo".
+	Wasei string `xml:"ls_wasei,attr"`
+}
+
+type edictGlossary struct {
+	Content string `xml:",chardata"`
+
+	// The xml:lang attribute defines the target language of the
+	// gloss. It will be coded using the three-letter language code from
+	// the ISO 639 standard. When absent, the value "eng" (i.e. English)
+	// is the default value.
+	Language string `xml:"lang,attr"`
+
+	// The g_gend attribute defines the gender of the gloss (typically
+	// a noun in the target language. When absent, the gender is either
+	// not relevant or has yet to be provided.
+	Gender string `xml:"g_gend"`
+}
+
 type edictSense struct {
 	// These elements, if present, indicate that the sense is restricted
 	// to the lexeme represented by the keb and/or reb.
@@ -137,7 +174,7 @@ type edictSense struct {
 	// language(s) of a loan-word/gairaigo. If the source language is other
 	// than English, the language is indicated by the xml:lang attribute.
 	// The element value (if any) is the source word or phrase.
-	SourceLanguage []string `xml:"lsource"`
+	SourceLanguage []edictSource `xml:"lsource"`
 
 	// For words specifically associated with regional dialects in
 	// Japanese, the entity code for that dialect, e.g. ksb for Kansaiben.
@@ -153,7 +190,7 @@ type edictSense struct {
 	// target-language words or phrases which are equivalents to the
 	// Japanese word. This element would normally be present, however it
 	// may be omitted in entries which are purely for a cross-reference.
-	Glossary []string `xml:"gloss"`
+	Glossary []edictGlossary `xml:"gloss"`
 }
 
 // Entries consist of kanji elements, reading elements,
