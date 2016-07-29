@@ -22,7 +22,12 @@
 
 package main
 
-import "io"
+import (
+	"encoding/xml"
+	"io"
+	"log"
+	"regexp"
+)
 
 type edictKanji struct {
 	// This element will contain a word or short phrase in Japanese
@@ -228,5 +233,54 @@ type edictEntry struct {
 }
 
 func processEdict(reader io.Reader, writer io.Writer) error {
-	return nil
+	entries, err := loadEdict(reader)
+	log.Print(entries)
+	return err
+}
+
+func loadEdict(reader io.Reader) ([]edictEntry, error) {
+	var (
+		err     error
+		entries []edictEntry
+	)
+
+	decoder := xml.NewDecoder(reader)
+
+	for {
+		token, _ := decoder.Token()
+		if token == nil {
+			break
+		}
+
+		switch startElement := token.(type) {
+		case xml.Directive:
+			directive := token.(xml.Directive)
+			if decoder.Entity, err = parseEntities(&directive); err != nil {
+				return nil, err
+			}
+		case xml.StartElement:
+			if startElement.Name.Local == "entry" {
+				var entry edictEntry
+				if err := decoder.DecodeElement(&entry, &startElement); err != nil {
+					return nil, err
+				}
+
+				entries = append(entries, entry)
+			}
+		}
+	}
+
+	return entries, nil
+}
+
+func parseEntities(d *xml.Directive) (map[string]string, error) {
+	re := regexp.MustCompile("<!ENTITY\\s([0-9\\-A-z]+)\\s\"(.+)\">")
+	matches := re.FindAllStringSubmatch(string(*d), -1)
+
+	entities := make(map[string]string)
+	for _, match := range matches {
+		entities[match[1]] = match[2]
+	}
+
+	return entities, nil
 }

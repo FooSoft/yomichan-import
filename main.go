@@ -25,10 +25,10 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path"
-	"strings"
 )
 
 func usage() {
@@ -36,6 +36,15 @@ func usage() {
 }
 
 func process(fileFormat, inputFile, outputFile string) error {
+	handlers := map[string]func(io.Reader, io.Writer) error{
+		"edict": processEdict,
+	}
+
+	handler, ok := handlers[fileFormat]
+	if !ok {
+		return errors.New("unrecognized file format")
+	}
+
 	input, err := os.Open(inputFile)
 	if err != nil {
 		return err
@@ -46,12 +55,7 @@ func process(fileFormat, inputFile, outputFile string) error {
 		return err
 	}
 
-	switch strings.ToLower(fileFormat) {
-	case "edict":
-		return processEdict(input, output)
-	default:
-		return errors.New("unrecognized file format")
-	}
+	return handler(input, output)
 }
 
 func main() {
