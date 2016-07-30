@@ -85,7 +85,7 @@ type edictReading struct {
 	// as a true reading of the kanji. It is typically used for words
 	// such as foreign place names, gairaigo which can be in kanji or
 	// katakana, etc.
-	NoKanji string `xml:"re_nokanji"`
+	NoKanji *string `xml:"re_nokanji"`
 
 	// This element is used to indicate when the reading only applies
 	// to a subset of the keb elements in the entry. In its absence, all
@@ -234,7 +234,15 @@ type edictEntry struct {
 
 func processEdict(reader io.Reader, writer io.Writer) error {
 	entries, err := loadEdict(reader)
-	log.Print(entries)
+
+	for _, entry := range entries {
+		if len(entry.Reading) > 0 {
+			for _, reading := range entry.Reading {
+				log.Print(reading.NoKanji)
+			}
+		}
+	}
+
 	return err
 }
 
