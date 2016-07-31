@@ -29,16 +29,87 @@ import (
 	"github.com/FooSoft/jmdict"
 )
 
-func processEdict(reader io.Reader, writer io.Writer) error {
-	entries, err := jmdict.LoadEdict(reader)
+type dictEntry struct {
+	Expression string
+	Reading    string
+	Glossary   []string
+	Tags       map[string]bool
+}
 
-	for _, entry := range entries {
-		if len(entry.Reading) > 0 {
-			for _, reading := range entry.Reading {
-				log.Print(reading.NoKanji)
-			}
+func (d *dictEntry) addTags(tags []string) {
+	for _, tag := range tags {
+		d.Tags[tag] = true
+	}
+}
+
+func findString(needle string, haystack []string) int {
+	for index, value := range haystack {
+		if needle == value {
+			return index
 		}
 	}
 
-	return err
+	return -1
+}
+
+func extractDictEntries(edictEntry jmdict.EdictEntry) []dictEntry {
+	var entries []dictEntry
+
+	for _, kanji := range edictEntry.Kanji {
+		for _, reading := range edictEntry.Reading {
+			if findString(kanji.Expression, reading.Restrictions) != -1 {
+				continue
+			}
+
+			entry := dictEntry{
+				Expression: kanji.Expression,
+				Reading:    reading.Reading,
+				Tags:       make(map[string]bool),
+			}
+
+			entry.addTags(reading.Information)
+			entry.addTags(reading.Priority)
+			entry.addTags(kanji.Information)
+			entry.addTags(kanji.Priority)
+
+			for _, sense := range edictEntry.Sense {
+				if findString(reading.Reading, sense.RestrictedReadings) != -1 {
+					continue
+				}
+
+				if findString(kanji.Expression, sense.RestrictedKanji) != -1 {
+					continue
+				}
+
+				for _, glossary := range sense.Glossary {
+					entry.Glossary = append(entry.Glossary, glossary.Content)
+				}
+
+				entry.addTags(sense.PartOfSpeech)
+				entry.addTags(sense.Fields)
+				entry.addTags(sense.Misc)
+				entry.addTags(sense.Dialect)
+			}
+
+			entries = append(entries, entry)
+		}
+	}
+
+	return entries
+}
+
+func processEdict(reader io.Reader, writer io.Writer) error {
+	edictEntries, _, err := jmdict.LoadEdict(reader, false)
+	if err != nil {
+		return err
+	}
+
+	var entries []dictEntry
+	for _, edictEntry := range edictEntries {
+		entries = append(entries, extractDictEntries(edictEntry)...)
+	}
+
+	log.Print(entries[123])
+
+	return nil
 }
