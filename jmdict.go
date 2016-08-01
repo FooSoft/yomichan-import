@@ -109,7 +109,7 @@ func processEdict(reader io.Reader, writer io.Writer) error {
 		entries = append(entries, extractDictEntries(edictEntry)...)
 	}
 
-	log.Print(entries[123])
+	log.Print(entries[42])
 
 	return nil
 }
