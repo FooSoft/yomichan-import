@@ -52,46 +52,60 @@ func findString(needle string, haystack []string) int {
 	return -1
 }
 
-func extractDictEntries(edictEntry jmdict.EdictEntry) []dictEntry {
+func convertEdictEntry(edictEntry jmdict.EdictEntry) []dictEntry {
 	var entries []dictEntry
 
-	for _, kanji := range edictEntry.Kanji {
-		for _, reading := range edictEntry.Reading {
-			if findString(kanji.Expression, reading.Restrictions) != -1 {
+	convert := func(reading jmdict.EdictReading, kanji *jmdict.EdictKanji) {
+		if kanji != nil && findString(kanji.Expression, reading.Restrictions) != -1 {
+			return
+		}
+
+		entry := dictEntry{Tags: make(map[string]bool)}
+
+		if kanji == nil {
+			entry.Expression = reading.Reading
+		} else {
+			entry.Expression = kanji.Expression
+			entry.Reading = reading.Reading
+
+			entry.addTags(kanji.Information)
+			entry.addTags(kanji.Priority)
+		}
+
+		entry.addTags(reading.Information)
+		entry.addTags(reading.Priority)
+
+		for _, sense := range edictEntry.Sense {
+			if findString(reading.Reading, sense.RestrictedReadings) != -1 {
 				continue
 			}
 
-			entry := dictEntry{
-				Expression: kanji.Expression,
-				Reading:    reading.Reading,
-				Tags:       make(map[string]bool),
+			if kanji != nil && findString(kanji.Expression, sense.RestrictedKanji) != -1 {
+				continue
 			}
 
-			entry.addTags(reading.Information)
-			entry.addTags(reading.Priority)
-			entry.addTags(kanji.Information)
-			entry.addTags(kanji.Priority)
-
-			for _, sense := range edictEntry.Sense {
-				if findString(reading.Reading, sense.RestrictedReadings) != -1 {
-					continue
-				}
-
-				if findString(kanji.Expression, sense.RestrictedKanji) != -1 {
-					continue
-				}
-
-				for _, glossary := range sense.Glossary {
-					entry.Glossary = append(entry.Glossary, glossary.Content)
-				}
-
-				entry.addTags(sense.PartOfSpeech)
-				entry.addTags(sense.Fields)
-				entry.addTags(sense.Misc)
-				entry.addTags(sense.Dialect)
+			for _, glossary := range sense.Glossary {
+				entry.Glossary = append(entry.Glossary, glossary.Content)
 			}
 
-			entries = append(entries, entry)
+			entry.addTags(sense.PartOfSpeech)
+			entry.addTags(sense.Fields)
+			entry.addTags(sense.Misc)
+			entry.addTags(sense.Dialect)
+		}
+
+		entries = append(entries, entry)
+	}
+
+	if len(edictEntry.Kanji) > 0 {
+		for _, kanji := range edictEntry.Kanji {
+			for _, reading := range edictEntry.Reading {
+				convert(reading, &kanji)
+			}
+		}
+	} else {
+		for _, reading := range edictEntry.Reading {
+			convert(reading, nil)
 		}
 	}
 
@@ -106,7 +120,7 @@ func processEdict(reader io.Reader, writer io.Writer) error {
 
 	var entries []dictEntry
 	for _, edictEntry := range edictEntries {
-		entries = append(entries, extractDictEntries(edictEntry)...)
+		entries = append(entries, convertEdictEntry(edictEntry)...)
 	}
 
 	log.Print(entries[42])
