@@ -37,7 +37,8 @@ func usage() {
 
 func process(fileFormat, inputFile, outputFile string) error {
 	handlers := map[string]func(io.Reader, io.Writer) error{
-		"edict": processEdict,
+		"edict":    processEdict,
+		"enamdict": processEnamdict,
 	}
 
 	handler, ok := handlers[fileFormat]

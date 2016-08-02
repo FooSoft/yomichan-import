@@ -24,7 +24,6 @@ package main
 
 import (
 	"io"
-	"log"
 
 	"github.com/FooSoft/jmdict"
 )
@@ -52,6 +51,52 @@ func findString(needle string, haystack []string) int {
 	return -1
 }
 
+func convertEnamdictEntry(enamdictEntry jmdict.EnamdictEntry) []dictEntry {
+	var entries []dictEntry
+
+	convert := func(reading jmdict.EnamdictReading, kanji *jmdict.EnamdictKanji) {
+		if kanji != nil && findString(kanji.Expression, reading.Restrictions) != -1 {
+			return
+		}
+
+		entry := dictEntry{Tags: make(map[string]bool)}
+
+		if kanji == nil {
+			entry.Expression = reading.Reading
+		} else {
+			entry.Expression = kanji.Expression
+			entry.Reading = reading.Reading
+
+			entry.addTags(kanji.Information)
+			entry.addTags(kanji.Priorities)
+		}
+
+		entry.addTags(reading.Information)
+		entry.addTags(reading.Priorities)
+
+		for _, trans := range enamdictEntry.Translations {
+			entry.Glossary = append(entry.Glossary, trans.Translations...)
+			entry.addTags(trans.NameTypes)
+		}
+
+		entries = append(entries, entry)
+	}
+
+	if len(enamdictEntry.Kanji) > 0 {
+		for _, kanji := range enamdictEntry.Kanji {
+			for _, reading := range enamdictEntry.Readings {
+				convert(reading, &kanji)
+			}
+		}
+	} else {
+		for _, reading := range enamdictEntry.Readings {
+			convert(reading, nil)
+		}
+	}
+
+	return entries
+}
+
 func convertEdictEntry(edictEntry jmdict.EdictEntry) []dictEntry {
 	var entries []dictEntry
 
@@ -69,11 +114,11 @@ func convertEdictEntry(edictEntry jmdict.EdictEntry) []dictEntry {
 			entry.Reading = reading.Reading
 
 			entry.addTags(kanji.Information)
-			entry.addTags(kanji.Priority)
+			entry.addTags(kanji.Priorities)
 		}
 
 		entry.addTags(reading.Information)
-		entry.addTags(reading.Priority)
+		entry.addTags(reading.Priorities)
 
 		for _, sense := range edictEntry.Sense {
 			if findString(reading.Reading, sense.RestrictedReadings) != -1 {
@@ -88,10 +133,10 @@ func convertEdictEntry(edictEntry jmdict.EdictEntry) []dictEntry {
 				entry.Glossary = append(entry.Glossary, glossary.Content)
 			}
 
-			entry.addTags(sense.PartOfSpeech)
+			entry.addTags(sense.PartsOfSpeech)
 			entry.addTags(sense.Fields)
 			entry.addTags(sense.Misc)
-			entry.addTags(sense.Dialect)
+			entry.addTags(sense.Dialects)
 		}
 
 		entries = append(entries, entry)
@@ -99,17 +144,31 @@ func convertEdictEntry(edictEntry jmdict.EdictEntry) []dictEntry {
 
 	if len(edictEntry.Kanji) > 0 {
 		for _, kanji := range edictEntry.Kanji {
-			for _, reading := range edictEntry.Reading {
+			for _, reading := range edictEntry.Readings {
 				convert(reading, &kanji)
 			}
 		}
 	} else {
-		for _, reading := range edictEntry.Reading {
+		for _, reading := range edictEntry.Readings {
 			convert(reading, nil)
 		}
 	}
 
 	return entries
+}
+
+func processEnamdict(reader io.Reader, writer io.Writer) error {
+	enamdictEntries, _, err := jmdict.LoadEnamdict(reader, false)
+	if err != nil {
+		return err
+	}
+
+	var entries []dictEntry
+	for _, enamdictEntry := range enamdictEntries {
+		entries = append(entries, convertEnamdictEntry(enamdictEntry)...)
+	}
+
+	return nil
 }
 
 func processEdict(reader io.Reader, writer io.Writer) error {
@@ -122,8 +181,6 @@ func processEdict(reader io.Reader, writer io.Writer) error {
 	for _, edictEntry := range edictEntries {
 		entries = append(entries, convertEdictEntry(edictEntry)...)
 	}
-
-	log.Print(entries[42])
 
 	return nil
 }
