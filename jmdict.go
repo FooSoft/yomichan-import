@@ -32,12 +32,14 @@ type dictEntry struct {
 	Expression string
 	Reading    string
 	Glossary   []string
-	Tags       map[string]bool
+	Tags       []string
 }
 
 func (d *dictEntry) addTags(tags []string) {
 	for _, tag := range tags {
-		d.Tags[tag] = true
+		if findString(tag, d.Tags) == -1 {
+			d.Tags = append(d.Tags, tag)
+		}
 	}
 }
 
@@ -59,8 +61,7 @@ func convertEnamdictEntry(enamdictEntry jmdict.EnamdictEntry) []dictEntry {
 			return
 		}
 
-		entry := dictEntry{Tags: make(map[string]bool)}
-
+		var entry dictEntry
 		if kanji == nil {
 			entry.Expression = reading.Reading
 		} else {
@@ -105,8 +106,7 @@ func convertEdictEntry(edictEntry jmdict.EdictEntry) []dictEntry {
 			return
 		}
 
-		entry := dictEntry{Tags: make(map[string]bool)}
-
+		var entry dictEntry
 		if kanji == nil {
 			entry.Expression = reading.Reading
 		} else {
