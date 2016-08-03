@@ -32,8 +32,9 @@ import (
 )
 
 type dictJson struct {
-	Indices map[string]string `json:"i"`
-	Items   [][]string        `json:"d"`
+	Indices  map[string]string `json:"i"`
+	Entities map[string]string `json:"e"`
+	Defs     [][]string        `json:"d"`
 }
 
 type dictEntry struct {
@@ -52,33 +53,36 @@ func (d *dictEntry) addTags(tags []string) {
 }
 
 func appendIndex(indices map[string]string, key string, value int) {
-	items, _ := indices[key]
-	if len(indices) > 0 {
-		items = " "
+	def, _ := indices[key]
+	if len(def) > 0 {
+		def += " "
 	}
-	items += strconv.Itoa(value)
-	indices[key] = items
+	def += strconv.Itoa(value)
+	indices[key] = def
 }
 
-func buildDictJson(entries []dictEntry) dictJson {
-	dict := dictJson{Indices: make(map[string]string)}
+func buildDictJson(entries []dictEntry, entities map[string]string) dictJson {
+	dict := dictJson{
+		Indices:  make(map[string]string),
+		Entities: entities,
+	}
 
-	for index, entry := range entries {
-		item := []string{entry.Expression, entry.Reading, strings.Join(entry.Tags, " ")}
-		item = append(item, entry.Glossary...)
-		dict.Items = append(dict.Items, item)
+	for i, e := range entries {
+		entry := []string{e.Expression, e.Reading, strings.Join(e.Tags, " ")}
+		entry = append(entry, e.Glossary...)
+		dict.Defs = append(dict.Defs, entry)
 
-		appendIndex(dict.Indices, entry.Expression, index)
-		if len(entry.Reading) > 0 {
-			appendIndex(dict.Indices, entry.Reading, index)
+		appendIndex(dict.Indices, e.Expression, i)
+		if len(e.Reading) > 0 {
+			appendIndex(dict.Indices, e.Reading, i)
 		}
 	}
 
 	return dict
 }
 
-func outputJson(entries []dictEntry, writer io.Writer) error {
-	dict := buildDictJson(entries)
+func outputJson(entries []dictEntry, entities map[string]string, writer io.Writer) error {
+	dict := buildDictJson(entries, entities)
 
 	bytes, err := json.MarshalIndent(dict, "", "    ")
 	// bytes, err := json.Marshal(dict)
@@ -205,7 +209,7 @@ func convertEdictEntry(edictEntry jmdict.EdictEntry) []dictEntry {
 }
 
 func processEnamdict(reader io.Reader, writer io.Writer) error {
-	enamdictEntries, _, err := jmdict.LoadEnamdict(reader, false)
+	enamdictEntries, entities, err := jmdict.LoadEnamdict(reader, false)
 	if err != nil {
 		return err
 	}
@@ -215,11 +219,11 @@ func processEnamdict(reader io.Reader, writer io.Writer) error {
 		entries = append(entries, convertEnamdictEntry(enamdictEntry)...)
 	}
 
-	return outputJson(entries, writer)
+	return outputJson(entries, entities, writer)
 }
 
 func processEdict(reader io.Reader, writer io.Writer) error {
-	edictEntries, _, err := jmdict.LoadEdict(reader, false)
+	edictEntries, entities, err := jmdict.LoadEdict(reader, false)
 	if err != nil {
 		return err
 	}
@@ -229,5 +233,5 @@ func processEdict(reader io.Reader, writer io.Writer) error {
 		entries = append(entries, convertEdictEntry(edictEntry)...)
 	}
 
-	return outputJson(entries, writer)
+	return outputJson(entries, entities, writer)
 }
