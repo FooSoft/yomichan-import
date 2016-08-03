@@ -23,16 +23,24 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"io"
+	"strings"
 
 	"github.com/FooSoft/jmdict"
 )
 
+type dictJson struct {
+	Indices map[string]string `json:"i"`
+	Items   [][]string        `json:"d"`
+}
+
 type dictEntry struct {
 	Expression string
 	Reading    string
-	Glossary   []string
 	Tags       []string
+	Glossary   []string
 }
 
 func (d *dictEntry) addTags(tags []string) {
@@ -41,6 +49,46 @@ func (d *dictEntry) addTags(tags []string) {
 			d.Tags = append(d.Tags, tag)
 		}
 	}
+}
+
+func appendIndex(indices map[string]string, key string, value int) {
+	items, _ := indices[key]
+	if len(indices) == 0 {
+		items = fmt.Sprintf(" %d", value)
+	} else {
+		items = string(value)
+	}
+	indices[key] = items
+}
+
+func buildDictJson(entries []dictEntry) dictJson {
+	dict := dictJson{Indices: make(map[string]string)}
+
+	for index, entry := range entries {
+		item := []string{entry.Expression, entry.Reading, strings.Join(entry.Tags, " ")}
+		item = append(item, entry.Glossary...)
+		dict.Items = append(dict.Items, item)
+
+		appendIndex(dict.Indices, entry.Expression, index)
+		if len(entry.Reading) > 0 {
+			appendIndex(dict.Indices, entry.Reading, index)
+		}
+	}
+
+	return dict
+}
+
+func outputJson(entries []dictEntry, writer io.Writer) error {
+	dict := buildDictJson(entries)
+
+	bytes, err := json.MarshalIndent(dict, "", "    ")
+	// bytes, err := json.Marshal(dict)
+	if err != nil {
+		return err
+	}
+
+	_, err = writer.Write(bytes)
+	return err
 }
 
 func findString(needle string, haystack []string) int {
@@ -168,7 +216,7 @@ func processEnamdict(reader io.Reader, writer io.Writer) error {
 		entries = append(entries, convertEnamdictEntry(enamdictEntry)...)
 	}
 
-	return nil
+	return outputJson(entries, writer)
 }
 
 func processEdict(reader io.Reader, writer io.Writer) error {
@@ -182,5 +230,5 @@ func processEdict(reader io.Reader, writer io.Writer) error {
 		entries = append(entries, convertEdictEntry(edictEntry)...)
 	}
 
-	return nil
+	return outputJson(entries, writer)
 }
