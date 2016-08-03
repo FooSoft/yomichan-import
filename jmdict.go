@@ -81,11 +81,20 @@ func buildDictJson(entries []dictEntry, entities map[string]string) dictJson {
 	return dict
 }
 
-func outputJson(entries []dictEntry, entities map[string]string, writer io.Writer) error {
+func outputJson(writer io.Writer, entries []dictEntry, entities map[string]string, pretty bool) error {
 	dict := buildDictJson(entries, entities)
 
-	bytes, err := json.MarshalIndent(dict, "", "    ")
-	// bytes, err := json.Marshal(dict)
+	var (
+		bytes []byte
+		err   error
+	)
+
+	if pretty {
+		bytes, err = json.MarshalIndent(dict, "", "    ")
+	} else {
+		bytes, err = json.Marshal(dict)
+	}
+
 	if err != nil {
 		return err
 	}
@@ -208,7 +217,7 @@ func convertEdictEntry(edictEntry jmdict.EdictEntry) []dictEntry {
 	return entries
 }
 
-func processEnamdict(reader io.Reader, writer io.Writer) error {
+func processEnamdict(writer io.Writer, reader io.Reader, flags int) error {
 	enamdictEntries, entities, err := jmdict.LoadEnamdict(reader, false)
 	if err != nil {
 		return err
@@ -219,10 +228,10 @@ func processEnamdict(reader io.Reader, writer io.Writer) error {
 		entries = append(entries, convertEnamdictEntry(enamdictEntry)...)
 	}
 
-	return outputJson(entries, entities, writer)
+	return outputJson(writer, entries, entities, flags&flagPrettyJson == flagPrettyJson)
 }
 
-func processEdict(reader io.Reader, writer io.Writer) error {
+func processEdict(writer io.Writer, reader io.Reader, flags int) error {
 	edictEntries, entities, err := jmdict.LoadEdict(reader, false)
 	if err != nil {
 		return err
@@ -233,5 +242,5 @@ func processEdict(reader io.Reader, writer io.Writer) error {
 		entries = append(entries, convertEdictEntry(edictEntry)...)
 	}
 
-	return outputJson(entries, entities, writer)
+	return outputJson(writer, entries, entities, flags&flagPrettyJson == flagPrettyJson)
 }

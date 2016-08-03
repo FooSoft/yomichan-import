@@ -24,6 +24,7 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -31,12 +32,18 @@ import (
 	"path"
 )
 
+const (
+	flagPrettyJson = 1 << iota
+)
+
 func usage() {
 	fmt.Fprintf(os.Stderr, "Usage: %s file_format input_file output_file\n\n", path.Base(os.Args[0]))
+	fmt.Fprintf(os.Stderr, "Parameters:\n")
+	flag.PrintDefaults()
 }
 
-func process(fileFormat, inputFile, outputFile string) error {
-	handlers := map[string]func(io.Reader, io.Writer) error{
+func process(fileFormat, inputFile, outputFile string, flags int) error {
+	handlers := map[string]func(io.Writer, io.Reader, int) error{
 		"edict":    processEdict,
 		"enamdict": processEnamdict,
 	}
@@ -56,14 +63,22 @@ func process(fileFormat, inputFile, outputFile string) error {
 		return err
 	}
 
-	return handler(input, output)
+	return handler(output, input, flags)
 }
 
 func main() {
-	args := os.Args[1:]
+	prettyJson := flag.Bool("prettyJson", false, "output prettified json")
 
-	if len(args) == 3 {
-		if err := process(args[0], args[1], args[2]); err != nil {
+	flag.Usage = usage
+	flag.Parse()
+
+	var flags int
+	if *prettyJson {
+		flags |= flagPrettyJson
+	}
+
+	if flag.NArg() == 3 {
+		if err := process(flag.Arg(0), flag.Arg(1), flag.Arg(2), flags); err != nil {
 			log.Fatal(err)
 		}
 	} else {
