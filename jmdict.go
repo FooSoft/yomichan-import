@@ -24,8 +24,8 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
+	"strconv"
 	"strings"
 
 	"github.com/FooSoft/jmdict"
@@ -53,11 +53,10 @@ func (d *dictEntry) addTags(tags []string) {
 
 func appendIndex(indices map[string]string, key string, value int) {
 	items, _ := indices[key]
-	if len(indices) == 0 {
-		items = fmt.Sprintf(" %d", value)
-	} else {
-		items = string(value)
+	if len(indices) > 0 {
+		items = " "
 	}
+	items += strconv.Itoa(value)
 	indices[key] = items
 }
 
