@@ -31,20 +31,24 @@ import (
 	"github.com/FooSoft/jmdict"
 )
 
-type dictJson struct {
+//
+//	Edict and Enamdict processing
+//
+
+type vocabDictJson struct {
 	Indices  map[string]string `json:"i"`
 	Entities map[string]string `json:"e"`
 	Defs     [][]string        `json:"d"`
 }
 
-type dictEntry struct {
+type vocabDictSource struct {
 	Expression string
 	Reading    string
 	Tags       []string
 	Glossary   []string
 }
 
-func (d *dictEntry) addTags(tags []string) {
+func (d *vocabDictSource) addTags(tags []string) {
 	for _, tag := range tags {
 		if findString(tag, d.Tags) == -1 {
 			d.Tags = append(d.Tags, tag)
@@ -61,8 +65,8 @@ func appendIndex(indices map[string]string, key string, value int) {
 	indices[key] = def
 }
 
-func buildDictJson(entries []dictEntry, entities map[string]string) dictJson {
-	dict := dictJson{
+func buildVocabDictJson(entries []vocabDictSource, entities map[string]string) vocabDictJson {
+	dict := vocabDictJson{
 		Indices:  make(map[string]string),
 		Entities: entities,
 	}
@@ -81,8 +85,8 @@ func buildDictJson(entries []dictEntry, entities map[string]string) dictJson {
 	return dict
 }
 
-func outputJson(writer io.Writer, entries []dictEntry, entities map[string]string, pretty bool) error {
-	dict := buildDictJson(entries, entities)
+func outputVocabDictJson(writer io.Writer, entries []vocabDictSource, entities map[string]string, pretty bool) error {
+	dict := buildVocabDictJson(entries, entities)
 
 	var (
 		bytes []byte
@@ -113,15 +117,15 @@ func findString(needle string, haystack []string) int {
 	return -1
 }
 
-func convertEnamdictEntry(enamdictEntry jmdict.EnamdictEntry) []dictEntry {
-	var entries []dictEntry
+func convertEnamdictEntry(enamdictEntry jmdict.EnamdictEntry) []vocabDictSource {
+	var entries []vocabDictSource
 
 	convert := func(reading jmdict.EnamdictReading, kanji *jmdict.EnamdictKanji) {
 		if kanji != nil && findString(kanji.Expression, reading.Restrictions) != -1 {
 			return
 		}
 
-		var entry dictEntry
+		var entry vocabDictSource
 		if kanji == nil {
 			entry.Expression = reading.Reading
 		} else {
@@ -158,15 +162,15 @@ func convertEnamdictEntry(enamdictEntry jmdict.EnamdictEntry) []dictEntry {
 	return entries
 }
 
-func convertEdictEntry(edictEntry jmdict.EdictEntry) []dictEntry {
-	var entries []dictEntry
+func convertEdictEntry(edictEntry jmdict.EdictEntry) []vocabDictSource {
+	var entries []vocabDictSource
 
 	convert := func(reading jmdict.EdictReading, kanji *jmdict.EdictKanji) {
 		if kanji != nil && findString(kanji.Expression, reading.Restrictions) != -1 {
 			return
 		}
 
-		var entry dictEntry
+		var entry vocabDictSource
 		if kanji == nil {
 			entry.Expression = reading.Reading
 		} else {
@@ -223,12 +227,12 @@ func processEnamdict(writer io.Writer, reader io.Reader, flags int) error {
 		return err
 	}
 
-	var entries []dictEntry
+	var entries []vocabDictSource
 	for _, enamdictEntry := range enamdictEntries {
 		entries = append(entries, convertEnamdictEntry(enamdictEntry)...)
 	}
 
-	return outputJson(writer, entries, entities, flags&flagPrettyJson == flagPrettyJson)
+	return outputVocabDictJson(writer, entries, entities, flags&flagPrettyJson == flagPrettyJson)
 }
 
 func processEdict(writer io.Writer, reader io.Reader, flags int) error {
@@ -237,10 +241,83 @@ func processEdict(writer io.Writer, reader io.Reader, flags int) error {
 		return err
 	}
 
-	var entries []dictEntry
+	var entries []vocabDictSource
 	for _, edictEntry := range edictEntries {
 		entries = append(entries, convertEdictEntry(edictEntry)...)
 	}
 
-	return outputJson(writer, entries, entities, flags&flagPrettyJson == flagPrettyJson)
+	return outputVocabDictJson(writer, entries, entities, flags&flagPrettyJson == flagPrettyJson)
+}
+
+//
+//	Kanjidic processing
+//
+
+type characterDictJson struct {
+	Characters map[string][]string `json:"c"`
+}
+
+type characterDictSource struct {
+	Character string
+	Kunyomi   []string
+	Onyomi    []string
+	Meanings  []string
+}
+
+func buildCharacterDictJson(characters []characterDictSource) characterDictJson {
+	dict := characterDictJson{make(map[string][]string)}
+
+	for _, c := range characters {
+		var params []string
+		params = append(params, strings.Join(c.Onyomi, " "))
+		params = append(params, strings.Join(c.Kunyomi, " "))
+		params = append(params, c.Meanings...)
+		dict.Characters[c.Character] = params
+	}
+
+	return dict
+}
+
+func outputCharacterDictJson(writer io.Writer, characters []characterDictSource, pretty bool) error {
+	dict := buildCharacterDictJson(characters)
+
+	var (
+		bytes []byte
+		err   error
+	)
+
+	if pretty {
+		bytes, err = json.MarshalIndent(dict, "", "    ")
+	} else {
+		bytes, err = json.Marshal(dict)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	_, err = writer.Write(bytes)
+	return err
+}
+
+func convertKanjidicCharacter(kanjidicCharacter jmdict.KanjidicCharacter) characterDictSource {
+	var character characterDictSource
+
+	character.Character = kanjidicCharacter.Literal
+
+	return character
+}
+
+func processKanjidic(writer io.Writer, reader io.Reader, flags int) error {
+	kanjidicCharacters, err := jmdict.LoadKanjidic(reader)
+	if err != nil {
+		return err
+	}
+
+	var characters []characterDictSource
+	for _, kanjidicCharacter := range kanjidicCharacters {
+		characters = append(characters, convertKanjidicCharacter(kanjidicCharacter))
+	}
+
+	return nil
 }

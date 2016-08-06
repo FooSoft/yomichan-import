@@ -46,6 +46,7 @@ func process(fileFormat, inputFile, outputFile string, flags int) error {
 	handlers := map[string]func(io.Writer, io.Reader, int) error{
 		"edict":    processEdict,
 		"enamdict": processEnamdict,
+		"kanjidic": processKanjidic,
 	}
 
 	handler, ok := handlers[fileFormat]
