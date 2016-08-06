@@ -305,7 +305,9 @@ func convertKanjidicCharacter(kanjidicCharacter jmdict.KanjidicCharacter) charac
 
 	character.Character = kanjidicCharacter.Literal
 	for _, m := range kanjidicCharacter.ReadingMeaning.ReadingMeaning.Meanings {
-		character.Meanings = append(character.Meanings, m.Meaning)
+		if m.Language == "en" || m.Language == "" {
+			character.Meanings = append(character.Meanings, m.Meaning)
+		}
 	}
 
 	for _, r := range kanjidicCharacter.ReadingMeaning.ReadingMeaning.Readings {
