@@ -304,6 +304,20 @@ func convertKanjidicCharacter(kanjidicCharacter jmdict.KanjidicCharacter) charac
 	var character characterDictSource
 
 	character.Character = kanjidicCharacter.Literal
+	for _, m := range kanjidicCharacter.ReadingMeaning.ReadingMeaning.Meanings {
+		character.Meanings = append(character.Meanings, m.Meaning)
+	}
+
+	for _, r := range kanjidicCharacter.ReadingMeaning.ReadingMeaning.Readings {
+		switch r.Type {
+		case "ja_on":
+			character.Onyomi = append(character.Onyomi, r.Value)
+			break
+		case "ja_kun":
+			character.Kunyomi = append(character.Kunyomi, r.Value)
+			break
+		}
+	}
 
 	return character
 }
@@ -319,5 +333,5 @@ func processKanjidic(writer io.Writer, reader io.Reader, flags int) error {
 		characters = append(characters, convertKanjidicCharacter(kanjidicCharacter))
 	}
 
-	return nil
+	return outputCharacterDictJson(writer, characters, flags&flagPrettyJson == flagPrettyJson)
 }
