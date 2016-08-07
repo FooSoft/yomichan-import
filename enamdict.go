@@ -43,16 +43,16 @@ func convertJmnedictEntry(enamdictEntry jmdict.JmnedictEntry) []vocabSource {
 			entry.Expression = kanji.Expression
 			entry.Reading = reading.Reading
 
-			entry.addTags(kanji.Information)
-			entry.addTags(kanji.Priorities)
+			entry.addTags(kanji.Information...)
+			entry.addTagsPri(kanji.Priorities...)
 		}
 
-		entry.addTags(reading.Information)
-		entry.addTags(reading.Priorities)
+		entry.addTags(reading.Information...)
+		entry.addTagsPri(reading.Priorities...)
 
 		for _, trans := range enamdictEntry.Translations {
 			entry.Glossary = append(entry.Glossary, trans.Translations...)
-			entry.addTags(trans.NameTypes)
+			entry.addTags(trans.NameTypes...)
 		}
 
 		entries = append(entries, entry)

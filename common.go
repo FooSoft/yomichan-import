@@ -42,10 +42,23 @@ type vocabSource struct {
 	Glossary   []string
 }
 
-func (d *vocabSource) addTags(tags []string) {
+func (d *vocabSource) addTags(tags ...string) {
 	for _, tag := range tags {
 		if !hasString(tag, d.Tags) {
 			d.Tags = append(d.Tags, tag)
+		}
+	}
+}
+
+func (d *vocabSource) addTagsPri(tags ...string) {
+	for _, tag := range tags {
+		switch tag {
+		case "news1", "ichi1", "spec1", "gai1":
+			d.addTags("P")
+			fallthrough
+		case "news2", "ichi2", "spec2", "gai2":
+			d.addTags(tag[:len(tag)-1])
+			break
 		}
 	}
 }

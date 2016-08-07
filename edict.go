@@ -43,12 +43,12 @@ func convertEdictEntry(edictEntry jmdict.JmdictEntry) []vocabSource {
 			entry.Expression = kanji.Expression
 			entry.Reading = reading.Reading
 
-			entry.addTags(kanji.Information)
-			entry.addTags(kanji.Priorities)
+			entry.addTags(kanji.Information...)
+			entry.addTagsPri(kanji.Priorities...)
 		}
 
-		entry.addTags(reading.Information)
-		entry.addTags(reading.Priorities)
+		entry.addTags(reading.Information...)
+		entry.addTagsPri(reading.Priorities...)
 
 		for _, sense := range edictEntry.Sense {
 			if hasString(reading.Reading, sense.RestrictedReadings) {
@@ -63,10 +63,10 @@ func convertEdictEntry(edictEntry jmdict.JmdictEntry) []vocabSource {
 				entry.Glossary = append(entry.Glossary, glossary.Content)
 			}
 
-			entry.addTags(sense.PartsOfSpeech)
-			entry.addTags(sense.Fields)
-			entry.addTags(sense.Misc)
-			entry.addTags(sense.Dialects)
+			entry.addTags(sense.PartsOfSpeech...)
+			entry.addTags(sense.Fields...)
+			entry.addTags(sense.Misc...)
+			entry.addTags(sense.Dialects...)
 		}
 
 		entries = append(entries, entry)
