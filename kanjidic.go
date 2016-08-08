@@ -24,7 +24,9 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
+	"strconv"
 	"strings"
 
 	"github.com/FooSoft/jmdict"
@@ -38,7 +40,16 @@ type kanjiSource struct {
 	Character string
 	Kunyomi   []string
 	Onyomi    []string
+	Tags      []string
 	Meanings  []string
+}
+
+func (s *kanjiSource) addTags(tags ...string) {
+	for _, tag := range tags {
+		if !hasString(tag, s.Tags) {
+			s.Tags = append(s.Tags, tag)
+		}
+	}
 }
 
 func buildKanjiJson(kanji []kanjiSource) kanjiJson {
@@ -48,6 +59,7 @@ func buildKanjiJson(kanji []kanjiSource) kanjiJson {
 		var params []string
 		params = append(params, strings.Join(k.Onyomi, " "))
 		params = append(params, strings.Join(k.Kunyomi, " "))
+		params = append(params, strings.Join(k.Tags, " "))
 		params = append(params, k.Meanings...)
 		dict.Characters[k.Character] = params
 	}
@@ -79,6 +91,31 @@ func outputKanjiJson(writer io.Writer, kanji []kanjiSource, pretty bool) error {
 
 func convertKanjidicCharacter(kanjidicCharacter jmdict.KanjidicCharacter) kanjiSource {
 	character := kanjiSource{Character: kanjidicCharacter.Literal}
+
+	if level := kanjidicCharacter.Misc.JlptLevel; level != nil {
+		character.addTags(fmt.Sprintf("jlpt:%s", *level))
+	}
+
+	if grade := kanjidicCharacter.Misc.Grade; grade != nil {
+		character.addTags(fmt.Sprintf("grade:%s", *grade))
+		if gradeInt, err := strconv.Atoi(*grade); err == nil {
+			if gradeInt >= 1 && gradeInt <= 8 {
+				character.addTags("jouyou")
+			} else if gradeInt >= 9 && gradeInt <= 10 {
+				character.addTags("jinmeiyou")
+			}
+		}
+	}
+
+	for _, number := range kanjidicCharacter.DictionaryNumbers {
+		if number.Type == "heisig" {
+			character.addTags(fmt.Sprintf("heisig:%s", number.Value))
+		}
+	}
+
+	if counts := kanjidicCharacter.Misc.StrokeCounts; len(counts) > 0 {
+		character.addTags(fmt.Sprintf("strokes:%s", counts[0]))
+	}
 
 	if kanjidicCharacter.ReadingMeaning != nil {
 		for _, m := range kanjidicCharacter.ReadingMeaning.Meanings {
