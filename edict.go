@@ -87,7 +87,7 @@ func convertEdictEntry(edictEntry jmdict.JmdictEntry) []vocabSource {
 	return entries
 }
 
-func processEdict(writer io.Writer, reader io.Reader, flags int) error {
+func outputEdictJson(writer io.Writer, reader io.Reader, flags int) error {
 	dict, entities, err := jmdict.LoadJmdictNoTransform(reader)
 	if err != nil {
 		return err

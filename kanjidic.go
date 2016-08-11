@@ -139,7 +139,7 @@ func convertKanjidicCharacter(kanjidicCharacter jmdict.KanjidicCharacter) kanjiS
 	return character
 }
 
-func processKanjidic(writer io.Writer, reader io.Reader, flags int) error {
+func outputKanjidicJson(writer io.Writer, reader io.Reader, flags int) error {
 	dict, err := jmdict.LoadKanjidic(reader)
 	if err != nil {
 		return err

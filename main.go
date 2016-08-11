@@ -42,11 +42,11 @@ func usage() {
 	flag.PrintDefaults()
 }
 
-func process(fileFormat, inputFile, outputFile string, flags int) error {
+func outputJson(fileFormat, inputFile, outputFile string, flags int) error {
 	handlers := map[string]func(io.Writer, io.Reader, int) error{
-		"edict":    processEdict,
-		"enamdict": processJmnedict,
-		"kanjidic": processKanjidic,
+		"edict":    outputEdictJson,
+		"enamdict": outputJmnedictJson,
+		"kanjidic": outputKanjidicJson,
 	}
 
 	handler, ok := handlers[fileFormat]
@@ -79,7 +79,7 @@ func main() {
 	}
 
 	if flag.NArg() == 3 {
-		if err := process(flag.Arg(0), flag.Arg(1), flag.Arg(2), flags); err != nil {
+		if err := outputJson(flag.Arg(0), flag.Arg(1), flag.Arg(2), flags); err != nil {
 			log.Fatal(err)
 		}
 	} else {

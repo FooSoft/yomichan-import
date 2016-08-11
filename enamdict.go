@@ -73,7 +73,7 @@ func convertJmnedictEntry(enamdictEntry jmdict.JmnedictEntry) []vocabSource {
 	return entries
 }
 
-func processJmnedict(writer io.Writer, reader io.Reader, flags int) error {
+func outputJmnedictJson(writer io.Writer, reader io.Reader, flags int) error {
 	dict, entities, err := jmdict.LoadJmnedictNoTransform(reader)
 	if err != nil {
 		return err
