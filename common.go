@@ -25,24 +25,22 @@ package main
 import (
 	"encoding/json"
 	"io"
-	"strconv"
 	"strings"
 )
 
-type vocabJson struct {
-	Indices  map[string]string `json:"i"`
-	Entities map[string]string `json:"e"`
-	Defs     [][]string        `json:"d"`
+type termJson struct {
+	Entities [][]string      `json:"e"`
+	Defs     [][]interface{} `json:"d"`
 }
 
-type vocabSource struct {
+type termSource struct {
 	Expression string
 	Reading    string
 	Tags       []string
 	Glossary   []string
 }
 
-func (s *vocabSource) addTags(tags ...string) {
+func (s *termSource) addTags(tags ...string) {
 	for _, tag := range tags {
 		if !hasString(tag, s.Tags) {
 			s.Tags = append(s.Tags, tag)
@@ -50,7 +48,7 @@ func (s *vocabSource) addTags(tags ...string) {
 	}
 }
 
-func (s *vocabSource) addTagsPri(tags ...string) {
+func (s *termSource) addTagsPri(tags ...string) {
 	for _, tag := range tags {
 		switch tag {
 		case "news1", "ichi1", "spec1", "gai1":
@@ -63,28 +61,30 @@ func (s *vocabSource) addTagsPri(tags ...string) {
 	}
 }
 
-func buildVocabJson(entries []vocabSource, entities map[string]string) vocabJson {
-	dict := vocabJson{
-		Indices:  make(map[string]string),
-		Entities: entities,
+func buildTermJson(entries []termSource, entities map[string]string) termJson {
+	var dict termJson
+
+	for key, value := range entities {
+		ent := []string{key, value}
+		dict.Entities = append(dict.Entities, ent)
 	}
 
-	for i, e := range entries {
-		entry := []string{e.Expression, e.Reading, strings.Join(e.Tags, " ")}
-		entry = append(entry, e.Glossary...)
-		dict.Defs = append(dict.Defs, entry)
-
-		appendStrIndex(dict.Indices, e.Expression, i)
-		if len(e.Reading) > 0 {
-			appendStrIndex(dict.Indices, e.Reading, i)
+	for _, e := range entries {
+		def := []interface{}{
+			e.Expression,
+			e.Reading,
+			strings.Join(e.Tags, " "),
+			e.Glossary,
 		}
+
+		dict.Defs = append(dict.Defs, def)
 	}
 
 	return dict
 }
 
-func outputVocabJson(writer io.Writer, entries []vocabSource, entities map[string]string, pretty bool) error {
-	dict := buildVocabJson(entries, entities)
+func outputTermJson(writer io.Writer, entries []termSource, entities map[string]string, pretty bool) error {
+	dict := buildTermJson(entries, entities)
 
 	var (
 		bytes []byte
@@ -103,16 +103,6 @@ func outputVocabJson(writer io.Writer, entries []vocabSource, entities map[strin
 
 	_, err = writer.Write(bytes)
 	return err
-}
-
-func appendStrIndex(indices map[string]string, key string, value int) {
-	def, _ := indices[key]
-	if len(def) > 0 {
-		def += " "
-	}
-
-	def += strconv.Itoa(value)
-	indices[key] = def
 }
 
 func hasString(needle string, haystack []string) bool {

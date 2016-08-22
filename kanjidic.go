@@ -33,13 +33,13 @@ import (
 )
 
 type kanjiJson struct {
-	Characters map[string][]string `json:"c"`
+	Defs [][]interface{} `json:"d"`
 }
 
 type kanjiSource struct {
 	Character string
-	Kunyomi   []string
 	Onyomi    []string
+	Kunyomi   []string
 	Tags      []string
 	Meanings  []string
 }
@@ -53,15 +53,18 @@ func (s *kanjiSource) addTags(tags ...string) {
 }
 
 func buildKanjiJson(kanji []kanjiSource) kanjiJson {
-	dict := kanjiJson{make(map[string][]string)}
+	var dict kanjiJson
 
 	for _, k := range kanji {
-		var params []string
-		params = append(params, strings.Join(k.Onyomi, " "))
-		params = append(params, strings.Join(k.Kunyomi, " "))
-		params = append(params, strings.Join(k.Tags, " "))
-		params = append(params, k.Meanings...)
-		dict.Characters[k.Character] = params
+		def := []interface{}{
+			k.Character,
+			strings.Join(k.Onyomi, " "),
+			strings.Join(k.Kunyomi, " "),
+			strings.Join(k.Tags, " "),
+			k.Meanings,
+		}
+
+		dict.Defs = append(dict.Defs, def)
 	}
 
 	return dict

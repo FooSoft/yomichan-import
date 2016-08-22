@@ -28,15 +28,15 @@ import (
 	"github.com/FooSoft/jmdict"
 )
 
-func convertJmnedictEntry(enamdictEntry jmdict.JmnedictEntry) []vocabSource {
-	var entries []vocabSource
+func convertJmnedictEntry(enamdictEntry jmdict.JmnedictEntry) []termSource {
+	var entries []termSource
 
 	convert := func(reading jmdict.JmnedictReading, kanji *jmdict.JmnedictKanji) {
 		if kanji != nil && hasString(kanji.Expression, reading.Restrictions) {
 			return
 		}
 
-		var entry vocabSource
+		var entry termSource
 		if kanji == nil {
 			entry.Expression = reading.Reading
 		} else {
@@ -79,10 +79,10 @@ func outputJmnedictJson(writer io.Writer, reader io.Reader, flags int) error {
 		return err
 	}
 
-	var entries []vocabSource
+	var entries []termSource
 	for _, e := range dict.Entries {
 		entries = append(entries, convertJmnedictEntry(e)...)
 	}
 
-	return outputVocabJson(writer, entries, entities, flags&flagPrettyJson == flagPrettyJson)
+	return outputTermJson(writer, entries, entities, flags&flagPrettyJson == flagPrettyJson)
 }
