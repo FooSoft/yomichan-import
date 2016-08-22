@@ -32,8 +32,16 @@ import (
 	"github.com/FooSoft/jmdict"
 )
 
+type kanjiDefJson struct {
+	Character string   `json:"c"`
+	Onyomi    string   `json:"o"`
+	Kunyomi   string   `json:"k"`
+	Tags      string   `json:"t"`
+	Meanings  []string `json:"m"`
+}
+
 type kanjiJson struct {
-	Defs [][]interface{} `json:"d"`
+	Defs []kanjiDefJson `json:"d"`
 }
 
 type kanjiSource struct {
@@ -56,12 +64,12 @@ func buildKanjiJson(kanji []kanjiSource) kanjiJson {
 	var dict kanjiJson
 
 	for _, k := range kanji {
-		def := []interface{}{
-			k.Character,
-			strings.Join(k.Onyomi, " "),
-			strings.Join(k.Kunyomi, " "),
-			strings.Join(k.Tags, " "),
-			k.Meanings,
+		def := kanjiDefJson{
+			Character: k.Character,
+			Onyomi:    strings.Join(k.Onyomi, " "),
+			Kunyomi:   strings.Join(k.Kunyomi, " "),
+			Tags:      strings.Join(k.Tags, " "),
+			Meanings:  k.Meanings,
 		}
 
 		dict.Defs = append(dict.Defs, def)

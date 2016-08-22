@@ -28,9 +28,21 @@ import (
 	"strings"
 )
 
+type termDefJson struct {
+	Expression string   `json:"e"`
+	Reading    string   `json:"r"`
+	Tags       string   `json:"t"`
+	Glossary   []string `json:"g"`
+}
+
+type termEntJson struct {
+	Name  string `json:"n"`
+	Value string `json:"v"`
+}
+
 type termJson struct {
-	Entities [][]string      `json:"e"`
-	Defs     [][]interface{} `json:"d"`
+	Entities []termEntJson `json:"e"`
+	Defs     []termDefJson `json:"d"`
 }
 
 type termSource struct {
@@ -64,13 +76,17 @@ func (s *termSource) addTagsPri(tags ...string) {
 func buildTermJson(entries []termSource, entities map[string]string) termJson {
 	var dict termJson
 
-	for key, value := range entities {
-		ent := []string{key, value}
+	for name, value := range entities {
+		ent := termEntJson{
+			Name:  name,
+			Value: value,
+		}
+
 		dict.Entities = append(dict.Entities, ent)
 	}
 
 	for _, e := range entries {
-		def := []interface{}{
+		def := termDefJson{
 			e.Expression,
 			e.Reading,
 			strings.Join(e.Tags, " "),
