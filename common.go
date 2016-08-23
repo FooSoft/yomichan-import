@@ -120,7 +120,7 @@ func outputTermJson(outputDir string, entries []termSource, entities map[string]
 	defCnt := len(dict.defs)
 
 	for i := 0; i < defCnt; i += REF_STEP_COUNT {
-		outputRef, err := os.Create(path.Join(outputDir, fmt.Sprintf("ref_%0.3d.json", i/REF_STEP_COUNT)))
+		outputRef, err := os.Create(path.Join(outputDir, fmt.Sprintf("ref_%d.json", i/REF_STEP_COUNT)))
 		if err != nil {
 			return err
 		}
