@@ -73,7 +73,7 @@ func convertJmnedictEntry(enamdictEntry jmdict.JmnedictEntry) []termSource {
 	return entries
 }
 
-func outputJmnedictJson(writer io.Writer, reader io.Reader, flags int) error {
+func outputJmnedictJson(outputDir string, reader io.Reader, flags int) error {
 	dict, entities, err := jmdict.LoadJmnedictNoTransform(reader)
 	if err != nil {
 		return err
@@ -84,5 +84,5 @@ func outputJmnedictJson(writer io.Writer, reader io.Reader, flags int) error {
 		entries = append(entries, convertJmnedictEntry(e)...)
 	}
 
-	return outputTermJson(writer, entries, entities, flags&flagPrettyJson == flagPrettyJson)
+	return outputTermJson(outputDir, entries, entities, flags&flagPrettyJson == flagPrettyJson)
 }

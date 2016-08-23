@@ -150,16 +150,18 @@ func convertKanjidicCharacter(kanjidicCharacter jmdict.KanjidicCharacter) kanjiS
 	return character
 }
 
-func outputKanjidicJson(writer io.Writer, reader io.Reader, flags int) error {
-	dict, err := jmdict.LoadKanjidic(reader)
-	if err != nil {
-		return err
-	}
+func outputKanjidicJson(outputDir string, reader io.Reader, flags int) error {
+	// dict, err := jmdict.LoadKanjidic(reader)
+	// if err != nil {
+	// 	return err
+	// }
 
-	var kanji []kanjiSource
-	for _, kanjidicCharacter := range dict.Characters {
-		kanji = append(kanji, convertKanjidicCharacter(kanjidicCharacter))
-	}
+	// var kanji []kanjiSource
+	// for _, kanjidicCharacter := range dict.Characters {
+	// 	kanji = append(kanji, convertKanjidicCharacter(kanjidicCharacter))
+	// }
 
-	return outputKanjiJson(writer, kanji, flags&flagPrettyJson == flagPrettyJson)
+	// return outputKanjiJson(writer, kanji, flags&flagPrettyJson == flagPrettyJson)
+
+	return nil
 }

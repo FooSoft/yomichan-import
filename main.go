@@ -42,8 +42,8 @@ func usage() {
 	flag.PrintDefaults()
 }
 
-func outputJson(fileFormat, inputFile, outputFile string, flags int) error {
-	handlers := map[string]func(io.Writer, io.Reader, int) error{
+func outputJson(fileFormat, inputPath, outputDir string, flags int) error {
+	handlers := map[string]func(string, io.Reader, int) error{
 		"edict":    outputEdictJson,
 		"enamdict": outputJmnedictJson,
 		"kanjidic": outputKanjidicJson,
@@ -54,17 +54,13 @@ func outputJson(fileFormat, inputFile, outputFile string, flags int) error {
 		return errors.New("unrecognized file format")
 	}
 
-	input, err := os.Open(inputFile)
+	input, err := os.Open(inputPath)
 	if err != nil {
 		return err
 	}
+	defer input.Close()
 
-	output, err := os.Create(outputFile)
-	if err != nil {
-		return err
-	}
-
-	return handler(output, input, flags)
+	return handler(outputDir, input, flags)
 }
 
 func main() {

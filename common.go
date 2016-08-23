@@ -24,25 +24,20 @@ package main
 
 import (
 	"encoding/json"
-	"io"
+	"fmt"
+	"os"
+	"path"
 	"strings"
 )
 
-type termDefJson struct {
-	Expression string   `json:"e"`
-	Reading    string   `json:"r"`
-	Tags       string   `json:"t"`
-	Glossary   []string `json:"g"`
-}
-
-type termEntJson struct {
-	Name  string `json:"n"`
-	Value string `json:"v"`
-}
+const (
+	REF_STEP_COUNT = 1000
+)
 
 type termJson struct {
-	Entities []termEntJson `json:"e"`
-	Defs     []termDefJson `json:"d"`
+	Refs     int        `json:"refs"`
+	Entities [][]string `json:"ents"`
+	defs     [][]string
 }
 
 type termSource struct {
@@ -77,48 +72,77 @@ func buildTermJson(entries []termSource, entities map[string]string) termJson {
 	var dict termJson
 
 	for name, value := range entities {
-		ent := termEntJson{
-			Name:  name,
-			Value: value,
-		}
-
+		ent := []string{name, value}
 		dict.Entities = append(dict.Entities, ent)
 	}
 
 	for _, e := range entries {
-		def := termDefJson{
-			e.Expression,
-			e.Reading,
-			strings.Join(e.Tags, " "),
-			e.Glossary,
-		}
-
-		dict.Defs = append(dict.Defs, def)
+		def := []string{e.Expression, e.Reading, strings.Join(e.Tags, " ")}
+		def = append(def, e.Glossary...)
+		dict.defs = append(dict.defs, def)
 	}
+
+	dict.Refs = len(dict.defs) / REF_STEP_COUNT
 
 	return dict
 }
 
-func outputTermJson(writer io.Writer, entries []termSource, entities map[string]string, pretty bool) error {
-	dict := buildTermJson(entries, entities)
-
-	var (
-		bytes []byte
-		err   error
-	)
-
+func marshalJson(obj interface{}, pretty bool) ([]byte, error) {
 	if pretty {
-		bytes, err = json.MarshalIndent(dict, "", "    ")
-	} else {
-		bytes, err = json.Marshal(dict)
+		return json.MarshalIndent(obj, "", "    ")
 	}
 
+	return json.Marshal(obj)
+}
+
+func outputTermJson(outputDir string, entries []termSource, entities map[string]string, pretty bool) error {
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		return err
+	}
+
+	outputIndex, err := os.Create(path.Join(outputDir, "index.json"))
+	if err != nil {
+		return err
+	}
+	defer outputIndex.Close()
+
+	dict := buildTermJson(entries, entities)
+
+	indexBytes, err := marshalJson(dict, pretty)
 	if err != nil {
 		return err
 	}
 
-	_, err = writer.Write(bytes)
-	return err
+	if _, err = outputIndex.Write(indexBytes); err != nil {
+		return err
+	}
+
+	defCnt := len(dict.defs)
+
+	for i := 0; i < defCnt; i += REF_STEP_COUNT {
+		outputRef, err := os.Create(path.Join(outputDir, fmt.Sprintf("ref_%0.3d.json", i/REF_STEP_COUNT)))
+		if err != nil {
+			return err
+		}
+		defer outputRef.Close()
+
+		indexSrc := i
+		indexDst := i + REF_STEP_COUNT
+		if indexDst > defCnt {
+			indexDst = defCnt
+		}
+
+		refBytes, err := marshalJson(dict.defs[indexSrc:indexDst], pretty)
+		if err != nil {
+			return err
+		}
+
+		if _, err = outputRef.Write(refBytes); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func hasString(needle string, haystack []string) bool {

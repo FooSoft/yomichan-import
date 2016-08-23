@@ -87,7 +87,7 @@ func convertEdictEntry(edictEntry jmdict.JmdictEntry) []termSource {
 	return entries
 }
 
-func outputEdictJson(writer io.Writer, reader io.Reader, flags int) error {
+func outputEdictJson(outputDir string, reader io.Reader, flags int) error {
 	dict, entities, err := jmdict.LoadJmdictNoTransform(reader)
 	if err != nil {
 		return err
@@ -98,5 +98,5 @@ func outputEdictJson(writer io.Writer, reader io.Reader, flags int) error {
 		entries = append(entries, convertEdictEntry(e)...)
 	}
 
-	return outputTermJson(writer, entries, entities, flags&flagPrettyJson == flagPrettyJson)
+	return outputTermJson(outputDir, entries, entities, flags&flagPrettyJson == flagPrettyJson)
 }
