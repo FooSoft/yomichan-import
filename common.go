@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	REF_STEP_COUNT = 1000
+	REF_STEP_COUNT = 50000
 )
 
 type termJson struct {
