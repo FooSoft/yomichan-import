@@ -23,25 +23,20 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
+	"os"
+	"path"
 	"strconv"
 	"strings"
 
 	"github.com/FooSoft/jmdict"
 )
 
-type kanjiDefJson struct {
-	Character string   `json:"c"`
-	Onyomi    string   `json:"o"`
-	Kunyomi   string   `json:"k"`
-	Tags      string   `json:"t"`
-	Meanings  []string `json:"m"`
-}
-
-type kanjiJson struct {
-	Defs []kanjiDefJson `json:"d"`
+type kanjiIndex struct {
+	Version int `json:"version"`
+	Banks   int `json:"banks"`
+	defs    [][]string
 }
 
 type kanjiSource struct {
@@ -60,44 +55,67 @@ func (s *kanjiSource) addTags(tags ...string) {
 	}
 }
 
-func buildKanjiJson(kanji []kanjiSource) kanjiJson {
-	var dict kanjiJson
+func buildKanjiIndex(entries []kanjiSource) kanjiIndex {
+	dict := kanjiIndex{
+		Version: DB_VERSION,
+		Banks:   bankCount(len(entries)),
+	}
 
-	for _, k := range kanji {
-		def := kanjiDefJson{
-			Character: k.Character,
-			Onyomi:    strings.Join(k.Onyomi, " "),
-			Kunyomi:   strings.Join(k.Kunyomi, " "),
-			Tags:      strings.Join(k.Tags, " "),
-			Meanings:  k.Meanings,
-		}
-
-		dict.Defs = append(dict.Defs, def)
+	for _, e := range entries {
+		def := []string{e.Character, strings.Join(e.Onyomi, " "), strings.Join(e.Kunyomi, " "), strings.Join(e.Tags, " ")}
+		def = append(def, e.Meanings...)
+		dict.defs = append(dict.defs, def)
 	}
 
 	return dict
 }
 
-func outputKanjiJson(writer io.Writer, kanji []kanjiSource, pretty bool) error {
-	dict := buildKanjiJson(kanji)
-
-	var (
-		bytes []byte
-		err   error
-	)
-
-	if pretty {
-		bytes, err = json.MarshalIndent(dict, "", "    ")
-	} else {
-		bytes, err = json.Marshal(dict)
+func outputKanjiIndex(outputDir string, entries []kanjiSource, pretty bool) error {
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		return err
 	}
 
+	outputIndex, err := os.Create(path.Join(outputDir, "index.json"))
+	if err != nil {
+		return err
+	}
+	defer outputIndex.Close()
+
+	dict := buildKanjiIndex(entries)
+	indexBytes, err := marshalJson(dict, pretty)
 	if err != nil {
 		return err
 	}
 
-	_, err = writer.Write(bytes)
-	return err
+	if _, err = outputIndex.Write(indexBytes); err != nil {
+		return err
+	}
+
+	defCnt := len(dict.defs)
+	for i := 0; i < defCnt; i += BANK_STRIDE {
+		outputRef, err := os.Create(path.Join(outputDir, fmt.Sprintf("bank_%d.json", i/BANK_STRIDE+1)))
+		if err != nil {
+			return err
+		}
+		defer outputRef.Close()
+
+		indexSrc := i
+		indexDst := i + BANK_STRIDE
+		if indexDst > defCnt {
+			indexDst = defCnt
+		}
+
+		refBytes, err := marshalJson(dict.defs[indexSrc:indexDst], pretty)
+		if err != nil {
+			return err
+		}
+
+		if _, err = outputRef.Write(refBytes); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func convertKanjidicCharacter(kanjidicCharacter jmdict.KanjidicCharacter) kanjiSource {
@@ -151,17 +169,15 @@ func convertKanjidicCharacter(kanjidicCharacter jmdict.KanjidicCharacter) kanjiS
 }
 
 func outputKanjidicJson(outputDir string, reader io.Reader, flags int) error {
-	// dict, err := jmdict.LoadKanjidic(reader)
-	// if err != nil {
-	// 	return err
-	// }
+	dict, err := jmdict.LoadKanjidic(reader)
+	if err != nil {
+		return err
+	}
 
-	// var kanji []kanjiSource
-	// for _, kanjidicCharacter := range dict.Characters {
-	// 	kanji = append(kanji, convertKanjidicCharacter(kanjidicCharacter))
-	// }
+	var kanji []kanjiSource
+	for _, kanjidicCharacter := range dict.Characters {
+		kanji = append(kanji, convertKanjidicCharacter(kanjidicCharacter))
+	}
 
-	// return outputKanjiJson(writer, kanji, flags&flagPrettyJson == flagPrettyJson)
-
-	return nil
+	return outputKanjiIndex(outputDir, kanji, flags&flagPrettyJson == flagPrettyJson)
 }

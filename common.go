@@ -31,11 +31,13 @@ import (
 )
 
 const (
-	REF_STEP_COUNT = 50000
+	BANK_STRIDE = 50000
+	DB_VERSION  = 0
 )
 
-type termJson struct {
-	Refs     int        `json:"refs"`
+type termIndex struct {
+	Version  int        `json:"version"`
+	Banks    int        `json:"banks"`
 	Entities [][]string `json:"ents"`
 	defs     [][]string
 }
@@ -68,12 +70,10 @@ func (s *termSource) addTagsPri(tags ...string) {
 	}
 }
 
-func buildTermJson(entries []termSource, entities map[string]string) termJson {
-	var dict termJson
-
-	for name, value := range entities {
-		ent := []string{name, value}
-		dict.Entities = append(dict.Entities, ent)
+func buildTermIndex(entries []termSource, entities map[string]string) termIndex {
+	dict := termIndex{
+		Version: DB_VERSION,
+		Banks:   bankCount(len(entries)),
 	}
 
 	for _, e := range entries {
@@ -82,20 +82,15 @@ func buildTermJson(entries []termSource, entities map[string]string) termJson {
 		dict.defs = append(dict.defs, def)
 	}
 
-	dict.Refs = len(dict.defs) / REF_STEP_COUNT
+	for name, value := range entities {
+		ent := []string{name, value}
+		dict.Entities = append(dict.Entities, ent)
+	}
 
 	return dict
 }
 
-func marshalJson(obj interface{}, pretty bool) ([]byte, error) {
-	if pretty {
-		return json.MarshalIndent(obj, "", "    ")
-	}
-
-	return json.Marshal(obj)
-}
-
-func outputTermJson(outputDir string, entries []termSource, entities map[string]string, pretty bool) error {
+func outputTermIndex(outputDir string, entries []termSource, entities map[string]string, pretty bool) error {
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
 		return err
 	}
@@ -106,8 +101,7 @@ func outputTermJson(outputDir string, entries []termSource, entities map[string]
 	}
 	defer outputIndex.Close()
 
-	dict := buildTermJson(entries, entities)
-
+	dict := buildTermIndex(entries, entities)
 	indexBytes, err := marshalJson(dict, pretty)
 	if err != nil {
 		return err
@@ -118,16 +112,15 @@ func outputTermJson(outputDir string, entries []termSource, entities map[string]
 	}
 
 	defCnt := len(dict.defs)
-
-	for i := 0; i < defCnt; i += REF_STEP_COUNT {
-		outputRef, err := os.Create(path.Join(outputDir, fmt.Sprintf("ref_%d.json", i/REF_STEP_COUNT)))
+	for i := 0; i < defCnt; i += BANK_STRIDE {
+		outputRef, err := os.Create(path.Join(outputDir, fmt.Sprintf("bank_%d.json", i/BANK_STRIDE+1)))
 		if err != nil {
 			return err
 		}
 		defer outputRef.Close()
 
 		indexSrc := i
-		indexDst := i + REF_STEP_COUNT
+		indexDst := i + BANK_STRIDE
 		if indexDst > defCnt {
 			indexDst = defCnt
 		}
@@ -143,6 +136,23 @@ func outputTermJson(outputDir string, entries []termSource, entities map[string]
 	}
 
 	return nil
+}
+
+func marshalJson(obj interface{}, pretty bool) ([]byte, error) {
+	if pretty {
+		return json.MarshalIndent(obj, "", "    ")
+	}
+
+	return json.Marshal(obj)
+}
+
+func bankCount(defCount int) int {
+	count := defCount / BANK_STRIDE
+	if defCount%BANK_STRIDE > 0 {
+		count += 1
+	}
+
+	return count
 }
 
 func hasString(needle string, haystack []string) bool {

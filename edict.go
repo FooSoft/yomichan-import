@@ -98,5 +98,5 @@ func outputEdictJson(outputDir string, reader io.Reader, flags int) error {
 		entries = append(entries, convertEdictEntry(e)...)
 	}
 
-	return outputTermJson(outputDir, entries, entities, flags&flagPrettyJson == flagPrettyJson)
+	return outputTermIndex(outputDir, entries, entities, flags&flagPrettyJson == flagPrettyJson)
 }

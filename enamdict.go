@@ -84,5 +84,5 @@ func outputJmnedictJson(outputDir string, reader io.Reader, flags int) error {
 		entries = append(entries, convertJmnedictEntry(e)...)
 	}
 
-	return outputTermJson(outputDir, entries, entities, flags&flagPrettyJson == flagPrettyJson)
+	return outputTermIndex(outputDir, entries, entities, flags&flagPrettyJson == flagPrettyJson)
 }
