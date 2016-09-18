@@ -58,8 +58,12 @@ func convertEdictEntry(edictEntry jmdict.JmdictEntry) []termSource {
 				continue
 			}
 
-			entry := entryBase
-			entry.Tags = append(entry.Tags, entryBase.Tags...)
+			entry := termSource{
+				Reading:    entryBase.Reading,
+				Expression: entryBase.Expression,
+			}
+
+			entry.addTags(entryBase.Tags...)
 
 			for _, glossary := range sense.Glossary {
 				entry.Glossary = append(entry.Glossary, glossary.Content)
