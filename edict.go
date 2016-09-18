@@ -36,19 +36,18 @@ func convertEdictEntry(edictEntry jmdict.JmdictEntry) []termSource {
 			return
 		}
 
-		var entry termSource
+		var entryBase termSource
+		entryBase.addTags(reading.Information...)
+		entryBase.addTagsPri(reading.Priorities...)
+
 		if kanji == nil {
-			entry.Expression = reading.Reading
+			entryBase.Expression = reading.Reading
 		} else {
-			entry.Expression = kanji.Expression
-			entry.Reading = reading.Reading
-
-			entry.addTags(kanji.Information...)
-			entry.addTagsPri(kanji.Priorities...)
+			entryBase.Expression = kanji.Expression
+			entryBase.Reading = reading.Reading
+			entryBase.addTags(kanji.Information...)
+			entryBase.addTagsPri(kanji.Priorities...)
 		}
-
-		entry.addTags(reading.Information...)
-		entry.addTagsPri(reading.Priorities...)
 
 		for _, sense := range edictEntry.Sense {
 			if hasString(reading.Reading, sense.RestrictedReadings) {
@@ -59,6 +58,9 @@ func convertEdictEntry(edictEntry jmdict.JmdictEntry) []termSource {
 				continue
 			}
 
+			entry := entryBase
+			entry.Tags = append(entry.Tags, entryBase.Tags...)
+
 			for _, glossary := range sense.Glossary {
 				entry.Glossary = append(entry.Glossary, glossary.Content)
 			}
@@ -67,9 +69,9 @@ func convertEdictEntry(edictEntry jmdict.JmdictEntry) []termSource {
 			entry.addTags(sense.Fields...)
 			entry.addTags(sense.Misc...)
 			entry.addTags(sense.Dialects...)
-		}
 
-		entries = append(entries, entry)
+			entries = append(entries, entry)
+		}
 	}
 
 	if len(edictEntry.Kanji) > 0 {
