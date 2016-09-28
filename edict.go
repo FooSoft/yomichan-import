@@ -50,11 +50,11 @@ func convertEdictEntry(edictEntry jmdict.JmdictEntry) []termSource {
 		}
 
 		for _, sense := range edictEntry.Sense {
-			if hasString(reading.Reading, sense.RestrictedReadings) {
+			if sense.RestrictedReadings != nil && !hasString(reading.Reading, sense.RestrictedReadings) {
 				continue
 			}
 
-			if kanji != nil && hasString(kanji.Expression, sense.RestrictedKanji) {
+			if kanji != nil && sense.RestrictedKanji != nil && !hasString(kanji.Expression, sense.RestrictedKanji) {
 				continue
 			}
 
