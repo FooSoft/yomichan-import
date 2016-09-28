@@ -32,7 +32,7 @@ func convertEdictEntry(edictEntry jmdict.JmdictEntry) []termSource {
 	var entries []termSource
 
 	convert := func(reading jmdict.JmdictReading, kanji *jmdict.JmdictKanji) {
-		if kanji != nil && hasString(kanji.Expression, reading.Restrictions) {
+		if kanji != nil && reading.Restrictions != nil && !hasString(kanji.Expression, reading.Restrictions) {
 			return
 		}
 
