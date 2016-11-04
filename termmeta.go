@@ -27,11 +27,35 @@ import (
 	"io"
 	"os"
 	"path"
+
+	"github.com/FooSoft/jmdict"
 )
 
 type termMetaEntry struct {
-	Text string `json:"text"`
-	Tags string `json:"tags"`
+	Expression string   `json:"exp"`
+	Reading    string   `json:"read"`
+	Tags       []string `json:"tags"`
+}
+
+func (meta *termMetaEntry) addTags(tags ...string) {
+	for _, tag := range tags {
+		if !hasString(tag, meta.Tags) {
+			meta.Tags = append(meta.Tags, tag)
+		}
+	}
+}
+
+func (meta *termMetaEntry) addTagsPri(tags ...string) {
+	for _, tag := range tags {
+		switch tag {
+		case "news1", "ichi1", "spec1", "gai1":
+			meta.addTags("P")
+			fallthrough
+		case "news2", "ichi2", "spec2", "gai2":
+			meta.addTags(tag[:len(tag)-1])
+			break
+		}
+	}
 }
 
 type termMetaIndex struct {
@@ -96,6 +120,72 @@ func (index *termMetaIndex) output(dir string, pretty bool) error {
 	}
 
 	return nil
+}
+
+func extractEdictTermMeta(edictEntry jmdict.JmdictEntry) []termMetaEntry {
+	var entries []termMetaEntry
+
+	convert := func(reading jmdict.JmdictReading, kanji *jmdict.JmdictKanji) {
+		if kanji != nil && reading.Restrictions != nil && !hasString(kanji.Expression, reading.Restrictions) {
+			return
+		}
+
+		var entryBase termMetaEntry
+		entryBase.addTags(reading.Information...)
+		entryBase.addTagsPri(reading.Priorities...)
+
+		if kanji == nil {
+			entryBase.Expression = reading.Reading
+			entryBase.addTagsPri(reading.Priorities...)
+		} else {
+			entryBase.Expression = kanji.Expression
+			entryBase.Reading = reading.Reading
+			entryBase.addTags(kanji.Information...)
+
+			for _, priority := range kanji.Priorities {
+				if hasString(priority, reading.Priorities) {
+					entryBase.addTagsPri(priority)
+				}
+			}
+		}
+
+		for _, sense := range edictEntry.Sense {
+			if sense.RestrictedReadings != nil && !hasString(reading.Reading, sense.RestrictedReadings) {
+				continue
+			}
+
+			if kanji != nil && sense.RestrictedKanji != nil && !hasString(kanji.Expression, sense.RestrictedKanji) {
+				continue
+			}
+
+			entry := termMetaEntry{
+				Reading:    entryBase.Reading,
+				Expression: entryBase.Expression,
+			}
+
+			entry.addTags(entryBase.Tags...)
+			entry.addTags(sense.PartsOfSpeech...)
+			entry.addTags(sense.Fields...)
+			entry.addTags(sense.Misc...)
+			entry.addTags(sense.Dialects...)
+
+			entries = append(entries, entry)
+		}
+	}
+
+	if len(edictEntry.Kanji) > 0 {
+		for _, kanji := range edictEntry.Kanji {
+			for _, reading := range edictEntry.Readings {
+				convert(reading, &kanji)
+			}
+		}
+	} else {
+		for _, reading := range edictEntry.Readings {
+			convert(reading, nil)
+		}
+	}
+
+	return entries
 }
 
 func outputTermMetaJson(dir string, reader io.Reader, flags int) error {
