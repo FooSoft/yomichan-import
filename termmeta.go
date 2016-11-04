@@ -189,22 +189,16 @@ func extractEdictTermMeta(edictEntry jmdict.JmdictEntry) []termMetaEntry {
 }
 
 func outputTermMetaJson(dir string, reader io.Reader, flags int) error {
-	// dict, entities, err := jmdict.LoadJmdictNoTransform(reader)
-	// if err != nil {
-	// 	return err
-	// }
+	dict, entities, err := jmdict.LoadJmdictNoTransform(reader)
+	if err != nil {
+		return err
+	}
 
-	// meta := make(map[string][]string)
-	// for _, entry := range dict.Entries {
-	// }
+	var entries []termMetaEntry
+	for _, jmdictEntry := range dict.Entries {
+		entries = append(entries, extractEdictTermMeta(jmdictEntry)...)
+	}
 
-	// var entries []termMetaEntry
-	// for _, entry := range dict.Entries {
-	// 	// defs = append(defs, convertEdictEntry(e)...)
-	// }
-
-	// index := newTermMetaIndex(entries, entities)
-	// return index.output(dir, flags&flagPrettyJson == flagPrettyJson)
-
-	return nil
+	index := newTermMetaIndex(entries, entities)
+	return index.output(dir, flags&flagPrettyJson == flagPrettyJson)
 }
