@@ -75,12 +75,12 @@ func newTermMetaIndex(entries []termMetaEntry, entities map[string]string) termM
 	}
 }
 
-func (index *termMetaDb) output(dir string, pretty bool) error {
+func (db *termMetaDb) output(dir string, pretty bool) error {
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return err
 	}
 
-	bytes, err := marshalJson(index, pretty)
+	bytes, err := marshalJson(db, pretty)
 	if err != nil {
 		return err
 	}
@@ -96,7 +96,7 @@ func (index *termMetaDb) output(dir string, pretty bool) error {
 	}
 
 	var entries [][]string
-	for _, e := range index.entries {
+	for _, e := range db.entries {
 		entries = append(
 			entries,
 			[]string{
@@ -212,6 +212,6 @@ func outputTermMetaJson(dir string, reader io.Reader, flags int) error {
 		entries = append(entries, extractEdictTermMeta(jmdictEntry)...)
 	}
 
-	index := newTermMetaIndex(entries, entities)
-	return index.output(dir, flags&flagPrettyJson == flagPrettyJson)
+	db := newTermMetaIndex(entries, entities)
+	return db.output(dir, flags&flagPrettyJson == flagPrettyJson)
 }

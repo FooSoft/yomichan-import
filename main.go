@@ -37,7 +37,7 @@ const (
 )
 
 func usage() {
-	fmt.Fprintf(os.Stderr, "Usage: %s file_format input_file output_file\n\n", path.Base(os.Args[0]))
+	fmt.Fprintf(os.Stderr, "Usage: %s format input output\n\n", path.Base(os.Args[0]))
 	fmt.Fprintf(os.Stderr, "Parameters:\n")
 	flag.PrintDefaults()
 }
@@ -65,7 +65,7 @@ func outputJson(fileFormat, inputPath, outputDir string, flags int) error {
 }
 
 func main() {
-	prettyJson := flag.Bool("prettyJson", false, "output prettified json")
+	prettyJson := flag.Bool("pretty", false, "output prettified json")
 
 	flag.Usage = usage
 	flag.Parse()
