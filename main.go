@@ -44,7 +44,7 @@ func usage() {
 
 func outputJson(fileFormat, inputPath, outputDir string, flags int) error {
 	handlers := map[string]func(string, io.Reader, int) error{
-		"termmeta": outputTermMetaJson,
+		"tmeta":    outputTermMetaJson,
 		"edict":    outputEdictJson,
 		"enamdict": outputJmnedictJson,
 		"kanjidic": outputKanjidicJson,
