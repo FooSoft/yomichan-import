@@ -37,17 +37,16 @@ const (
 )
 
 func usage() {
-	fmt.Fprintf(os.Stderr, "Usage: %s format input output\n\n", path.Base(os.Args[0]))
+	fmt.Fprintf(os.Stderr, "Usage: %s [edict|enamdict|kanjidic] input output\n\n", path.Base(os.Args[0]))
 	fmt.Fprintf(os.Stderr, "Parameters:\n")
 	flag.PrintDefaults()
 }
 
-func outputJson(fileFormat, inputPath, outputDir string, flags int) error {
+func exportDb(fileFormat, inputPath, outputDir string, flags int) error {
 	handlers := map[string]func(string, io.Reader, int) error{
-		"tmeta":    outputTermMetaJson,
-		"edict":    outputEdictJson,
-		"enamdict": outputJmnedictJson,
-		"kanjidic": outputKanjidicJson,
+		"edict":    exportJmdictDb,
+		"enamdict": exportJmnedictDb,
+		"kanjidic": exportKanjidicDb,
 	}
 
 	handler, ok := handlers[fileFormat]
@@ -76,7 +75,7 @@ func main() {
 	}
 
 	if flag.NArg() == 3 {
-		if err := outputJson(flag.Arg(0), flag.Arg(1), flag.Arg(2), flags); err != nil {
+		if err := exportDb(flag.Arg(0), flag.Arg(1), flag.Arg(2), flags); err != nil {
 			log.Fatal(err)
 		}
 	} else {

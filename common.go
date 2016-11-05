@@ -30,129 +30,157 @@ import (
 	"strings"
 )
 
-const (
-	BANK_STRIDE = 50000
-	DB_VERSION  = 0
-)
-
-type termIndex struct {
-	Version  int        `json:"version"`
-	Banks    int        `json:"banks"`
-	Entities [][]string `json:"ents"`
-	defs     [][]string
-}
-
-type termSource struct {
+type dbTerm struct {
 	Expression string
 	Reading    string
 	Tags       []string
 	Glossary   []string
 }
 
-func (s *termSource) addTags(tags ...string) {
+type dbTermList []dbTerm
+
+func (term *dbTerm) addTags(tags ...string) {
 	for _, tag := range tags {
-		if !hasString(tag, s.Tags) {
-			s.Tags = append(s.Tags, tag)
+		if !hasString(tag, term.Tags) {
+			term.Tags = append(term.Tags, tag)
 		}
 	}
 }
 
-func (s *termSource) addTagsPri(tags ...string) {
+func (term *dbTerm) addTagsPri(tags ...string) {
 	for _, tag := range tags {
 		switch tag {
 		case "news1", "ichi1", "spec1", "gai1":
-			s.addTags("P")
+			term.addTags("P")
 			fallthrough
 		case "news2", "ichi2", "spec2", "gai2":
-			s.addTags(tag[:len(tag)-1])
+			term.addTags(tag[:len(tag)-1])
 			break
 		}
 	}
 }
 
-func buildTermIndex(entries []termSource, entities map[string]string) termIndex {
-	dict := termIndex{
-		Version: DB_VERSION,
-		Banks:   bankCount(len(entries)),
+func (terms dbTermList) crush() [][]string {
+	var results [][]string
+	for _, t := range terms {
+		result := []string{
+			t.Expression,
+			t.Reading,
+			strings.Join(t.Tags, " "),
+		}
+
+		result = append(result, t.Glossary...)
+		results = append(results, result)
 	}
 
-	for _, e := range entries {
-		def := []string{e.Expression, e.Reading, strings.Join(e.Tags, " ")}
-		def = append(def, e.Glossary...)
-		dict.defs = append(dict.defs, def)
-	}
-
-	for name, value := range entities {
-		ent := []string{name, value}
-		dict.Entities = append(dict.Entities, ent)
-	}
-
-	return dict
+	return results
 }
 
-func outputTermIndex(outputDir string, entries []termSource, entities map[string]string, pretty bool) error {
+type dbKanji struct {
+	Character string
+	Onyomi    []string
+	Kunyomi   []string
+	Tags      []string
+	Meanings  []string
+}
+
+type dbKanjiList []dbKanji
+
+func (kanji *dbKanji) addTags(tags ...string) {
+	for _, tag := range tags {
+		if !hasString(tag, kanji.Tags) {
+			kanji.Tags = append(kanji.Tags, tag)
+		}
+	}
+}
+
+func (kanji dbKanjiList) crush() [][]string {
+	var results [][]string
+	for _, k := range kanji {
+		result := []string{
+			k.Character,
+			strings.Join(k.Onyomi, " "),
+			strings.Join(k.Kunyomi, " "),
+			strings.Join(k.Tags, " "),
+		}
+
+		result = append(result, k.Meanings...)
+		results = append(results, result)
+	}
+
+	return results
+}
+
+func writeDb(outputDir string, records [][]string, entities map[string]string, pretty bool) error {
+	const DB_VERSION = 1
+	const BANK_STRIDE = 50000
+
+	marshalJson := func(obj interface{}, pretty bool) ([]byte, error) {
+		if pretty {
+			return json.MarshalIndent(obj, "", "    ")
+		}
+
+		return json.Marshal(obj)
+	}
+
+	var db struct {
+		Version  int               `json:"version"`
+		Banks    int               `json:"banks"`
+		Entities map[string]string `json:"entities"`
+	}
+
+	recordCount := len(records)
+
+	db.Version = 0
+	db.Entities = entities
+	db.Banks = recordCount / BANK_STRIDE
+	if recordCount%BANK_STRIDE > 0 {
+		db.Banks += 1
+	}
+
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
 		return err
 	}
 
-	outputIndex, err := os.Create(path.Join(outputDir, "index.json"))
-	if err != nil {
-		return err
-	}
-	defer outputIndex.Close()
-
-	dict := buildTermIndex(entries, entities)
-	indexBytes, err := marshalJson(dict, pretty)
+	bytes, err := marshalJson(db, pretty)
 	if err != nil {
 		return err
 	}
 
-	if _, err = outputIndex.Write(indexBytes); err != nil {
+	fp, err := os.Create(path.Join(outputDir, "index.json"))
+	if err != nil {
+		return err
+	}
+	defer fp.Close()
+
+	if _, err = fp.Write(bytes); err != nil {
 		return err
 	}
 
-	defCnt := len(dict.defs)
-	for i := 0; i < defCnt; i += BANK_STRIDE {
-		outputRef, err := os.Create(path.Join(outputDir, fmt.Sprintf("bank_%d.json", i/BANK_STRIDE+1)))
-		if err != nil {
-			return err
-		}
-		defer outputRef.Close()
-
+	for i := 0; i < recordCount; i += BANK_STRIDE {
 		indexSrc := i
 		indexDst := i + BANK_STRIDE
-		if indexDst > defCnt {
-			indexDst = defCnt
+		if indexDst > recordCount {
+			indexDst = recordCount
 		}
 
-		refBytes, err := marshalJson(dict.defs[indexSrc:indexDst], pretty)
+		bytes, err := marshalJson(records[indexSrc:indexDst], pretty)
 		if err != nil {
 			return err
 		}
 
-		if _, err = outputRef.Write(refBytes); err != nil {
+		fp, err := os.Create(path.Join(outputDir, fmt.Sprintf("bank_%d.json", i/BANK_STRIDE+1)))
+		if err != nil {
+			return err
+		}
+		defer fp.Close()
+
+		if _, err = fp.Write(bytes); err != nil {
 			return err
 		}
 	}
 
 	return nil
-}
-
-func marshalJson(obj interface{}, pretty bool) ([]byte, error) {
-	if pretty {
-		return json.MarshalIndent(obj, "", "    ")
-	}
-
-	return json.Marshal(obj)
-}
-
-func bankCount(defCount int) int {
-	count := defCount / BANK_STRIDE
-	if defCount%BANK_STRIDE > 0 {
-		count += 1
-	}
-
-	return count
 }
 
 func hasString(needle string, haystack []string) bool {

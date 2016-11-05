@@ -28,25 +28,30 @@ import (
 	"github.com/FooSoft/jmdict"
 )
 
-func convertEdictEntry(edictEntry jmdict.JmdictEntry) []termSource {
-	var entries []termSource
+func extractJmdictTerms(edictEntry jmdict.JmdictEntry) []dbTerm {
+	var terms []dbTerm
 
 	convert := func(reading jmdict.JmdictReading, kanji *jmdict.JmdictKanji) {
 		if kanji != nil && reading.Restrictions != nil && !hasString(kanji.Expression, reading.Restrictions) {
 			return
 		}
 
-		var entryBase termSource
-		entryBase.addTags(reading.Information...)
-		entryBase.addTagsPri(reading.Priorities...)
+		var termBase dbTerm
+		termBase.addTags(reading.Information...)
 
 		if kanji == nil {
-			entryBase.Expression = reading.Reading
+			termBase.Expression = reading.Reading
+			termBase.addTagsPri(reading.Priorities...)
 		} else {
-			entryBase.Expression = kanji.Expression
-			entryBase.Reading = reading.Reading
-			entryBase.addTags(kanji.Information...)
-			entryBase.addTagsPri(kanji.Priorities...)
+			termBase.Expression = kanji.Expression
+			termBase.Reading = reading.Reading
+			termBase.addTags(kanji.Information...)
+
+			for _, priority := range kanji.Priorities {
+				if hasString(priority, reading.Priorities) {
+					termBase.addTagsPri(priority)
+				}
+			}
 		}
 
 		for _, sense := range edictEntry.Sense {
@@ -58,23 +63,18 @@ func convertEdictEntry(edictEntry jmdict.JmdictEntry) []termSource {
 				continue
 			}
 
-			entry := termSource{
-				Reading:    entryBase.Reading,
-				Expression: entryBase.Expression,
-			}
-
-			entry.addTags(entryBase.Tags...)
+			term := dbTerm{Reading: termBase.Reading, Expression: termBase.Expression}
+			term.addTags(termBase.Tags...)
+			term.addTags(sense.PartsOfSpeech...)
+			term.addTags(sense.Fields...)
+			term.addTags(sense.Misc...)
+			term.addTags(sense.Dialects...)
 
 			for _, glossary := range sense.Glossary {
-				entry.Glossary = append(entry.Glossary, glossary.Content)
+				term.Glossary = append(term.Glossary, glossary.Content)
 			}
 
-			entry.addTags(sense.PartsOfSpeech...)
-			entry.addTags(sense.Fields...)
-			entry.addTags(sense.Misc...)
-			entry.addTags(sense.Dialects...)
-
-			entries = append(entries, entry)
+			terms = append(terms, term)
 		}
 	}
 
@@ -90,19 +90,24 @@ func convertEdictEntry(edictEntry jmdict.JmdictEntry) []termSource {
 		}
 	}
 
-	return entries
+	return terms
 }
 
-func outputEdictJson(outputDir string, reader io.Reader, flags int) error {
+func exportJmdictDb(outputDir string, reader io.Reader, flags int) error {
 	dict, entities, err := jmdict.LoadJmdictNoTransform(reader)
 	if err != nil {
 		return err
 	}
 
-	var entries []termSource
-	for _, e := range dict.Entries {
-		entries = append(entries, convertEdictEntry(e)...)
+	var terms dbTermList
+	for _, entry := range dict.Entries {
+		terms = append(terms, extractJmdictTerms(entry)...)
 	}
 
-	return outputTermIndex(outputDir, entries, entities, flags&flagPrettyJson == flagPrettyJson)
+	return writeDb(
+		outputDir,
+		terms.crush(),
+		entities,
+		flags&flagPrettyJson == flagPrettyJson,
+	)
 }

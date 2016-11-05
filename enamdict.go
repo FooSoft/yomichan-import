@@ -28,34 +28,38 @@ import (
 	"github.com/FooSoft/jmdict"
 )
 
-func convertJmnedictEntry(enamdictEntry jmdict.JmnedictEntry) []termSource {
-	var entries []termSource
+func extractJmnedictTerms(enamdictEntry jmdict.JmnedictEntry) []dbTerm {
+	var terms []dbTerm
 
 	convert := func(reading jmdict.JmnedictReading, kanji *jmdict.JmnedictKanji) {
 		if kanji != nil && hasString(kanji.Expression, reading.Restrictions) {
 			return
 		}
 
-		var entry termSource
+		var term dbTerm
+		term.addTags(reading.Information...)
+
 		if kanji == nil {
-			entry.Expression = reading.Reading
+			term.Expression = reading.Reading
+			term.addTags(reading.Information...)
 		} else {
-			entry.Expression = kanji.Expression
-			entry.Reading = reading.Reading
+			term.Expression = kanji.Expression
+			term.Reading = reading.Reading
+			term.addTags(kanji.Information...)
 
-			entry.addTags(kanji.Information...)
-			entry.addTagsPri(kanji.Priorities...)
+			for _, priority := range kanji.Priorities {
+				if hasString(priority, reading.Priorities) {
+					term.addTagsPri(priority)
+				}
+			}
 		}
-
-		entry.addTags(reading.Information...)
-		entry.addTagsPri(reading.Priorities...)
 
 		for _, trans := range enamdictEntry.Translations {
-			entry.Glossary = append(entry.Glossary, trans.Translations...)
-			entry.addTags(trans.NameTypes...)
+			term.Glossary = append(term.Glossary, trans.Translations...)
+			term.addTags(trans.NameTypes...)
 		}
 
-		entries = append(entries, entry)
+		terms = append(terms, term)
 	}
 
 	if len(enamdictEntry.Kanji) > 0 {
@@ -70,19 +74,24 @@ func convertJmnedictEntry(enamdictEntry jmdict.JmnedictEntry) []termSource {
 		}
 	}
 
-	return entries
+	return terms
 }
 
-func outputJmnedictJson(outputDir string, reader io.Reader, flags int) error {
+func exportJmnedictDb(outputDir string, reader io.Reader, flags int) error {
 	dict, entities, err := jmdict.LoadJmnedictNoTransform(reader)
 	if err != nil {
 		return err
 	}
 
-	var entries []termSource
+	var terms dbTermList
 	for _, e := range dict.Entries {
-		entries = append(entries, convertJmnedictEntry(e)...)
+		terms = append(terms, extractJmnedictTerms(e)...)
 	}
 
-	return outputTermIndex(outputDir, entries, entities, flags&flagPrettyJson == flagPrettyJson)
+	return writeDb(
+		outputDir,
+		terms.crush(),
+		entities,
+		flags&flagPrettyJson == flagPrettyJson,
+	)
 }
