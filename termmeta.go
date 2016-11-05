@@ -62,7 +62,7 @@ type termMetaIndex struct {
 	Version  int               `json:"version"`
 	Banks    int               `json:"banks"`
 	Entities map[string]string `json:"entities"`
-	Entries  []termMetaEntry   `json:"entries"`
+	entries  []termMetaEntry
 }
 
 func newTermMetaIndex(entries []termMetaEntry, entities map[string]string) termMetaIndex {
@@ -70,7 +70,7 @@ func newTermMetaIndex(entries []termMetaEntry, entities map[string]string) termM
 		Version:  DB_VERSION,
 		Banks:    bankCount(len(entries)),
 		Entities: entities,
-		Entries:  entries,
+		entries:  entries,
 	}
 }
 
@@ -94,7 +94,7 @@ func (index *termMetaIndex) output(dir string, pretty bool) error {
 		return err
 	}
 
-	count := len(index.Entries)
+	count := len(index.entries)
 
 	for i := 0; i < count; i += BANK_STRIDE {
 		indexSrc := i
@@ -103,7 +103,7 @@ func (index *termMetaIndex) output(dir string, pretty bool) error {
 			indexDst = count
 		}
 
-		bytes, err := marshalJson(index.Entries[indexSrc:indexDst], pretty)
+		bytes, err := marshalJson(index.entries[indexSrc:indexDst], pretty)
 		if err != nil {
 			return err
 		}
