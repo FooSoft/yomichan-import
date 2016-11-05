@@ -27,6 +27,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/FooSoft/jmdict"
 )
@@ -58,15 +59,15 @@ func (meta *termMetaEntry) addTagsPri(tags ...string) {
 	}
 }
 
-type termMetaIndex struct {
+type termMetaDb struct {
 	Version  int               `json:"version"`
 	Banks    int               `json:"banks"`
 	Entities map[string]string `json:"entities"`
 	entries  []termMetaEntry
 }
 
-func newTermMetaIndex(entries []termMetaEntry, entities map[string]string) termMetaIndex {
-	return termMetaIndex{
+func newTermMetaIndex(entries []termMetaEntry, entities map[string]string) termMetaDb {
+	return termMetaDb{
 		Version:  DB_VERSION,
 		Banks:    bankCount(len(entries)),
 		Entities: entities,
@@ -74,7 +75,7 @@ func newTermMetaIndex(entries []termMetaEntry, entities map[string]string) termM
 	}
 }
 
-func (index *termMetaIndex) output(dir string, pretty bool) error {
+func (index *termMetaDb) output(dir string, pretty bool) error {
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return err
 	}
@@ -94,16 +95,27 @@ func (index *termMetaIndex) output(dir string, pretty bool) error {
 		return err
 	}
 
-	count := len(index.entries)
+	var entries [][]string
+	var entryCount = len(entries)
+	for _, e := range index.entries {
+		entries = append(
+			entries,
+			[]string{
+				e.Expression,
+				e.Reading,
+				strings.Join(e.Tags, " "),
+			},
+		)
+	}
 
-	for i := 0; i < count; i += BANK_STRIDE {
+	for i := 0; i < entryCount; i += BANK_STRIDE {
 		indexSrc := i
 		indexDst := i + BANK_STRIDE
-		if indexDst > count {
-			indexDst = count
+		if indexDst > entryCount {
+			indexDst = entryCount
 		}
 
-		bytes, err := marshalJson(index.entries[indexSrc:indexDst], pretty)
+		bytes, err := marshalJson(entries[indexSrc:indexDst], pretty)
 		if err != nil {
 			return err
 		}
