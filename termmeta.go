@@ -96,7 +96,6 @@ func (index *termMetaDb) output(dir string, pretty bool) error {
 	}
 
 	var entries [][]string
-	var entryCount = len(entries)
 	for _, e := range index.entries {
 		entries = append(
 			entries,
@@ -107,6 +106,8 @@ func (index *termMetaDb) output(dir string, pretty bool) error {
 			},
 		)
 	}
+
+	entryCount := len(entries)
 
 	for i := 0; i < entryCount; i += BANK_STRIDE {
 		indexSrc := i
