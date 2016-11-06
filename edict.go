@@ -108,6 +108,7 @@ func exportJmdictDb(outputDir, title string, reader io.Reader, flags int) error 
 		outputDir,
 		title,
 		terms.crush(),
+		nil,
 		entities,
 		flags&flagPretty == flagPretty,
 	)

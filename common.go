@@ -111,7 +111,7 @@ func (kanji dbKanjiList) crush() [][]string {
 	return results
 }
 
-func writeDb(outputDir, title string, records [][]string, entities map[string]string, pretty bool) error {
+func writeDb(outputDir, title string, termRecords [][]string, kanjiRecords [][]string, entities map[string]string, pretty bool) error {
 	const DB_VERSION = 1
 	const BANK_STRIDE = 50000
 
@@ -123,24 +123,60 @@ func writeDb(outputDir, title string, records [][]string, entities map[string]st
 		return json.Marshal(obj)
 	}
 
-	var db struct {
-		Title    string            `json:"title"`
-		Version  int               `json:"version"`
-		Banks    int               `json:"banks"`
-		Entities map[string]string `json:"entities"`
-	}
+	writeDbRecords := func(prefix string, records [][]string) (int, error) {
+		recordCount := len(records)
+		bankCount := 0
 
-	recordCount := len(records)
+		for i := 0; i < recordCount; i += BANK_STRIDE {
+			indexSrc := i
+			indexDst := i + BANK_STRIDE
+			if indexDst > recordCount {
+				indexDst = recordCount
+			}
 
-	db.Title = title
-	db.Version = 0
-	db.Entities = entities
-	db.Banks = recordCount / BANK_STRIDE
-	if recordCount%BANK_STRIDE > 0 {
-		db.Banks += 1
+			bytes, err := marshalJson(records[indexSrc:indexDst], pretty)
+			if err != nil {
+				return 0, err
+			}
+
+			fp, err := os.Create(path.Join(outputDir, fmt.Sprintf("%s_bank_%d.json", prefix, i/BANK_STRIDE+1)))
+			if err != nil {
+				return 0, err
+			}
+			defer fp.Close()
+
+			if _, err = fp.Write(bytes); err != nil {
+				return 0, err
+			}
+
+			bankCount += 1
+		}
+
+		return bankCount, nil
 	}
 
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		return err
+	}
+
+	var err error
+	var db struct {
+		Title      string            `json:"title"`
+		Version    int               `json:"version"`
+		Entities   map[string]string `json:"entities"`
+		TermBanks  int               `json:"termBanks"`
+		KanjiBanks int               `json:"kanjiBanks"`
+	}
+
+	db.Title = title
+	db.Version = DB_VERSION
+	db.Entities = entities
+
+	if db.TermBanks, err = writeDbRecords("term", termRecords); err != nil {
+		return err
+	}
+
+	if db.KanjiBanks, err = writeDbRecords("kanji", kanjiRecords); err != nil {
 		return err
 	}
 
@@ -155,31 +191,8 @@ func writeDb(outputDir, title string, records [][]string, entities map[string]st
 	}
 	defer fp.Close()
 
-	if _, err = fp.Write(bytes); err != nil {
+	if _, err := fp.Write(bytes); err != nil {
 		return err
-	}
-
-	for i := 0; i < recordCount; i += BANK_STRIDE {
-		indexSrc := i
-		indexDst := i + BANK_STRIDE
-		if indexDst > recordCount {
-			indexDst = recordCount
-		}
-
-		bytes, err := marshalJson(records[indexSrc:indexDst], pretty)
-		if err != nil {
-			return err
-		}
-
-		fp, err := os.Create(path.Join(outputDir, fmt.Sprintf("bank_%d.json", i/BANK_STRIDE+1)))
-		if err != nil {
-			return err
-		}
-		defer fp.Close()
-
-		if _, err = fp.Write(bytes); err != nil {
-			return err
-		}
 	}
 
 	return nil

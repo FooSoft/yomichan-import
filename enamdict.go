@@ -92,6 +92,7 @@ func exportJmnedictDb(outputDir, title string, reader io.Reader, flags int) erro
 		outputDir,
 		title,
 		terms.crush(),
+		nil,
 		entities,
 		flags&flagPretty == flagPretty,
 	)

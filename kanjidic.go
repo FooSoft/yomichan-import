@@ -94,6 +94,7 @@ func exportKanjidicDb(outputDir, title string, reader io.Reader, flags int) erro
 	return writeDb(
 		outputDir,
 		title,
+		nil,
 		kanji.crush(),
 		nil,
 		flags&flagPretty == flagPretty,
