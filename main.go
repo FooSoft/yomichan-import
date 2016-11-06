@@ -33,7 +33,7 @@ import (
 )
 
 const (
-	flagPrettyJson = 1 << iota
+	flagPretty = 1 << iota
 )
 
 func usage() {
@@ -42,14 +42,14 @@ func usage() {
 	flag.PrintDefaults()
 }
 
-func exportDb(fileFormat, inputPath, outputDir string, flags int) error {
-	handlers := map[string]func(string, io.Reader, int) error{
+func exportDb(inputPath, outputDir, format, title string, flags int) error {
+	handlers := map[string]func(string, string, io.Reader, int) error{
 		"edict":    exportJmdictDb,
 		"enamdict": exportJmnedictDb,
 		"kanjidic": exportKanjidicDb,
 	}
 
-	handler, ok := handlers[fileFormat]
+	handler, ok := handlers[format]
 	if !ok {
 		return errors.New("unrecognized file format")
 	}
@@ -60,22 +60,24 @@ func exportDb(fileFormat, inputPath, outputDir string, flags int) error {
 	}
 	defer input.Close()
 
-	return handler(outputDir, input, flags)
+	return handler(outputDir, title, input, flags)
 }
 
 func main() {
-	prettyJson := flag.Bool("pretty", false, "output prettified json")
+	pretty := flag.Bool("pretty", false, "output prettified json")
+	format := flag.String("format", "", "dictionary format")
+	title := flag.String("title", "", "dictionary title")
 
 	flag.Usage = usage
 	flag.Parse()
 
 	var flags int
-	if *prettyJson {
-		flags |= flagPrettyJson
+	if *pretty {
+		flags |= flagPretty
 	}
 
-	if flag.NArg() == 3 {
-		if err := exportDb(flag.Arg(0), flag.Arg(1), flag.Arg(2), flags); err != nil {
+	if flag.NArg() == 2 && len(*format) > 0 && len(*title) > 0 {
+		if err := exportDb(flag.Arg(0), flag.Arg(1), *format, *title, flags); err != nil {
 			log.Fatal(err)
 		}
 	} else {

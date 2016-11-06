@@ -111,7 +111,7 @@ func (kanji dbKanjiList) crush() [][]string {
 	return results
 }
 
-func writeDb(outputDir string, records [][]string, entities map[string]string, pretty bool) error {
+func writeDb(outputDir, title string, records [][]string, entities map[string]string, pretty bool) error {
 	const DB_VERSION = 1
 	const BANK_STRIDE = 50000
 
@@ -124,6 +124,7 @@ func writeDb(outputDir string, records [][]string, entities map[string]string, p
 	}
 
 	var db struct {
+		Title    string            `json:"title"`
 		Version  int               `json:"version"`
 		Banks    int               `json:"banks"`
 		Entities map[string]string `json:"entities"`
@@ -131,6 +132,7 @@ func writeDb(outputDir string, records [][]string, entities map[string]string, p
 
 	recordCount := len(records)
 
+	db.Title = title
 	db.Version = 0
 	db.Entities = entities
 	db.Banks = recordCount / BANK_STRIDE

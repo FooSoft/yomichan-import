@@ -93,7 +93,7 @@ func extractJmdictTerms(edictEntry jmdict.JmdictEntry) []dbTerm {
 	return terms
 }
 
-func exportJmdictDb(outputDir string, reader io.Reader, flags int) error {
+func exportJmdictDb(outputDir, title string, reader io.Reader, flags int) error {
 	dict, entities, err := jmdict.LoadJmdictNoTransform(reader)
 	if err != nil {
 		return err
@@ -106,8 +106,9 @@ func exportJmdictDb(outputDir string, reader io.Reader, flags int) error {
 
 	return writeDb(
 		outputDir,
+		title,
 		terms.crush(),
 		entities,
-		flags&flagPrettyJson == flagPrettyJson,
+		flags&flagPretty == flagPretty,
 	)
 }
