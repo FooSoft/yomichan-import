@@ -23,66 +23,69 @@
 package main
 
 import (
-	"errors"
-	"flag"
+	"encoding/json"
 	"fmt"
 	"io"
-	"log"
-	"os"
-	"path"
+	"io/ioutil"
 )
 
-const (
-	flagPretty = 1 << iota
-)
-
-func usage() {
-	fmt.Fprintf(os.Stderr, "Usage: %s [edict|enamdict|kanjidic] input output\n\n", path.Base(os.Args[0]))
-	fmt.Fprintf(os.Stderr, "Parameters:\n")
-	flag.PrintDefaults()
+type epwingEntry struct {
+	Heading string `json:"heading"`
+	Text    string `json:"text"`
 }
 
-func exportDb(inputPath, outputDir, format, title string, flags int) error {
-	handlers := map[string]func(string, string, io.Reader, int) error{
-		"edict":    exportJmdictDb,
-		"enamdict": exportJmnedictDb,
-		"kanjidic": exportKanjidicDb,
-		"epwing":   exportEpwingDb,
-	}
+type epwingBook struct {
+	Title     string        `json:"title"`
+	Copyright string        `json:"copyright"`
+	Entries   []epwingEntry `json:"entries"`
+}
 
-	handler, ok := handlers[format]
-	if !ok {
-		return errors.New("unrecognized file format")
-	}
+type epwingDict struct {
+	CharacterCode string       `json:"characterCode"`
+	DiscCode      string       `json:"discCode"`
+	SubBooks      []epwingBook `json:"subBooks"`
+}
 
-	input, err := os.Open(inputPath)
+func extractEpwingTerms(entry epwingEntry) []dbTerm {
+	fmt.Print(entry.Heading)
+	return nil
+}
+
+func extractEpwingKanji(entry epwingEntry) []dbKanji {
+	return nil
+}
+
+func exportEpwingDb(outputDir, title string, reader io.Reader, flags int) error {
+	data, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return err
 	}
-	defer input.Close()
 
-	return handler(outputDir, title, input, flags)
-}
-
-func main() {
-	pretty := flag.Bool("pretty", false, "output prettified json")
-	format := flag.String("format", "", "dictionary format")
-	title := flag.String("title", "", "dictionary title")
-
-	flag.Usage = usage
-	flag.Parse()
-
-	var flags int
-	if *pretty {
-		flags |= flagPretty
+	var dict epwingDict
+	if err := json.Unmarshal(data, &dict); err != nil {
+		return err
 	}
 
-	if flag.NArg() == 2 && len(*format) > 0 && len(*title) > 0 {
-		if err := exportDb(flag.Arg(0), flag.Arg(1), *format, *title, flags); err != nil {
-			log.Fatal(err)
+	var terms dbTermList
+	for _, subBook := range dict.SubBooks {
+		for _, entry := range subBook.Entries {
+			terms = append(terms, extractEpwingTerms(entry)...)
 		}
-	} else {
-		usage()
-		os.Exit(2)
 	}
+
+	var kanji dbKanjiList
+	for _, subBook := range dict.SubBooks {
+		for _, entry := range subBook.Entries {
+			kanji = append(kanji, extractEpwingKanji(entry)...)
+		}
+	}
+
+	return writeDb(
+		outputDir,
+		title,
+		terms.crush(),
+		kanji.crush(),
+		nil,
+		flags&flagPretty == flagPretty,
+	)
 }
