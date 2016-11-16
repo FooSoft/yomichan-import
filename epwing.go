@@ -24,7 +24,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 )
@@ -46,12 +45,11 @@ type epwingDict struct {
 	SubBooks      []epwingBook `json:"subBooks"`
 }
 
-func extractEpwingTerms(entry epwingEntry) []dbTerm {
-	fmt.Print(entry.Heading)
+func extractDaijisenTerms(entry epwingEntry) []dbTerm {
 	return nil
 }
 
-func extractEpwingKanji(entry epwingEntry) []dbKanji {
+func extractDaijisenKanji(entry epwingEntry) []dbKanji {
 	return nil
 }
 
@@ -66,17 +64,29 @@ func exportEpwingDb(outputDir, title string, reader io.Reader, flags int) error 
 		return err
 	}
 
+	termExtractors := map[string]func(epwingEntry) []dbTerm{
+		"大辞泉": extractDaijisenTerms,
+	}
+
 	var terms dbTermList
 	for _, subBook := range dict.SubBooks {
-		for _, entry := range subBook.Entries {
-			terms = append(terms, extractEpwingTerms(entry)...)
+		if extractor, ok := termExtractors[subBook.Title]; ok {
+			for _, entry := range subBook.Entries {
+				terms = append(terms, extractor(entry)...)
+			}
 		}
+	}
+
+	kanjiExtractors := map[string]func(epwingEntry) []dbKanji{
+		"大辞泉": extractDaijisenKanji,
 	}
 
 	var kanji dbKanjiList
 	for _, subBook := range dict.SubBooks {
-		for _, entry := range subBook.Entries {
-			kanji = append(kanji, extractEpwingKanji(entry)...)
+		if extractor, ok := kanjiExtractors[subBook.Title]; ok {
+			for _, entry := range subBook.Entries {
+				kanji = append(kanji, extractor(entry)...)
+			}
 		}
 	}
 
