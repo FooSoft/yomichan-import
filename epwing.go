@@ -24,7 +24,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"regexp"
@@ -65,13 +64,12 @@ func makeDaijirinExtractor() epwingExtractor {
 		partsExp:   regexp.MustCompile(`(?P<reading>[^（【〖]+)(?:【(?P<expression>.*)】)?(?:〖(?P<native>.*)〗)?(?:（(?P<tag>.*)）)?`),
 		phonExp:    regexp.MustCompile(`[-・]+`),
 		variantExp: regexp.MustCompile(`\((.*)\)`),
-		annotExp:   regexp.MustCompile(`（.*）`),
+		annotExp:   regexp.MustCompile(`（(.*)）`),
 	}
 }
 
 func (e *daijirinExtractor) extractTerms(entry epwingEntry) []dbTerm {
-	var readings []string
-	var expressions []string
+	var expressions, readings, glossary, tags []string
 
 	matches := e.partsExp.FindStringSubmatch(entry.Heading)
 	for i, name := range e.partsExp.SubexpNames() {
@@ -97,8 +95,16 @@ func (e *daijirinExtractor) extractTerms(entry epwingEntry) []dbTerm {
 		}
 	}
 
-	fmt.Printf("%q\n", expressions)
-	fmt.Printf("%q\n", readings)
+	for i, split := range strings.Split(entry.Text, "\n") {
+		if i == 0 {
+			matches := e.annotExp.FindStringSubmatch(split)
+			if len(matches) >= 1 {
+				tags = append(tags, strings.Split(matches[1], `・`)...)
+			}
+		}
+
+		glossary = append(glossary, split)
+	}
 
 	return nil
 }
