@@ -27,6 +27,8 @@ import (
 	"io"
 	"io/ioutil"
 	"regexp"
+	"strconv"
+	"strings"
 )
 
 type epwingEntry struct {
@@ -49,6 +51,8 @@ type epwingBook struct {
 type epwingExtractor interface {
 	extractTerms(entry epwingEntry) []dbTerm
 	extractKanji(entry epwingEntry) []dbKanji
+	getFontNarrow() map[int]string
+	getFontWide() map[int]string
 }
 
 type daijirinExtractor struct {
@@ -69,6 +73,7 @@ func exportEpwingDb(outputDir, title string, reader io.Reader, flags int) error 
 		return err
 	}
 
+	translateExp := regexp.MustCompile(`{{([nw])_(\d+)}}`)
 	epwingExtractors := map[string]epwingExtractor{
 		"三省堂　スーパー大辞林": makeDaijirinExtractor(),
 	}
@@ -78,7 +83,34 @@ func exportEpwingDb(outputDir, title string, reader io.Reader, flags int) error 
 
 	for _, subbook := range book.Subbooks {
 		if extractor, ok := epwingExtractors[subbook.Title]; ok {
+			fontNarrow := extractor.getFontNarrow()
+			fontWide := extractor.getFontWide()
+
+			translate := func(str string) string {
+				for _, matches := range translateExp.FindAllStringSubmatch(str, -1) {
+					var font map[int]string
+					if matches[1] == "n" {
+						font = fontNarrow
+					} else {
+						font = fontWide
+					}
+
+					code, _ := strconv.Atoi(matches[2])
+					replacement, ok := font[code]
+					if !ok {
+						replacement = "�"
+					}
+
+					str = strings.Replace(str, matches[0], replacement, -1)
+				}
+
+				return str
+			}
+
 			for _, entry := range subbook.Entries {
+				entry.Heading = translate(entry.Heading)
+				entry.Text = translate(entry.Text)
+
 				terms = append(terms, extractor.extractTerms(entry)...)
 				kanji = append(kanji, extractor.extractKanji(entry)...)
 			}
