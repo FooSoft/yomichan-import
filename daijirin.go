@@ -29,7 +29,7 @@ import (
 
 func makeDaijirinExtractor() epwingExtractor {
 	return &daijirinExtractor{
-		partsExp:   regexp.MustCompile(`(?P<reading>[^（【〖]+)(?:【(?P<expression>.*)】)?(?:〖(?P<native>.*)〗)?(?:（(?P<tag>.*)）)?`),
+		partsExp:   regexp.MustCompile(`([^（【〖]+)(?:【(.*)】)?(?:〖(.*)〗)?(?:（(.*)）)?`),
 		phonExp:    regexp.MustCompile(`[-・]+`),
 		variantExp: regexp.MustCompile(`\((.*)\)`),
 		annotExp:   regexp.MustCompile(`（(.*)）`),
@@ -40,15 +40,9 @@ func (e *daijirinExtractor) extractTerms(entry epwingEntry) []dbTerm {
 	var expressions, readings, glossary, tags []string
 
 	matches := e.partsExp.FindStringSubmatch(entry.Heading)
-	for i, name := range e.partsExp.SubexpNames() {
-		value := matches[i]
-		if i == 0 || len(value) == 0 {
-			continue
-		}
-
-		switch name {
-		case "expression":
-			expression := e.annotExp.ReplaceAllLiteralString(value, "")
+	if matches != nil {
+		if expression := matches[2]; len(expression) > 0 {
+			expression = e.annotExp.ReplaceAllLiteralString(expression, "")
 			for _, split := range strings.Split(expression, `・`) {
 				splitInc := e.variantExp.ReplaceAllString(split, "$1")
 				expressions = append(expressions, splitInc)
@@ -57,16 +51,17 @@ func (e *daijirinExtractor) extractTerms(entry epwingEntry) []dbTerm {
 					expressions = append(expressions, splitExc)
 				}
 			}
-		case "reading":
-			reading := e.phonExp.ReplaceAllLiteralString(value, "")
+		}
+
+		if reading := matches[1]; len(reading) > 0 {
+			reading = e.phonExp.ReplaceAllLiteralString(reading, "")
 			readings = append(readings, reading)
 		}
 	}
 
 	for i, split := range strings.Split(entry.Text, "\n") {
 		if i == 0 {
-			matches := e.annotExp.FindStringSubmatch(split)
-			if len(matches) >= 1 {
+			if matches := e.annotExp.FindStringSubmatch(split); matches != nil {
 				tags = append(tags, strings.Split(matches[1], `・`)...)
 			}
 		}
