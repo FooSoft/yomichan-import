@@ -43,7 +43,7 @@ func (e *daijirinExtractor) extractTerms(entry epwingEntry) []dbTerm {
 	if matches != nil {
 		if expression := matches[2]; len(expression) > 0 {
 			expression = e.annotExp.ReplaceAllLiteralString(expression, "")
-			for _, split := range strings.Split(expression, `・`) {
+			for _, split := range strings.Split(expression, "・") {
 				splitInc := e.variantExp.ReplaceAllString(split, "$1")
 				expressions = append(expressions, splitInc)
 				if split != splitInc {
@@ -60,13 +60,19 @@ func (e *daijirinExtractor) extractTerms(entry epwingEntry) []dbTerm {
 	}
 
 	for i, split := range strings.Split(entry.Text, "\n") {
+		glossary = append(glossary, split)
 		if i == 0 {
-			if matches := e.annotExp.FindStringSubmatch(split); matches != nil {
-				tags = append(tags, strings.Split(matches[1], `・`)...)
-			}
+			continue
 		}
 
-		glossary = append(glossary, split)
+		tagLookup := e.getTags()
+		if matches := e.annotExp.FindStringSubmatch(split); matches != nil {
+			for _, split := range strings.Split(matches[1], "・") {
+				if tag, ok := tagLookup[split]; ok {
+					tags = append(tags, tag)
+				}
+			}
+		}
 	}
 
 	return nil
@@ -74,6 +80,113 @@ func (e *daijirinExtractor) extractTerms(entry epwingEntry) []dbTerm {
 
 func (e *daijirinExtractor) extractKanji(entry epwingEntry) []dbKanji {
 	return nil
+}
+
+func (*daijirinExtractor) getTags() map[string]string {
+	return map[string]string{
+		"並立助":     "",
+		"代":       "",
+		"係助":      "",
+		"副":       "",
+		"副助":      "",
+		"助動":      "",
+		"動":       "",
+		"動ア上一":    "",
+		"動ア下一":    "",
+		"動ア下二":    "",
+		"動ア五［ハ四］": "",
+		"動カ上一":    "",
+		"動カ上二":    "",
+		"動カ下一":    "",
+		"動カ下二":    "",
+		"動カ五":     "",
+		"動カ五［四］":  "",
+		"動カ四":     "",
+		"動カ変":     "",
+		"動ガ上一":    "",
+		"動ガ上二":    "",
+		"動ガ下一":    "",
+		"動ガ下二":    "",
+		"動ガ五［四］":  "",
+		"動ガ四":     "",
+		"動サ上一":    "",
+		"動サ下一":    "",
+		"動サ下二":    "",
+		"動サ五":     "",
+		"動サ五［四］":  "",
+		"動サ四":     "",
+		"動サ変":     "",
+		"動サ特活":    "",
+		"動ザ上一":    "",
+		"動ザ上二":    "",
+		"動ザ下一":    "",
+		"動ザ下二":    "",
+		"動タ上一":    "",
+		"動タ上二":    "",
+		"動タ下一":    "",
+		"動タ下二":    "",
+		"動タ五［四］":  "",
+		"動タ四":     "",
+		"動ダ上二":    "",
+		"動ダ下一":    "",
+		"動ダ下二":    "",
+		"動ナ上一":    "",
+		"動ナ下一":    "",
+		"動ナ下二":    "",
+		"動ナ五":     "",
+		"動ハ上一":    "",
+		"動ハ上二":    "",
+		"動ハ下一":    "",
+		"動ハ下二":    "",
+		"動ハ四":     "",
+		"動バ上一":    "",
+		"動バ上二":    "",
+		"動バ下一":    "",
+		"動バ下二":    "",
+		"動バ五［四］":  "",
+		"動バ四":     "",
+		"動マ上一":    "",
+		"動マ上二":    "",
+		"動マ下一":    "",
+		"動マ下二":    "",
+		"動マ五":     "",
+		"動マ五［四］":  "",
+		"動マ四":     "",
+		"動マ特活":    "",
+		"動ヤ上二":    "",
+		"動ヤ下二":    "",
+		"動ラ上一":    "",
+		"動ラ上二":    "",
+		"動ラ下一":    "",
+		"動ラ下二":    "",
+		"動ラ五":     "",
+		"動ラ五［四］":  "",
+		"動ラ四":     "",
+		"動ラ変":     "",
+		"動ラ特活":    "",
+		"動ワ上一":    "",
+		"動ワ上二":    "",
+		"動ワ下二":    "",
+		"動ワ五［ハ四］": "",
+		"名":    "",
+		"形":    "",
+		"形ク":   "",
+		"形シク":  "",
+		"形動":   "",
+		"形動タリ": "",
+		"形動ナリ": "",
+		"感":    "",
+		"接助":   "",
+		"接尾":   "",
+		"接続":   "",
+		"接頭":   "",
+		"枕詞":   "",
+		"格助":   "",
+		"終助":   "",
+		"連体":   "",
+		"連語":   "",
+		"間投助":  "",
+	}
 }
 
 func (*daijirinExtractor) getFontNarrow() map[int]string {
