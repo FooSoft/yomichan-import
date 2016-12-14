@@ -27,7 +27,6 @@ import (
 	"io"
 	"io/ioutil"
 	"regexp"
-	"strings"
 )
 
 type epwingEntry struct {
@@ -57,60 +56,6 @@ type daijirinExtractor struct {
 	phonExp    *regexp.Regexp
 	variantExp *regexp.Regexp
 	annotExp   *regexp.Regexp
-}
-
-func makeDaijirinExtractor() epwingExtractor {
-	return &daijirinExtractor{
-		partsExp:   regexp.MustCompile(`(?P<reading>[^（【〖]+)(?:【(?P<expression>.*)】)?(?:〖(?P<native>.*)〗)?(?:（(?P<tag>.*)）)?`),
-		phonExp:    regexp.MustCompile(`[-・]+`),
-		variantExp: regexp.MustCompile(`\((.*)\)`),
-		annotExp:   regexp.MustCompile(`（(.*)）`),
-	}
-}
-
-func (e *daijirinExtractor) extractTerms(entry epwingEntry) []dbTerm {
-	var expressions, readings, glossary, tags []string
-
-	matches := e.partsExp.FindStringSubmatch(entry.Heading)
-	for i, name := range e.partsExp.SubexpNames() {
-		value := matches[i]
-		if i == 0 || len(value) == 0 {
-			continue
-		}
-
-		switch name {
-		case "expression":
-			expression := e.annotExp.ReplaceAllLiteralString(value, "")
-			for _, split := range strings.Split(expression, `・`) {
-				splitInc := e.variantExp.ReplaceAllString(split, "$1")
-				expressions = append(expressions, splitInc)
-				if split != splitInc {
-					splitExc := e.variantExp.ReplaceAllLiteralString(split, "")
-					expressions = append(expressions, splitExc)
-				}
-			}
-		case "reading":
-			reading := e.phonExp.ReplaceAllLiteralString(value, "")
-			readings = append(readings, reading)
-		}
-	}
-
-	for i, split := range strings.Split(entry.Text, "\n") {
-		if i == 0 {
-			matches := e.annotExp.FindStringSubmatch(split)
-			if len(matches) >= 1 {
-				tags = append(tags, strings.Split(matches[1], `・`)...)
-			}
-		}
-
-		glossary = append(glossary, split)
-	}
-
-	return nil
-}
-
-func (e *daijirinExtractor) extractKanji(entry epwingEntry) []dbKanji {
-	return nil
 }
 
 func exportEpwingDb(outputDir, title string, reader io.Reader, flags int) error {
