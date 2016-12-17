@@ -27,37 +27,33 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 )
+
+type dbTagMeta struct {
+	Notes string `json:"notes"`
+	Class string `json:"class"`
+	Order int    `json:"order"`
+}
 
 type dbTerm struct {
 	Expression string
 	Reading    string
 	Tags       []string
+	Rules      []string
+	Score      int
 	Glossary   []string
 }
 
 type dbTermList []dbTerm
 
 func (term *dbTerm) addTags(tags ...string) {
-	for _, tag := range tags {
-		if !hasString(tag, term.Tags) {
-			term.Tags = append(term.Tags, tag)
-		}
-	}
+	term.Tags = appendStringUnique(term.Tags, tags...)
 }
 
-func (term *dbTerm) addTagsPri(tags ...string) {
-	for _, tag := range tags {
-		switch tag {
-		case "news1", "ichi1", "spec1", "gai1":
-			term.addTags("P")
-			fallthrough
-		case "news2", "ichi2", "spec2", "gai2":
-			term.addTags(tag[:len(tag)-1])
-			break
-		}
-	}
+func (term *dbTerm) addRules(rules ...string) {
+	term.Rules = appendStringUnique(term.Rules, rules...)
 }
 
 func (terms dbTermList) crush() [][]string {
@@ -67,6 +63,8 @@ func (terms dbTermList) crush() [][]string {
 			t.Expression,
 			t.Reading,
 			strings.Join(t.Tags, " "),
+			strings.Join(t.Rules, " "),
+			strconv.Itoa(t.Score),
 		}
 
 		result = append(result, t.Glossary...)
@@ -111,7 +109,7 @@ func (kanji dbKanjiList) crush() [][]string {
 	return results
 }
 
-func writeDb(outputDir, title string, termRecords [][]string, kanjiRecords [][]string, entities map[string]string, pretty bool) error {
+func writeDb(outputDir, title string, termRecords [][]string, kanjiRecords [][]string, tagMeta map[string]dbTagMeta, pretty bool) error {
 	const DB_VERSION = 1
 	const BANK_STRIDE = 50000
 
@@ -161,16 +159,16 @@ func writeDb(outputDir, title string, termRecords [][]string, kanjiRecords [][]s
 
 	var err error
 	var db struct {
-		Title      string            `json:"title"`
-		Version    int               `json:"version"`
-		Entities   map[string]string `json:"entities"`
-		TermBanks  int               `json:"termBanks"`
-		KanjiBanks int               `json:"kanjiBanks"`
+		Title      string               `json:"title"`
+		Version    int                  `json:"version"`
+		TagMeta    map[string]dbTagMeta `json:"tagMeta"`
+		TermBanks  int                  `json:"termBanks"`
+		KanjiBanks int                  `json:"kanjiBanks"`
 	}
 
 	db.Title = title
 	db.Version = DB_VERSION
-	db.Entities = entities
+	db.TagMeta = tagMeta
 
 	if db.TermBanks, err = writeDbRecords("term", termRecords); err != nil {
 		return err
@@ -196,6 +194,16 @@ func writeDb(outputDir, title string, termRecords [][]string, kanjiRecords [][]s
 	}
 
 	return nil
+}
+
+func appendStringUnique(target []string, source ...string) []string {
+	for _, str := range source {
+		if !hasString(str, target) {
+			target = append(target, str)
+		}
+	}
+
+	return target
 }
 
 func hasString(needle string, haystack []string) bool {

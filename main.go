@@ -37,7 +37,7 @@ const (
 )
 
 func usage() {
-	fmt.Fprintf(os.Stderr, "Usage: %s [edict|enamdict|kanjidic] input output\n\n", path.Base(os.Args[0]))
+	fmt.Fprintf(os.Stderr, "Usage: %s [edict|enamdict|kanjidic|epwing] input output\n\n", path.Base(os.Args[0]))
 	fmt.Fprintf(os.Stderr, "Parameters:\n")
 	flag.PrintDefaults()
 }

@@ -24,9 +24,71 @@ package main
 
 import (
 	"io"
+	"strings"
 
 	"github.com/FooSoft/jmdict"
 )
+
+func computeJmdictRules(term *dbTerm) {
+	for _, tag := range term.Tags {
+		switch tag {
+		case "adj-i":
+		case "v1":
+		case "vk":
+		case "vs":
+			term.addRules(tag)
+		default:
+			if strings.HasPrefix(tag, "v5") {
+				term.addRules("v5")
+			}
+		}
+	}
+}
+
+func computeJmdictScore(term *dbTerm) {
+	term.Score = 0
+	for _, tag := range term.Tags {
+		switch tag {
+		case "gai1":
+		case "ichi1":
+		case "news1":
+		case "spec1":
+			term.Score += 5
+		case "arch":
+		case "iK":
+			term.Score -= 1
+		}
+	}
+}
+
+func computeJmdictTagMeta(entities map[string]string) map[string]dbTagMeta {
+	tags := make(map[string]dbTagMeta)
+
+	for name, value := range entities {
+		tag := dbTagMeta{Notes: value}
+
+		switch name {
+		case "gai1":
+		case "ichi1":
+		case "news1":
+		case "spec1":
+			tag.Class = "frequent"
+			tag.Order = 1
+		case "exp":
+		case "id":
+			tag.Class = "expression"
+			tag.Order = 2
+		case "arch":
+		case "iK":
+			tag.Class = "archaism"
+			tag.Order = 2
+		}
+
+		tags[name] = tag
+	}
+
+	return tags
+}
 
 func extractJmdictTerms(edictEntry jmdict.JmdictEntry) []dbTerm {
 	var terms []dbTerm
@@ -41,7 +103,7 @@ func extractJmdictTerms(edictEntry jmdict.JmdictEntry) []dbTerm {
 
 		if kanji == nil {
 			termBase.Expression = reading.Reading
-			termBase.addTagsPri(reading.Priorities...)
+			termBase.addTags(reading.Priorities...)
 		} else {
 			termBase.Expression = kanji.Expression
 			termBase.Reading = reading.Reading
@@ -49,7 +111,7 @@ func extractJmdictTerms(edictEntry jmdict.JmdictEntry) []dbTerm {
 
 			for _, priority := range kanji.Priorities {
 				if hasString(priority, reading.Priorities) {
-					termBase.addTagsPri(priority)
+					termBase.addTags(priority)
 				}
 			}
 		}
@@ -73,6 +135,9 @@ func extractJmdictTerms(edictEntry jmdict.JmdictEntry) []dbTerm {
 			for _, glossary := range sense.Glossary {
 				term.Glossary = append(term.Glossary, glossary.Content)
 			}
+
+			computeJmdictRules(&term)
+			computeJmdictScore(&term)
 
 			terms = append(terms, term)
 		}
@@ -109,7 +174,7 @@ func exportJmdictDb(outputDir, title string, reader io.Reader, flags int) error 
 		title,
 		terms.crush(),
 		nil,
-		entities,
+		computeJmdictTagMeta(entities),
 		flags&flagPretty == flagPretty,
 	)
 }

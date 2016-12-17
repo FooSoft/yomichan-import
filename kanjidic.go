@@ -69,10 +69,8 @@ func extractKanjidicKanji(entry jmdict.KanjidicCharacter) dbKanji {
 			switch r.Type {
 			case "ja_on":
 				kanji.Onyomi = append(kanji.Onyomi, r.Value)
-				break
 			case "ja_kun":
 				kanji.Kunyomi = append(kanji.Kunyomi, r.Value)
-				break
 			}
 		}
 	}
@@ -91,12 +89,21 @@ func exportKanjidicDb(outputDir, title string, reader io.Reader, flags int) erro
 		kanji = append(kanji, extractKanjidicKanji(entry))
 	}
 
+	tagMeta := map[string]dbTagMeta{
+		"jouyou":    {Notes: "included in list of regular-use characters", Class: "frequent", Order: 3},
+		"jinmeiyou": {Notes: "included in list of characters for use in personal names", Class: "frequent", Order: 3},
+		"jlpt":      {Notes: "corresponding Japanese Language Proficiency Test level"},
+		"grade":     {Notes: "school grade level at which the character is taught"},
+		"strokes":   {Notes: "number of strokes needed to write the character"},
+		"heisig":    {Notes: "frame number in Remembering the Kanji"},
+	}
+
 	return writeDb(
 		outputDir,
 		title,
 		nil,
 		kanji.crush(),
-		nil,
+		tagMeta,
 		flags&flagPretty == flagPretty,
 	)
 }

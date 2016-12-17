@@ -28,6 +28,35 @@ import (
 	"github.com/FooSoft/jmdict"
 )
 
+func computeJmnedictTagMeta(entities map[string]string) map[string]dbTagMeta {
+	tags := make(map[string]dbTagMeta)
+
+	for name, value := range entities {
+		tag := dbTagMeta{Notes: value}
+
+		switch name {
+		case "company":
+		case "fem":
+		case "given":
+		case "masc":
+		case "organization":
+		case "person":
+		case "place":
+		case "product":
+		case "station":
+		case "surname":
+		case "unclass":
+		case "work":
+			tag.Class = "name"
+			tag.Order = 4
+		}
+
+		tags[name] = tag
+	}
+
+	return tags
+}
+
 func extractJmnedictTerms(enamdictEntry jmdict.JmnedictEntry) []dbTerm {
 	var terms []dbTerm
 
@@ -49,7 +78,7 @@ func extractJmnedictTerms(enamdictEntry jmdict.JmnedictEntry) []dbTerm {
 
 			for _, priority := range kanji.Priorities {
 				if hasString(priority, reading.Priorities) {
-					term.addTagsPri(priority)
+					term.addTags(priority)
 				}
 			}
 		}
@@ -93,7 +122,7 @@ func exportJmnedictDb(outputDir, title string, reader io.Reader, flags int) erro
 		title,
 		terms.crush(),
 		nil,
-		entities,
+		computeJmnedictTagMeta(entities),
 		flags&flagPretty == flagPretty,
 	)
 }

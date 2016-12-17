@@ -169,7 +169,7 @@ func (*daijirinExtractor) getTags() map[string]string {
 		"動ワ下二":    "",
 		"動ワ五［ハ四］": "",
 		"名":    "",
-		"形":    "",
+		"形":    "adj-i",
 		"形ク":   "",
 		"形シク":  "",
 		"形動":   "",
