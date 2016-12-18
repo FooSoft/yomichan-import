@@ -27,6 +27,13 @@ import (
 	"strings"
 )
 
+type daijirinExtractor struct {
+	partsExp   *regexp.Regexp
+	phonExp    *regexp.Regexp
+	variantExp *regexp.Regexp
+	annotExp   *regexp.Regexp
+}
+
 func makeDaijirinExtractor() epwingExtractor {
 	return &daijirinExtractor{
 		partsExp:   regexp.MustCompile(`([^（【〖]+)(?:【(.*)】)?(?:〖(.*)〗)?(?:（(.*)）)?`),

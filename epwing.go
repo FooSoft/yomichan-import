@@ -55,14 +55,7 @@ type epwingExtractor interface {
 	getFontWide() map[int]string
 }
 
-type daijirinExtractor struct {
-	partsExp   *regexp.Regexp
-	phonExp    *regexp.Regexp
-	variantExp *regexp.Regexp
-	annotExp   *regexp.Regexp
-}
-
-func exportEpwingDb(outputDir, title string, reader io.Reader, flags int) error {
+func epwingExportDb(outputDir, title string, reader io.Reader, flags int) error {
 	data, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return err

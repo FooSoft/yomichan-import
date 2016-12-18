@@ -44,10 +44,10 @@ func usage() {
 
 func exportDb(inputPath, outputDir, format, title string, flags int) error {
 	handlers := map[string]func(string, string, io.Reader, int) error{
-		"edict":    exportJmdictDb,
-		"enamdict": exportJmnedictDb,
-		"kanjidic": exportKanjidicDb,
-		"epwing":   exportEpwingDb,
+		"edict":    jmdictExportDb,
+		"enamdict": jmnedictExportDb,
+		"kanjidic": kanjidicExportDb,
+		"epwing":   epwingExportDb,
 	}
 
 	handler, ok := handlers[format]

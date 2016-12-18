@@ -29,7 +29,7 @@ import (
 	"github.com/FooSoft/jmdict"
 )
 
-func computeJmdictRules(term *dbTerm) {
+func jmdictBuildRules(term *dbTerm) {
 	for _, tag := range term.Tags {
 		switch tag {
 		case "adj-i", "v1", "vk", "vs":
@@ -42,7 +42,7 @@ func computeJmdictRules(term *dbTerm) {
 	}
 }
 
-func computeJmdictScore(term *dbTerm) {
+func jmdictBuildScore(term *dbTerm) {
 	term.Score = 0
 	for _, tag := range term.Tags {
 		switch tag {
@@ -54,31 +54,37 @@ func computeJmdictScore(term *dbTerm) {
 	}
 }
 
-func computeJmdictTagMeta(entities map[string]string) map[string]dbTagMeta {
+func jmdictAddPriorities(term *dbTerm, priorities ...string) {
+	for _, priority := range priorities {
+		switch priority {
+		case "news1", "ichi1", "spec1", "gai1":
+			term.addTags("P")
+			fallthrough
+		case "news2", "ichi2", "spec2", "gai2":
+			term.addTags(priority[:len(priority)-1])
+		}
+	}
+}
+
+func jmdictBuildTagMeta(entities map[string]string) map[string]dbTagMeta {
 	tags := map[string]dbTagMeta{
-		"news1": {Notes: "appears frequently in Mainichi Shimbun (top listing)", Category: "frequent", Order: 3},
-		"ichi1": {Notes: "listed as common in Ichimango Goi Bunruishuu (top listing)", Category: "frequent", Order: 3},
-		"spec1": {Notes: "common words not included in frequency lists (top listing)", Category: "frequent", Order: 3},
-		"gai1":  {Notes: "common loanword (top listing)", Category: "frequent", Order: 3},
-		"news2": {Notes: "appears frequently in Mainichi Shimbun (bottom listing)", Order: 3},
-		"ichi2": {Notes: "listed as common in Ichimango Goi Bunruishuu (bottom listing)", Order: 3},
-		"spec2": {Notes: "common words not included in frequency lists (bottom listing)", Order: 3},
-		"gai2":  {Notes: "common loanword (bottom listing)", Order: 3},
+		"news": {Notes: "appears frequently in Mainichi Shimbun"},
+		"ichi": {Notes: "listed as common in Ichimango Goi Bunruishuu"},
+		"spec": {Notes: "common words not included in frequency lists"},
+		"gai":  {Notes: "common loanword"},
+		"P":    {Notes: "popular term", Category: "popular", Order: -10},
 	}
 
 	for name, value := range entities {
 		tag := dbTagMeta{Notes: value}
 
 		switch name {
-		case "gai1", "ichi1", "news1", "spec1":
-			tag.Category = "frequent"
-			tag.Order = 1
 		case "exp", "id":
 			tag.Category = "expression"
-			tag.Order = 2
+			tag.Order = -5
 		case "arch", "iK":
 			tag.Category = "archaism"
-			tag.Order = 2
+			tag.Order = -5
 		}
 
 		tags[name] = tag
@@ -87,7 +93,7 @@ func computeJmdictTagMeta(entities map[string]string) map[string]dbTagMeta {
 	return tags
 }
 
-func extractJmdictTerms(edictEntry jmdict.JmdictEntry) []dbTerm {
+func jmdictExtractTerms(edictEntry jmdict.JmdictEntry) []dbTerm {
 	var terms []dbTerm
 
 	convert := func(reading jmdict.JmdictReading, kanji *jmdict.JmdictKanji) {
@@ -100,7 +106,7 @@ func extractJmdictTerms(edictEntry jmdict.JmdictEntry) []dbTerm {
 
 		if kanji == nil {
 			termBase.Expression = reading.Reading
-			termBase.addTags(reading.Priorities...)
+			jmdictAddPriorities(&termBase, reading.Priorities...)
 		} else {
 			termBase.Expression = kanji.Expression
 			termBase.Reading = reading.Reading
@@ -108,7 +114,7 @@ func extractJmdictTerms(edictEntry jmdict.JmdictEntry) []dbTerm {
 
 			for _, priority := range kanji.Priorities {
 				if hasString(priority, reading.Priorities) {
-					termBase.addTags(priority)
+					jmdictAddPriorities(&termBase, priority)
 				}
 			}
 		}
@@ -133,8 +139,8 @@ func extractJmdictTerms(edictEntry jmdict.JmdictEntry) []dbTerm {
 				term.Glossary = append(term.Glossary, glossary.Content)
 			}
 
-			computeJmdictRules(&term)
-			computeJmdictScore(&term)
+			jmdictBuildRules(&term)
+			jmdictBuildScore(&term)
 
 			terms = append(terms, term)
 		}
@@ -155,7 +161,7 @@ func extractJmdictTerms(edictEntry jmdict.JmdictEntry) []dbTerm {
 	return terms
 }
 
-func exportJmdictDb(outputDir, title string, reader io.Reader, flags int) error {
+func jmdictExportDb(outputDir, title string, reader io.Reader, flags int) error {
 	dict, entities, err := jmdict.LoadJmdictNoTransform(reader)
 	if err != nil {
 		return err
@@ -163,7 +169,7 @@ func exportJmdictDb(outputDir, title string, reader io.Reader, flags int) error 
 
 	var terms dbTermList
 	for _, entry := range dict.Entries {
-		terms = append(terms, extractJmdictTerms(entry)...)
+		terms = append(terms, jmdictExtractTerms(entry)...)
 	}
 
 	return writeDb(
@@ -171,7 +177,7 @@ func exportJmdictDb(outputDir, title string, reader io.Reader, flags int) error 
 		title,
 		terms.crush(),
 		nil,
-		computeJmdictTagMeta(entities),
+		jmdictBuildTagMeta(entities),
 		flags&flagPretty == flagPretty,
 	)
 }

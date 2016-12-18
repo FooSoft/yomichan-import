@@ -30,7 +30,7 @@ import (
 	"github.com/FooSoft/jmdict"
 )
 
-func extractKanjidicKanji(entry jmdict.KanjidicCharacter) dbKanji {
+func kanjidicExtractKanji(entry jmdict.KanjidicCharacter) dbKanji {
 	kanji := dbKanji{Character: entry.Literal}
 
 	if level := entry.Misc.JlptLevel; level != nil {
@@ -78,7 +78,7 @@ func extractKanjidicKanji(entry jmdict.KanjidicCharacter) dbKanji {
 	return kanji
 }
 
-func exportKanjidicDb(outputDir, title string, reader io.Reader, flags int) error {
+func kanjidicExportDb(outputDir, title string, reader io.Reader, flags int) error {
 	dict, err := jmdict.LoadKanjidic(reader)
 	if err != nil {
 		return err
@@ -86,12 +86,12 @@ func exportKanjidicDb(outputDir, title string, reader io.Reader, flags int) erro
 
 	var kanji dbKanjiList
 	for _, entry := range dict.Characters {
-		kanji = append(kanji, extractKanjidicKanji(entry))
+		kanji = append(kanji, kanjidicExtractKanji(entry))
 	}
 
 	tagMeta := map[string]dbTagMeta{
-		"jouyou":    {Notes: "included in list of regular-use characters", Category: "frequent", Order: 3},
-		"jinmeiyou": {Notes: "included in list of characters for use in personal names", Category: "frequent", Order: 3},
+		"jouyou":    {Notes: "included in list of regular-use characters", Category: "frequent", Order: -5},
+		"jinmeiyou": {Notes: "included in list of characters for use in personal names", Category: "frequent", Order: -5},
 		"jlpt":      {Notes: "corresponding Japanese Language Proficiency Test level"},
 		"grade":     {Notes: "school grade level at which the character is taught"},
 		"strokes":   {Notes: "number of strokes needed to write the character"},

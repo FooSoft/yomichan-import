@@ -28,7 +28,7 @@ import (
 	"github.com/FooSoft/jmdict"
 )
 
-func computeJmnedictTagMeta(entities map[string]string) map[string]dbTagMeta {
+func jmnedictBuildTagMeta(entities map[string]string) map[string]dbTagMeta {
 	tags := make(map[string]dbTagMeta)
 
 	for name, value := range entities {
@@ -46,7 +46,7 @@ func computeJmnedictTagMeta(entities map[string]string) map[string]dbTagMeta {
 	return tags
 }
 
-func extractJmnedictTerms(enamdictEntry jmdict.JmnedictEntry) []dbTerm {
+func jmnedictExtractTerms(enamdictEntry jmdict.JmnedictEntry) []dbTerm {
 	var terms []dbTerm
 
 	convert := func(reading jmdict.JmnedictReading, kanji *jmdict.JmnedictKanji) {
@@ -95,7 +95,7 @@ func extractJmnedictTerms(enamdictEntry jmdict.JmnedictEntry) []dbTerm {
 	return terms
 }
 
-func exportJmnedictDb(outputDir, title string, reader io.Reader, flags int) error {
+func jmnedictExportDb(outputDir, title string, reader io.Reader, flags int) error {
 	dict, entities, err := jmdict.LoadJmnedictNoTransform(reader)
 	if err != nil {
 		return err
@@ -103,7 +103,7 @@ func exportJmnedictDb(outputDir, title string, reader io.Reader, flags int) erro
 
 	var terms dbTermList
 	for _, e := range dict.Entries {
-		terms = append(terms, extractJmnedictTerms(e)...)
+		terms = append(terms, jmnedictExtractTerms(e)...)
 	}
 
 	return writeDb(
@@ -111,7 +111,7 @@ func exportJmnedictDb(outputDir, title string, reader io.Reader, flags int) erro
 		title,
 		terms.crush(),
 		nil,
-		computeJmnedictTagMeta(entities),
+		jmnedictBuildTagMeta(entities),
 		flags&flagPretty == flagPretty,
 	)
 }
