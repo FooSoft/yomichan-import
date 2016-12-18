@@ -56,10 +56,10 @@ func computeJmdictScore(term *dbTerm) {
 
 func computeJmdictTagMeta(entities map[string]string) map[string]dbTagMeta {
 	tags := map[string]dbTagMeta{
-		"news1": {Notes: "appears frequently in Mainichi Shimbun (top listing)", Class: "frequent", Order: 3},
-		"ichi1": {Notes: "listed as common in Ichimango Goi Bunruishuu (top listing)", Class: "frequent", Order: 3},
-		"spec1": {Notes: "common words not included in frequency lists (top listing)", Class: "frequent", Order: 3},
-		"gai1":  {Notes: "common loanword (top listing)", Class: "frequent", Order: 3},
+		"news1": {Notes: "appears frequently in Mainichi Shimbun (top listing)", Category: "frequent", Order: 3},
+		"ichi1": {Notes: "listed as common in Ichimango Goi Bunruishuu (top listing)", Category: "frequent", Order: 3},
+		"spec1": {Notes: "common words not included in frequency lists (top listing)", Category: "frequent", Order: 3},
+		"gai1":  {Notes: "common loanword (top listing)", Category: "frequent", Order: 3},
 		"news2": {Notes: "appears frequently in Mainichi Shimbun (bottom listing)", Order: 3},
 		"ichi2": {Notes: "listed as common in Ichimango Goi Bunruishuu (bottom listing)", Order: 3},
 		"spec2": {Notes: "common words not included in frequency lists (bottom listing)", Order: 3},
@@ -71,13 +71,13 @@ func computeJmdictTagMeta(entities map[string]string) map[string]dbTagMeta {
 
 		switch name {
 		case "gai1", "ichi1", "news1", "spec1":
-			tag.Class = "frequent"
+			tag.Category = "frequent"
 			tag.Order = 1
 		case "exp", "id":
-			tag.Class = "expression"
+			tag.Category = "expression"
 			tag.Order = 2
 		case "arch", "iK":
-			tag.Class = "archaism"
+			tag.Category = "archaism"
 			tag.Order = 2
 		}
 

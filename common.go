@@ -32,9 +32,9 @@ import (
 )
 
 type dbTagMeta struct {
-	Notes string `json:"notes"`
-	Class string `json:"class"`
-	Order int    `json:"order"`
+	Category string `json:"class"`
+	Notes    string `json:"notes"`
+	Order    int    `json:"order"`
 }
 
 type dbTerm struct {

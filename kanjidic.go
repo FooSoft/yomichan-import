@@ -90,8 +90,8 @@ func exportKanjidicDb(outputDir, title string, reader io.Reader, flags int) erro
 	}
 
 	tagMeta := map[string]dbTagMeta{
-		"jouyou":    {Notes: "included in list of regular-use characters", Class: "frequent", Order: 3},
-		"jinmeiyou": {Notes: "included in list of characters for use in personal names", Class: "frequent", Order: 3},
+		"jouyou":    {Notes: "included in list of regular-use characters", Category: "frequent", Order: 3},
+		"jinmeiyou": {Notes: "included in list of characters for use in personal names", Category: "frequent", Order: 3},
 		"jlpt":      {Notes: "corresponding Japanese Language Proficiency Test level"},
 		"grade":     {Notes: "school grade level at which the character is taught"},
 		"strokes":   {Notes: "number of strokes needed to write the character"},

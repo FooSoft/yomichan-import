@@ -36,7 +36,7 @@ func computeJmnedictTagMeta(entities map[string]string) map[string]dbTagMeta {
 
 		switch name {
 		case "company", "fem", "given", "masc", "organization", "person", "place", "product", "station", "surname", "unclass", "work":
-			tag.Class = "name"
+			tag.Category = "name"
 			tag.Order = 4
 		}
 
