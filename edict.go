@@ -32,10 +32,7 @@ import (
 func computeJmdictRules(term *dbTerm) {
 	for _, tag := range term.Tags {
 		switch tag {
-		case "adj-i":
-		case "v1":
-		case "vk":
-		case "vs":
+		case "adj-i", "v1", "vk", "vs":
 			term.addRules(tag)
 		default:
 			if strings.HasPrefix(tag, "v5") {
@@ -49,37 +46,37 @@ func computeJmdictScore(term *dbTerm) {
 	term.Score = 0
 	for _, tag := range term.Tags {
 		switch tag {
-		case "gai1":
-		case "ichi1":
-		case "news1":
-		case "spec1":
+		case "gai1", "ichi1", "news1", "spec1":
 			term.Score += 5
-		case "arch":
-		case "iK":
+		case "arch", "iK":
 			term.Score -= 1
 		}
 	}
 }
 
 func computeJmdictTagMeta(entities map[string]string) map[string]dbTagMeta {
-	tags := make(map[string]dbTagMeta)
+	tags := map[string]dbTagMeta{
+		"news1": {Notes: "appears frequently in Mainichi Shimbun (top listing)", Class: "frequent", Order: 3},
+		"ichi1": {Notes: "listed as common in Ichimango Goi Bunruishuu (top listing)", Class: "frequent", Order: 3},
+		"spec1": {Notes: "common words not included in frequency lists (top listing)", Class: "frequent", Order: 3},
+		"gai1":  {Notes: "common loanword (top listing)", Class: "frequent", Order: 3},
+		"news2": {Notes: "appears frequently in Mainichi Shimbun (bottom listing)", Order: 3},
+		"ichi2": {Notes: "listed as common in Ichimango Goi Bunruishuu (bottom listing)", Order: 3},
+		"spec2": {Notes: "common words not included in frequency lists (bottom listing)", Order: 3},
+		"gai2":  {Notes: "common loanword (bottom listing)", Order: 3},
+	}
 
 	for name, value := range entities {
 		tag := dbTagMeta{Notes: value}
 
 		switch name {
-		case "gai1":
-		case "ichi1":
-		case "news1":
-		case "spec1":
+		case "gai1", "ichi1", "news1", "spec1":
 			tag.Class = "frequent"
 			tag.Order = 1
-		case "exp":
-		case "id":
+		case "exp", "id":
 			tag.Class = "expression"
 			tag.Order = 2
-		case "arch":
-		case "iK":
+		case "arch", "iK":
 			tag.Class = "archaism"
 			tag.Order = 2
 		}

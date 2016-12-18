@@ -35,18 +35,7 @@ func computeJmnedictTagMeta(entities map[string]string) map[string]dbTagMeta {
 		tag := dbTagMeta{Notes: value}
 
 		switch name {
-		case "company":
-		case "fem":
-		case "given":
-		case "masc":
-		case "organization":
-		case "person":
-		case "place":
-		case "product":
-		case "station":
-		case "surname":
-		case "unclass":
-		case "work":
+		case "company", "fem", "given", "masc", "organization", "person", "place", "product", "station", "surname", "unclass", "work":
 			tag.Class = "name"
 			tag.Order = 4
 		}
