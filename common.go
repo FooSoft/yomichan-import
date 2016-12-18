@@ -31,7 +31,7 @@ import (
 )
 
 type dbTagMeta struct {
-	Category string `json:"class,omitempty"`
+	Category string `json:"category,omitempty"`
 	Notes    string `json:"notes,omitempty"`
 	Order    int    `json:"order,omitempty"`
 }
