@@ -27,14 +27,13 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"strconv"
 	"strings"
 )
 
 type dbTagMeta struct {
-	Category string `json:"class"`
-	Notes    string `json:"notes"`
-	Order    int    `json:"order"`
+	Category string `json:"class,omitempty"`
+	Notes    string `json:"notes,omitempty"`
+	Order    int    `json:"order,omitempty"`
 }
 
 type dbTerm struct {
@@ -56,18 +55,21 @@ func (term *dbTerm) addRules(rules ...string) {
 	term.Rules = appendStringUnique(term.Rules, rules...)
 }
 
-func (terms dbTermList) crush() [][]string {
-	var results [][]string
+func (terms dbTermList) crush() [][]interface{} {
+	var results [][]interface{}
 	for _, t := range terms {
-		result := []string{
+		result := []interface{}{
 			t.Expression,
 			t.Reading,
 			strings.Join(t.Tags, " "),
 			strings.Join(t.Rules, " "),
-			strconv.Itoa(t.Score),
+			t.Score,
 		}
 
-		result = append(result, t.Glossary...)
+		for _, gloss := range t.Glossary {
+			result = append(result, gloss)
+		}
+
 		results = append(results, result)
 	}
 
@@ -92,24 +94,27 @@ func (kanji *dbKanji) addTags(tags ...string) {
 	}
 }
 
-func (kanji dbKanjiList) crush() [][]string {
-	var results [][]string
+func (kanji dbKanjiList) crush() [][]interface{} {
+	var results [][]interface{}
 	for _, k := range kanji {
-		result := []string{
+		result := []interface{}{
 			k.Character,
 			strings.Join(k.Onyomi, " "),
 			strings.Join(k.Kunyomi, " "),
 			strings.Join(k.Tags, " "),
 		}
 
-		result = append(result, k.Meanings...)
+		for _, meaning := range k.Meanings {
+			result = append(result, meaning)
+		}
+
 		results = append(results, result)
 	}
 
 	return results
 }
 
-func writeDb(outputDir, title string, termRecords [][]string, kanjiRecords [][]string, tagMeta map[string]dbTagMeta, pretty bool) error {
+func writeDb(outputDir, title string, termRecords [][]interface{}, kanjiRecords [][]interface{}, tagMeta map[string]dbTagMeta, pretty bool) error {
 	const DB_VERSION = 1
 	const BANK_STRIDE = 50000
 
@@ -121,7 +126,7 @@ func writeDb(outputDir, title string, termRecords [][]string, kanjiRecords [][]s
 		return json.Marshal(obj)
 	}
 
-	writeDbRecords := func(prefix string, records [][]string) (int, error) {
+	writeDbRecords := func(prefix string, records [][]interface{}) (int, error) {
 		recordCount := len(records)
 		bankCount := 0
 
