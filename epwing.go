@@ -23,7 +23,12 @@
 package main
 
 import (
+	"encoding/json"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 )
@@ -52,11 +57,28 @@ type epwingExtractor interface {
 	getFontWide() map[int]string
 }
 
-func epwingExportDb(inputPath, outputDir, title string, pretty bool) error {
+func epwingInvokeTool(inputPath string) (*epwingBook, error) {
+	baseDir := filepath.Dir(os.Args[0])
+	toolPath := filepath.Join(baseDir, "bin", runtime.GOOS, "zero-epwing")
+
+	data, err := exec.Command(toolPath, inputPath).Output()
+	if err != nil {
+		return nil, err
+	}
+
 	var book epwingBook
-	// if err := json.Unmarshal(data, &book); err != nil {
-	// 	return err
-	// }
+	if err := json.Unmarshal(data, &book); err != nil {
+		return nil, err
+	}
+
+	return &book, nil
+}
+
+func epwingExportDb(inputPath, outputDir, title string, pretty bool) error {
+	book, err := epwingInvokeTool(inputPath)
+	if err != nil {
+		return err
+	}
 
 	translateExp := regexp.MustCompile(`{{([nw])_(\d+)}}`)
 	epwingExtractors := map[string]epwingExtractor{
