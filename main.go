@@ -85,7 +85,7 @@ func main() {
 	)
 
 	if flag.NArg() == 3 {
-		outputDir = flag.Arg(3)
+		outputDir = flag.Arg(2)
 	} else {
 		var err error
 		outputDir, err = ioutil.TempDir("", "yomichan_tmp_")
