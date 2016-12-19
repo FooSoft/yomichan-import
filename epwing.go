@@ -24,6 +24,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -66,8 +67,18 @@ func epwingExportDb(inputPath, outputDir, title string, pretty bool) error {
 
 	var data []byte
 	if stat.IsDir() {
-		baseDir := filepath.Dir(os.Args[0])
-		toolPath := filepath.Join(baseDir, "bin", runtime.GOOS, "zero-epwing")
+		toolPath := filepath.Join(
+			filepath.Dir(os.Args[0]),
+			"bin",
+			runtime.GOOS,
+			"zero-epwing",
+		)
+
+		_, err := os.Stat(toolPath)
+		if err != nil {
+			return fmt.Errorf("failed to find extractor in '%s'", toolPath)
+		}
+
 		data, err = exec.Command(toolPath, inputPath).Output()
 	} else {
 		data, err = ioutil.ReadFile(inputPath)
