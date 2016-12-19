@@ -53,6 +53,7 @@ func exportDb(inputPath, outputDir, format, title string, pretty bool) error {
 		return errors.New("unrecognized dictionray format")
 	}
 
+	log.Printf("converting '%s' to '%s'...", inputPath, outputDir)
 	return handler(inputPath, outputDir, title, pretty)
 }
 
