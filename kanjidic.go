@@ -24,7 +24,7 @@ package main
 
 import (
 	"fmt"
-	"io"
+	"os"
 	"strconv"
 
 	"github.com/FooSoft/jmdict"
@@ -78,7 +78,13 @@ func kanjidicExtractKanji(entry jmdict.KanjidicCharacter) dbKanji {
 	return kanji
 }
 
-func kanjidicExportDb(outputDir, title string, reader io.Reader, pretty bool) error {
+func kanjidicExportDb(inputPath, outputDir, title string, pretty bool) error {
+	reader, err := os.Open(inputPath)
+	if err != nil {
+		return err
+	}
+	defer reader.Close()
+
 	dict, err := jmdict.LoadKanjidic(reader)
 	if err != nil {
 		return err

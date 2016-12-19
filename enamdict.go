@@ -23,7 +23,7 @@
 package main
 
 import (
-	"io"
+	"os"
 
 	"github.com/FooSoft/jmdict"
 )
@@ -95,7 +95,13 @@ func jmnedictExtractTerms(enamdictEntry jmdict.JmnedictEntry) []dbTerm {
 	return terms
 }
 
-func jmnedictExportDb(outputDir, title string, reader io.Reader, pretty bool) error {
+func jmnedictExportDb(inputPath, outputDir, title string, pretty bool) error {
+	reader, err := os.Open(inputPath)
+	if err != nil {
+		return err
+	}
+	defer reader.Close()
+
 	dict, entities, err := jmdict.LoadJmnedictNoTransform(reader)
 	if err != nil {
 		return err

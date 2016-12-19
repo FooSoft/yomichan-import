@@ -26,17 +26,12 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"path"
 	"time"
-)
-
-const (
-	flagPretty = 1 << iota
 )
 
 func usage() {
@@ -46,7 +41,7 @@ func usage() {
 }
 
 func exportDb(inputPath, outputDir, format, title string, pretty bool) error {
-	handlers := map[string]func(string, string, io.Reader, bool) error{
+	handlers := map[string]func(string, string, string, bool) error{
 		"edict":    jmdictExportDb,
 		"enamdict": jmnedictExportDb,
 		"kanjidic": kanjidicExportDb,
@@ -58,13 +53,7 @@ func exportDb(inputPath, outputDir, format, title string, pretty bool) error {
 		return errors.New("unrecognized dictionray format")
 	}
 
-	input, err := os.Open(inputPath)
-	if err != nil {
-		return err
-	}
-	defer input.Close()
-
-	return handler(outputDir, title, input, pretty)
+	return handler(inputPath, outputDir, title, pretty)
 }
 
 func serveDb(serveDir string, port int) error {

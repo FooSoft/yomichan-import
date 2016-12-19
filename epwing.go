@@ -23,9 +23,6 @@
 package main
 
 import (
-	"encoding/json"
-	"io"
-	"io/ioutil"
 	"regexp"
 	"strconv"
 	"strings"
@@ -55,16 +52,11 @@ type epwingExtractor interface {
 	getFontWide() map[int]string
 }
 
-func epwingExportDb(outputDir, title string, reader io.Reader, pretty bool) error {
-	data, err := ioutil.ReadAll(reader)
-	if err != nil {
-		return err
-	}
-
+func epwingExportDb(inputPath, outputDir, title string, pretty bool) error {
 	var book epwingBook
-	if err := json.Unmarshal(data, &book); err != nil {
-		return err
-	}
+	// if err := json.Unmarshal(data, &book); err != nil {
+	// 	return err
+	// }
 
 	translateExp := regexp.MustCompile(`{{([nw])_(\d+)}}`)
 	epwingExtractors := map[string]epwingExtractor{
