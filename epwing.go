@@ -76,7 +76,7 @@ func epwingExportDb(inputPath, outputDir, title string, pretty bool) error {
 
 		_, err := os.Stat(toolPath)
 		if err != nil {
-			return fmt.Errorf("failed to find extractor in '%s'", toolPath)
+			return fmt.Errorf("failed to find zero-epwing in '%s'", toolPath)
 		}
 
 		data, err = exec.Command(toolPath, inputPath).Output()
@@ -134,6 +134,8 @@ func epwingExportDb(inputPath, outputDir, title string, pretty bool) error {
 				terms = append(terms, extractor.extractTerms(entry)...)
 				kanji = append(kanji, extractor.extractKanji(entry)...)
 			}
+		} else {
+			return fmt.Errorf("failed to find compatible extractor for '%s'", subbook.Title)
 		}
 	}
 
