@@ -24,6 +24,7 @@ package main
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -57,26 +58,27 @@ type epwingExtractor interface {
 	getFontWide() map[int]string
 }
 
-func epwingInvokeTool(inputPath string) (*epwingBook, error) {
-	baseDir := filepath.Dir(os.Args[0])
-	toolPath := filepath.Join(baseDir, "bin", runtime.GOOS, "zero-epwing")
-
-	data, err := exec.Command(toolPath, inputPath).Output()
+func epwingExportDb(inputPath, outputDir, title string, pretty bool) error {
+	stat, err := os.Stat(inputPath)
 	if err != nil {
-		return nil, err
+		return err
+	}
+
+	var data []byte
+	if stat.IsDir() {
+		baseDir := filepath.Dir(os.Args[0])
+		toolPath := filepath.Join(baseDir, "bin", runtime.GOOS, "zero-epwing")
+		data, err = exec.Command(toolPath, inputPath).Output()
+	} else {
+		data, err = ioutil.ReadFile(inputPath)
+	}
+
+	if err != nil {
+		return err
 	}
 
 	var book epwingBook
 	if err := json.Unmarshal(data, &book); err != nil {
-		return nil, err
-	}
-
-	return &book, nil
-}
-
-func epwingExportDb(inputPath, outputDir, title string, pretty bool) error {
-	book, err := epwingInvokeTool(inputPath)
-	if err != nil {
 		return err
 	}
 
