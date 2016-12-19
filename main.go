@@ -27,9 +27,12 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"path"
+	"time"
 )
 
 const (
@@ -37,13 +40,13 @@ const (
 )
 
 func usage() {
-	fmt.Fprintf(os.Stderr, "Usage: %s [edict|enamdict|kanjidic|epwing] input output\n\n", path.Base(os.Args[0]))
+	fmt.Fprintf(os.Stderr, "Usage:\n  %s [options] [edict|enamdict|kanjidic|epwing] input-path [output-dir]\n\n", path.Base(os.Args[0]))
 	fmt.Fprintf(os.Stderr, "Parameters:\n")
 	flag.PrintDefaults()
 }
 
-func exportDb(inputPath, outputDir, format, title string, flags int) error {
-	handlers := map[string]func(string, string, io.Reader, int) error{
+func exportDb(inputPath, outputDir, format, title string, pretty bool) error {
+	handlers := map[string]func(string, string, io.Reader, bool) error{
 		"edict":    jmdictExportDb,
 		"enamdict": jmnedictExportDb,
 		"kanjidic": kanjidicExportDb,
@@ -52,7 +55,7 @@ func exportDb(inputPath, outputDir, format, title string, flags int) error {
 
 	handler, ok := handlers[format]
 	if !ok {
-		return errors.New("unrecognized file format")
+		return errors.New("unrecognized dictionray format")
 	}
 
 	input, err := os.Open(inputPath)
@@ -61,28 +64,58 @@ func exportDb(inputPath, outputDir, format, title string, flags int) error {
 	}
 	defer input.Close()
 
-	return handler(outputDir, title, input, flags)
+	return handler(outputDir, title, input, pretty)
+}
+
+func serveDb(serveDir string, port int) error {
+	log.Printf("starting HTTP server on port %d...\n", port)
+	return http.ListenAndServe(fmt.Sprintf(":%d", port), http.FileServer(http.Dir(serveDir)))
 }
 
 func main() {
-	pretty := flag.Bool("pretty", false, "output prettified json")
-	format := flag.String("format", "", "dictionary format")
-	title := flag.String("title", "", "dictionary title")
+	var (
+		serve  = flag.Bool("serve", false, "serve JSON over HTTP")
+		port   = flag.Int("port", 9876, "port to serve JSON on")
+		pretty = flag.Bool("pretty", false, "output prettified JSON")
+		title  = flag.String("title", "", "dictionary title")
+	)
 
 	flag.Usage = usage
 	flag.Parse()
 
-	var flags int
-	if *pretty {
-		flags |= flagPretty
-	}
-
-	if flag.NArg() == 2 && len(*format) > 0 && len(*title) > 0 {
-		if err := exportDb(flag.Arg(0), flag.Arg(1), *format, *title, flags); err != nil {
-			log.Fatal(err)
-		}
-	} else {
+	if flag.NArg() != 2 && flag.NArg() != 3 {
 		usage()
 		os.Exit(2)
+	}
+
+	var (
+		format    = flag.Arg(0)
+		inputPath = flag.Arg(1)
+		outputDir string
+	)
+
+	if flag.NArg() == 3 {
+		outputDir = flag.Arg(3)
+	} else {
+		var err error
+		outputDir, err = ioutil.TempDir("", "yomichan_tmp_")
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	if *title == "" {
+		t := time.Now()
+		*title = fmt.Sprintf("%s-%s", format, t.Format("20060102150405"))
+	}
+
+	if err := exportDb(inputPath, outputDir, format, *title, *pretty); err != nil {
+		log.Fatal(err)
+	}
+
+	if *serve {
+		if err := serveDb(outputDir, *port); err != nil {
+			log.Fatal(err)
+		}
 	}
 }

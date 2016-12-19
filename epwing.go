@@ -55,7 +55,7 @@ type epwingExtractor interface {
 	getFontWide() map[int]string
 }
 
-func epwingExportDb(outputDir, title string, reader io.Reader, flags int) error {
+func epwingExportDb(outputDir, title string, reader io.Reader, pretty bool) error {
 	data, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return err
@@ -116,6 +116,6 @@ func epwingExportDb(outputDir, title string, reader io.Reader, flags int) error 
 		terms.crush(),
 		kanji.crush(),
 		nil,
-		flags&flagPretty == flagPretty,
+		pretty,
 	)
 }

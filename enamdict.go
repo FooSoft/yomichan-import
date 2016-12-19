@@ -95,7 +95,7 @@ func jmnedictExtractTerms(enamdictEntry jmdict.JmnedictEntry) []dbTerm {
 	return terms
 }
 
-func jmnedictExportDb(outputDir, title string, reader io.Reader, flags int) error {
+func jmnedictExportDb(outputDir, title string, reader io.Reader, pretty bool) error {
 	dict, entities, err := jmdict.LoadJmnedictNoTransform(reader)
 	if err != nil {
 		return err
@@ -112,6 +112,6 @@ func jmnedictExportDb(outputDir, title string, reader io.Reader, flags int) erro
 		terms.crush(),
 		nil,
 		jmnedictBuildTagMeta(entities),
-		flags&flagPretty == flagPretty,
+		pretty,
 	)
 }

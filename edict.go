@@ -161,7 +161,7 @@ func jmdictExtractTerms(edictEntry jmdict.JmdictEntry) []dbTerm {
 	return terms
 }
 
-func jmdictExportDb(outputDir, title string, reader io.Reader, flags int) error {
+func jmdictExportDb(outputDir, title string, reader io.Reader, pretty bool) error {
 	dict, entities, err := jmdict.LoadJmdictNoTransform(reader)
 	if err != nil {
 		return err
@@ -178,6 +178,6 @@ func jmdictExportDb(outputDir, title string, reader io.Reader, flags int) error 
 		terms.crush(),
 		nil,
 		jmdictBuildTagMeta(entities),
-		flags&flagPretty == flagPretty,
+		pretty,
 	)
 }

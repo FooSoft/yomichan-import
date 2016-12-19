@@ -78,7 +78,7 @@ func kanjidicExtractKanji(entry jmdict.KanjidicCharacter) dbKanji {
 	return kanji
 }
 
-func kanjidicExportDb(outputDir, title string, reader io.Reader, flags int) error {
+func kanjidicExportDb(outputDir, title string, reader io.Reader, pretty bool) error {
 	dict, err := jmdict.LoadKanjidic(reader)
 	if err != nil {
 		return err
@@ -104,6 +104,6 @@ func kanjidicExportDb(outputDir, title string, reader io.Reader, flags int) erro
 		nil,
 		kanji.crush(),
 		tagMeta,
-		flags&flagPretty == flagPretty,
+		pretty,
 	)
 }
