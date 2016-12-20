@@ -32,11 +32,13 @@ import (
 func jmdictBuildRules(term *dbTerm) {
 	for _, tag := range term.Tags {
 		switch tag {
-		case "adj-i", "v1", "vk", "vs":
+		case "adj-i", "v1", "vk":
 			term.addRules(tag)
 		default:
 			if strings.HasPrefix(tag, "v5") {
 				term.addRules("v5")
+			} else if strings.HasPrefix(tag, "vs") {
+				term.addRules("vs")
 			}
 		}
 	}
