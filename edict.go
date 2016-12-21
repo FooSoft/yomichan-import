@@ -48,7 +48,7 @@ func jmdictBuildScore(term *dbTerm) {
 	term.Score = 0
 	for _, tag := range term.Tags {
 		switch tag {
-		case "gai1", "ichi1", "news1", "spec1":
+		case "P":
 			term.Score += 5
 		case "arch", "iK":
 			term.Score -= 1
