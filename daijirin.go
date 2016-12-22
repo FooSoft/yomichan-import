@@ -68,9 +68,11 @@ func (e *daijirinExtractor) extractTerms(entry epwingEntry) []dbTerm {
 	}
 
 	var tags []string
-	if matches := e.annotExp.FindStringSubmatch(strings.Split(entry.Text, "\n")[0]); matches != nil {
-		for _, tag := range strings.Split(matches[1], "・") {
-			tags = append(tags, tag)
+	for _, split := range strings.Split(entry.Text, "\n") {
+		if matches := e.annotExp.FindStringSubmatch(split); matches != nil {
+			for _, tag := range strings.Split(matches[1], "・") {
+				tags = append(tags, tag)
+			}
 		}
 	}
 
@@ -83,6 +85,8 @@ func (e *daijirinExtractor) extractTerms(entry epwingEntry) []dbTerm {
 			}
 
 			e.exportTags(&term, tags)
+			e.exportRules(&term, tags)
+
 			terms = append(terms, term)
 		}
 
@@ -96,6 +100,8 @@ func (e *daijirinExtractor) extractTerms(entry epwingEntry) []dbTerm {
 				}
 
 				e.exportTags(&term, tags)
+				e.exportRules(&term, tags)
+
 				terms = append(terms, term)
 			}
 		}
@@ -106,6 +112,46 @@ func (e *daijirinExtractor) extractTerms(entry epwingEntry) []dbTerm {
 
 func (*daijirinExtractor) extractKanji(entry epwingEntry) []dbKanji {
 	return nil
+}
+
+func (e *daijirinExtractor) exportRules(term *dbTerm, tags []string) {
+	v5 := []string{
+		"動ワ五",
+		"動カ下二", "動カ五",
+		"動ガ下二", "動ガ五",
+		"動サ五",
+		"動タ五",
+		"動ナ五",
+		"動バ五",
+		"動マ五",
+		"動ラ五",
+	}
+
+	v1 := []string{
+		"動バ下一",
+	}
+
+tagLoop:
+	for _, tag := range tags {
+		if tag == "形" {
+			term.addRules("adj-i")
+			continue tagLoop
+		}
+
+		for _, v := range v5 {
+			if strings.HasPrefix(tag, v) {
+				term.addRules("v5")
+				continue tagLoop
+			}
+		}
+
+		for _, v := range v1 {
+			if strings.HasPrefix(tag, v) {
+				term.addRules("v1")
+				continue tagLoop
+			}
+		}
+	}
 }
 
 func (e *daijirinExtractor) exportTags(term *dbTerm, tags []string) {
