@@ -44,30 +44,31 @@ func makeDaijirinExtractor() epwingExtractor {
 }
 
 func (e *daijirinExtractor) extractTerms(entry epwingEntry) []dbTerm {
-	var expressions, readings, glossary, tags []string
-
 	matches := e.partsExp.FindStringSubmatch(entry.Heading)
-	if matches != nil {
-		if expression := matches[2]; len(expression) > 0 {
-			expression = e.annotExp.ReplaceAllLiteralString(expression, "")
-			for _, split := range strings.Split(expression, "・") {
-				splitInc := e.variantExp.ReplaceAllString(split, "$1")
-				expressions = append(expressions, splitInc)
-				if split != splitInc {
-					splitExc := e.variantExp.ReplaceAllLiteralString(split, "")
-					expressions = append(expressions, splitExc)
-				}
-			}
-		}
+	if matches == nil {
+		return nil
+	}
 
-		if reading := matches[1]; len(reading) > 0 {
-			reading = e.phonExp.ReplaceAllLiteralString(reading, "")
-			readings = append(readings, reading)
+	var expressions, readings []string
+	if expression := matches[2]; len(expression) > 0 {
+		expression = e.annotExp.ReplaceAllLiteralString(expression, "")
+		for _, split := range strings.Split(expression, "・") {
+			splitInc := e.variantExp.ReplaceAllString(split, "$1")
+			expressions = append(expressions, splitInc)
+			if split != splitInc {
+				splitExc := e.variantExp.ReplaceAllLiteralString(split, "")
+				expressions = append(expressions, splitExc)
+			}
 		}
 	}
 
+	if reading := matches[1]; len(reading) > 0 {
+		reading = e.phonExp.ReplaceAllLiteralString(reading, "")
+		readings = append(readings, reading)
+	}
+
+	var tags []string
 	for i, split := range strings.Split(entry.Text, "\n") {
-		glossary = append(glossary, split)
 		if i == 0 {
 			continue
 		}
@@ -82,11 +83,42 @@ func (e *daijirinExtractor) extractTerms(entry epwingEntry) []dbTerm {
 		}
 	}
 
+	var terms []dbTerm
+	if len(expressions) == 0 {
+		for _, reading := range readings {
+			term := dbTerm{
+				Expression: reading,
+				Glossary:   []string{entry.Text},
+			}
+
+			e.exportTags(&term, tags)
+			terms = append(terms, term)
+		}
+
+	} else {
+		for _, expression := range expressions {
+			for _, reading := range readings {
+				term := dbTerm{
+					Expression: expression,
+					Reading:    reading,
+					Glossary:   []string{entry.Text},
+				}
+
+				e.exportTags(&term, tags)
+				terms = append(terms, term)
+			}
+		}
+	}
+
+	return terms
+}
+
+func (*daijirinExtractor) extractKanji(entry epwingEntry) []dbKanji {
 	return nil
 }
 
-func (e *daijirinExtractor) extractKanji(entry epwingEntry) []dbKanji {
-	return nil
+func (e *daijirinExtractor) exportTags(term *dbTerm, tags []string) {
+
 }
 
 func (*daijirinExtractor) getTags() map[string]string {
