@@ -32,6 +32,8 @@ type daijirinExtractor struct {
 	phonExp    *regexp.Regexp
 	variantExp *regexp.Regexp
 	annotExp   *regexp.Regexp
+	v5Exp      *regexp.Regexp
+	v1Exp      *regexp.Regexp
 }
 
 func makeDaijirinExtractor() epwingExtractor {
@@ -40,6 +42,8 @@ func makeDaijirinExtractor() epwingExtractor {
 		phonExp:    regexp.MustCompile(`[-・]+`),
 		variantExp: regexp.MustCompile(`\((.*)\)`),
 		annotExp:   regexp.MustCompile(`（(.*)）`),
+		v5Exp:      regexp.MustCompile(`(動.五)|(動..二)`),
+		v1Exp:      regexp.MustCompile(`動..一`),
 	}
 }
 
@@ -115,41 +119,16 @@ func (*daijirinExtractor) extractKanji(entry epwingEntry) []dbKanji {
 }
 
 func (e *daijirinExtractor) exportRules(term *dbTerm, tags []string) {
-	v5 := []string{
-		"動ワ五",
-		"動カ下二", "動カ五",
-		"動ガ下二", "動ガ五",
-		"動サ五",
-		"動タ五",
-		"動ナ五",
-		"動バ五",
-		"動マ五",
-		"動ラ五",
-	}
-
-	v1 := []string{
-		"動バ下一",
-	}
-
-tagLoop:
 	for _, tag := range tags {
 		if tag == "形" {
+			term.addTags("adj-i")
 			term.addRules("adj-i")
-			continue tagLoop
-		}
-
-		for _, v := range v5 {
-			if strings.HasPrefix(tag, v) {
-				term.addRules("v5")
-				continue tagLoop
-			}
-		}
-
-		for _, v := range v1 {
-			if strings.HasPrefix(tag, v) {
-				term.addRules("v1")
-				continue tagLoop
-			}
+		} else if e.v5Exp.MatchString(tag) {
+			term.addTags("v5")
+			term.addRules("v5")
+		} else if e.v1Exp.MatchString(tag) {
+			term.addTags("v1")
+			term.addRules("v1")
 		}
 	}
 }
