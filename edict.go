@@ -70,10 +70,10 @@ func jmdictAddPriorities(term *dbTerm, priorities ...string) {
 
 func jmdictBuildTagMeta(entities map[string]string) map[string]dbTagMeta {
 	tags := map[string]dbTagMeta{
-		"news": {Notes: "appears frequently in Mainichi Shimbun", Category: "frequent"},
-		"ichi": {Notes: "listed as common in Ichimango Goi Bunruishuu", Category: "frequent"},
-		"spec": {Notes: "common words not included in frequency lists", Category: "frequent"},
-		"gai":  {Notes: "common loanword", Category: "frequent"},
+		"news": {Notes: "appears frequently in Mainichi Shimbun", Category: "frequent", Order: -2},
+		"ichi": {Notes: "listed as common in Ichimango Goi Bunruishuu", Category: "frequent", Order: -2},
+		"spec": {Notes: "common words not included in frequency lists", Category: "frequent", Order: -2},
+		"gai":  {Notes: "common loanword", Category: "frequent", Order: -2},
 		"P":    {Notes: "popular term", Category: "popular", Order: -10},
 	}
 
