@@ -134,7 +134,7 @@ func (e *daijirinExtractor) exportRules(term *dbTerm, tags []string) {
 }
 
 func (*daijirinExtractor) getRevision() string {
-	return "daijirin:1"
+	return "daijirin1"
 }
 
 func (e *daijirinExtractor) exportTags(term *dbTerm, tags []string) {

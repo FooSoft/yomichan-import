@@ -28,7 +28,7 @@ import (
 	"github.com/FooSoft/jmdict"
 )
 
-const JMNEDICT_REVISION = "jmnedict:1"
+const JMNEDICT_REVISION = "jmnedict1"
 
 func jmnedictBuildTagMeta(entities map[string]string) map[string]dbTagMeta {
 	tags := make(map[string]dbTagMeta)

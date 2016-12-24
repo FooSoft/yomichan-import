@@ -30,7 +30,7 @@ import (
 	"github.com/FooSoft/jmdict"
 )
 
-const KANJIDIC_REVISION = "kanjidic:1"
+const KANJIDIC_REVISION = "kanjidic1"
 
 func kanjidicExtractKanji(entry jmdict.KanjidicCharacter) dbKanji {
 	kanji := dbKanji{Character: entry.Literal}

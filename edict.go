@@ -29,7 +29,7 @@ import (
 	"github.com/FooSoft/jmdict"
 )
 
-const JMDICT_REVISION = "jmdict:1"
+const JMDICT_REVISION = "jmdict1"
 
 func jmdictBuildRules(term *dbTerm) {
 	for _, tag := range term.Tags {
