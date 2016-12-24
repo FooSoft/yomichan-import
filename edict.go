@@ -29,6 +29,8 @@ import (
 	"github.com/FooSoft/jmdict"
 )
 
+const JMDICT_REVISION = "jmdict:1"
+
 func jmdictBuildRules(term *dbTerm) {
 	for _, tag := range term.Tags {
 		switch tag {
@@ -183,6 +185,7 @@ func jmdictExportDb(inputPath, outputDir, title string, pretty bool) error {
 	return writeDb(
 		outputDir,
 		title,
+		JMDICT_REVISION,
 		terms.crush(),
 		nil,
 		jmdictBuildTagMeta(entities),

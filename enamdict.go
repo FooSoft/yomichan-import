@@ -28,6 +28,8 @@ import (
 	"github.com/FooSoft/jmdict"
 )
 
+const JMNEDICT_REVISION = "jmnedict:1"
+
 func jmnedictBuildTagMeta(entities map[string]string) map[string]dbTagMeta {
 	tags := make(map[string]dbTagMeta)
 
@@ -115,6 +117,7 @@ func jmnedictExportDb(inputPath, outputDir, title string, pretty bool) error {
 	return writeDb(
 		outputDir,
 		title,
+		JMNEDICT_REVISION,
 		terms.crush(),
 		nil,
 		jmnedictBuildTagMeta(entities),

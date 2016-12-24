@@ -30,6 +30,8 @@ import (
 	"github.com/FooSoft/jmdict"
 )
 
+const KANJIDIC_REVISION = "kanjidic:1"
+
 func kanjidicExtractKanji(entry jmdict.KanjidicCharacter) dbKanji {
 	kanji := dbKanji{Character: entry.Literal}
 
@@ -107,6 +109,7 @@ func kanjidicExportDb(inputPath, outputDir, title string, pretty bool) error {
 	return writeDb(
 		outputDir,
 		title,
+		KANJIDIC_REVISION,
 		nil,
 		kanji.crush(),
 		tagMeta,

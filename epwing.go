@@ -57,6 +57,7 @@ type epwingExtractor interface {
 	extractKanji(entry epwingEntry) []dbKanji
 	getFontNarrow() map[int]string
 	getFontWide() map[int]string
+	getRevision() string
 }
 
 func epwingExportDb(inputPath, outputDir, title string, pretty bool) error {
@@ -100,6 +101,7 @@ func epwingExportDb(inputPath, outputDir, title string, pretty bool) error {
 
 	var terms dbTermList
 	var kanji dbKanjiList
+	var revisions []string
 
 	for _, subbook := range book.Subbooks {
 		if extractor, ok := epwingExtractors[subbook.Title]; ok {
@@ -134,6 +136,8 @@ func epwingExportDb(inputPath, outputDir, title string, pretty bool) error {
 				terms = append(terms, extractor.extractTerms(entry)...)
 				kanji = append(kanji, extractor.extractKanji(entry)...)
 			}
+
+			revisions = append(revisions, extractor.getRevision())
 		} else {
 			return fmt.Errorf("failed to find compatible extractor for '%s'", subbook.Title)
 		}
@@ -142,6 +146,7 @@ func epwingExportDb(inputPath, outputDir, title string, pretty bool) error {
 	return writeDb(
 		outputDir,
 		title,
+		strings.Join(revisions, ";"),
 		terms.crush(),
 		kanji.crush(),
 		nil,

@@ -114,7 +114,7 @@ func (kanji dbKanjiList) crush() [][]interface{} {
 	return results
 }
 
-func writeDb(outputDir, title string, termRecords [][]interface{}, kanjiRecords [][]interface{}, tagMeta map[string]dbTagMeta, pretty bool) error {
+func writeDb(outputDir, title string, revision string, termRecords [][]interface{}, kanjiRecords [][]interface{}, tagMeta map[string]dbTagMeta, pretty bool) error {
 	const DB_VERSION = 1
 	const BANK_STRIDE = 10000
 
@@ -166,6 +166,7 @@ func writeDb(outputDir, title string, termRecords [][]interface{}, kanjiRecords 
 	var db struct {
 		Title      string               `json:"title"`
 		Version    int                  `json:"version"`
+		Revision   string               `json:"revision"`
 		TagMeta    map[string]dbTagMeta `json:"tagMeta"`
 		TermBanks  int                  `json:"termBanks"`
 		KanjiBanks int                  `json:"kanjiBanks"`
@@ -173,6 +174,7 @@ func writeDb(outputDir, title string, termRecords [][]interface{}, kanjiRecords 
 
 	db.Title = title
 	db.Version = DB_VERSION
+	db.Revision = revision
 	db.TagMeta = tagMeta
 
 	if db.TermBanks, err = writeDbRecords("term", termRecords); err != nil {

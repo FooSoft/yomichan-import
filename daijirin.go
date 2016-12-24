@@ -133,6 +133,10 @@ func (e *daijirinExtractor) exportRules(term *dbTerm, tags []string) {
 	}
 }
 
+func (*daijirinExtractor) getRevision() string {
+	return "daijirin:1"
+}
+
 func (e *daijirinExtractor) exportTags(term *dbTerm, tags []string) {
 	parsed := []string{
 		"並立助",
