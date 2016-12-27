@@ -28,22 +28,22 @@ import (
 )
 
 type daijirinExtractor struct {
-	partsExp   *regexp.Regexp
-	phonExp    *regexp.Regexp
-	variantExp *regexp.Regexp
-	annotExp   *regexp.Regexp
-	v5Exp      *regexp.Regexp
-	v1Exp      *regexp.Regexp
+	partsExp     *regexp.Regexp
+	readGroupExp *regexp.Regexp
+	expVarExp    *regexp.Regexp
+	metaExp      *regexp.Regexp
+	v5Exp        *regexp.Regexp
+	v1Exp        *regexp.Regexp
 }
 
 func makeDaijirinExtractor() epwingExtractor {
 	return &daijirinExtractor{
-		partsExp:   regexp.MustCompile(`([^（【〖]+)(?:【(.*)】)?(?:〖(.*)〗)?(?:（(.*)）)?`),
-		phonExp:    regexp.MustCompile(`[-・]+`),
-		variantExp: regexp.MustCompile(`\((.*)\)`),
-		annotExp:   regexp.MustCompile(`（(.*)）`),
-		v5Exp:      regexp.MustCompile(`(動.五)|(動..二)`),
-		v1Exp:      regexp.MustCompile(`動..一`),
+		partsExp:     regexp.MustCompile(`([^（【〖]+)(?:【(.*)】)?(?:〖(.*)〗)?(?:（(.*)）)?`),
+		readGroupExp: regexp.MustCompile(`[-・]+`),
+		expVarExp:    regexp.MustCompile(`\((.*)\)`),
+		metaExp:      regexp.MustCompile(`（(.*)）`),
+		v5Exp:        regexp.MustCompile(`(動.五)|(動..二)`),
+		v1Exp:        regexp.MustCompile(`動..一`),
 	}
 }
 
@@ -55,25 +55,25 @@ func (e *daijirinExtractor) extractTerms(entry epwingEntry) []dbTerm {
 
 	var expressions, readings []string
 	if expression := matches[2]; len(expression) > 0 {
-		expression = e.annotExp.ReplaceAllLiteralString(expression, "")
+		expression = e.metaExp.ReplaceAllLiteralString(expression, "")
 		for _, split := range strings.Split(expression, "・") {
-			splitInc := e.variantExp.ReplaceAllString(split, "$1")
+			splitInc := e.expVarExp.ReplaceAllString(split, "$1")
 			expressions = append(expressions, splitInc)
 			if split != splitInc {
-				splitExc := e.variantExp.ReplaceAllLiteralString(split, "")
+				splitExc := e.expVarExp.ReplaceAllLiteralString(split, "")
 				expressions = append(expressions, splitExc)
 			}
 		}
 	}
 
 	if reading := matches[1]; len(reading) > 0 {
-		reading = e.phonExp.ReplaceAllLiteralString(reading, "")
+		reading = e.readGroupExp.ReplaceAllLiteralString(reading, "")
 		readings = append(readings, reading)
 	}
 
 	var tags []string
 	for _, split := range strings.Split(entry.Text, "\n") {
-		if matches := e.annotExp.FindStringSubmatch(split); matches != nil {
+		if matches := e.metaExp.FindStringSubmatch(split); matches != nil {
 			for _, tag := range strings.Split(matches[1], "・") {
 				tags = append(tags, tag)
 			}
