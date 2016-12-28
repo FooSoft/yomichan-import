@@ -34,7 +34,6 @@ type daijirinExtractor struct {
 	metaExp      *regexp.Regexp
 	v5Exp        *regexp.Regexp
 	v1Exp        *regexp.Regexp
-	tagExp       *regexp.Regexp
 }
 
 func makeDaijirinExtractor() epwingExtractor {
@@ -45,7 +44,6 @@ func makeDaijirinExtractor() epwingExtractor {
 		metaExp:      regexp.MustCompile(`（([^）]*)）`),
 		v5Exp:        regexp.MustCompile(`(動.[四五](［[^］]+］)?)|(動..二)`),
 		v1Exp:        regexp.MustCompile(`(動..一)`),
-		tagExp:       regexp.MustCompile(`(動.[四五](［[^］]+］)?)|(動..二)|(動..一)|(名)|(形動)|(副)|(連語)|(形)|(枕詞)|(代)|(感)|(接尾)|(助動)|(接続)|(接頭)|(連体)|(終助)|(接助)|(副助)|(係助)|(格助)|(間投助)`),
 	}
 }
 
@@ -90,9 +88,7 @@ func (e *daijirinExtractor) extractTerms(entry epwingEntry) []dbTerm {
 				Glossary:   []string{entry.Text},
 			}
 
-			e.exportTags(&term, tags)
 			e.exportRules(&term, tags)
-
 			terms = append(terms, term)
 		}
 
@@ -105,9 +101,7 @@ func (e *daijirinExtractor) extractTerms(entry epwingEntry) []dbTerm {
 					Glossary:   []string{entry.Text},
 				}
 
-				e.exportTags(&term, tags)
 				e.exportRules(&term, tags)
-
 				terms = append(terms, term)
 			}
 		}
@@ -123,19 +117,14 @@ func (*daijirinExtractor) extractKanji(entry epwingEntry) []dbKanji {
 func (e *daijirinExtractor) exportRules(term *dbTerm, tags []string) {
 	for _, tag := range tags {
 		if tag == "形" {
-			term.addTags("adj-i")
 			term.addRules("adj-i")
 		} else if tag == "動サ変" && (strings.HasSuffix(term.Expression, "する") || strings.HasSuffix(term.Expression, "為る")) {
-			term.addTags("vs")
 			term.addRules("vs")
 		} else if term.Expression == "来る" {
-			term.addTags("vk")
 			term.addRules("vk")
 		} else if e.v5Exp.MatchString(tag) {
-			term.addTags("v5")
 			term.addRules("v5")
 		} else if e.v1Exp.MatchString(tag) {
-			term.addTags("v1")
 			term.addRules("v1")
 		}
 	}
@@ -143,14 +132,6 @@ func (e *daijirinExtractor) exportRules(term *dbTerm, tags []string) {
 
 func (*daijirinExtractor) getRevision() string {
 	return "daijirin1"
-}
-
-func (e *daijirinExtractor) exportTags(term *dbTerm, tags []string) {
-	for _, tag := range tags {
-		if match := e.tagExp.FindString(tag); match != "" {
-			term.addTags(match)
-		}
-	}
 }
 
 func (*daijirinExtractor) getFontNarrow() map[int]string {
