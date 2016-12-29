@@ -34,8 +34,9 @@ import (
 )
 
 func usage() {
-	fmt.Fprintf(os.Stderr, "Usage:\n  %s [options] input-path [output-dir]\n\n", path.Base(os.Args[0]))
-	fmt.Fprintf(os.Stderr, "Parameters:\n")
+	fmt.Fprintf(os.Stderr, "Usage: %s [options] input-path [output-dir]\n", path.Base(os.Args[0]))
+	fmt.Fprint(os.Stderr, "https://foosoft.net/projects/yomichan-import/\n\n")
+	fmt.Fprint(os.Stderr, "Parameters:\n")
 	flag.PrintDefaults()
 }
 
