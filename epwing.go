@@ -69,14 +69,20 @@ func epwingExportDb(inputPath, outputDir, title string, stride int, pretty bool)
 	var data []byte
 	if stat.IsDir() {
 		toolPath := filepath.Join(
-			filepath.Dir(os.Args[0]),
 			"bin",
 			runtime.GOOS,
 			"zero-epwing",
 		)
 
-		_, err := os.Stat(toolPath)
-		if err != nil {
+		if runtime.GOOS == "windows" {
+			toolPath += ".exe"
+		}
+
+		if toolPath, err = filepath.Abs(toolPath); err != nil {
+			return err
+		}
+
+		if _, err = os.Stat(toolPath); err != nil {
 			return fmt.Errorf("failed to find zero-epwing in '%s'", toolPath)
 		}
 
