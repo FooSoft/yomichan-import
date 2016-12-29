@@ -57,16 +57,16 @@ func exportDb(inputPath, outputDir, format, title string, stride int, pretty boo
 }
 
 func serveDb(serveDir string, port int) error {
-	log.Printf("starting dictionary server on port %d...\n", port)
+	log.Printf("starting dictionary server on port %d for extension...\n", port)
 	return http.ListenAndServe(fmt.Sprintf(":%d", port), http.FileServer(http.Dir(serveDir)))
 }
 
 func main() {
 	var (
 		format = flag.String("format", "", "dictionary format [edict|enamdict|kanjidic|epwing]")
-		port   = flag.Int("port", 9876, "port to serve JSON on")
-		pretty = flag.Bool("pretty", false, "output prettified JSON")
-		serve  = flag.Bool("serve", false, "serve JSON over HTTP")
+		port   = flag.Int("port", 9876, "port to serve dictionary JSON on")
+		pretty = flag.Bool("pretty", false, "output prettified dictionary JSON")
+		serve  = flag.Bool("serve", false, "serve dictionary JSON for extension")
 		stride = flag.Int("stride", 10000, "dictionary bank stride")
 		title  = flag.String("title", "", "dictionary title")
 	)
@@ -95,6 +95,8 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		*serve = true
 	}
 
 	if err := exportDb(inputPath, outputDir, *format, *title, *stride, *pretty); err != nil {
