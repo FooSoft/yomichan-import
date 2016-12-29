@@ -80,7 +80,7 @@ func kanjidicExtractKanji(entry jmdict.KanjidicCharacter) dbKanji {
 	return kanji
 }
 
-func kanjidicExportDb(inputPath, outputDir, title string, pretty bool) error {
+func kanjidicExportDb(inputPath, outputDir, title string, stride int, pretty bool) error {
 	reader, err := os.Open(inputPath)
 	if err != nil {
 		return err
@@ -106,6 +106,10 @@ func kanjidicExportDb(inputPath, outputDir, title string, pretty bool) error {
 		"heisig":    {Notes: "frame number in Remembering the Kanji"},
 	}
 
+	if title == "" {
+		title = "KANJIDIC2"
+	}
+
 	return writeDb(
 		outputDir,
 		title,
@@ -113,6 +117,7 @@ func kanjidicExportDb(inputPath, outputDir, title string, pretty bool) error {
 		nil,
 		kanji.crush(),
 		tagMeta,
+		stride,
 		pretty,
 	)
 }

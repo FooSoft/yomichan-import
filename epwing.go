@@ -60,7 +60,7 @@ type epwingExtractor interface {
 	getRevision() string
 }
 
-func epwingExportDb(inputPath, outputDir, title string, pretty bool) error {
+func epwingExportDb(inputPath, outputDir, title string, stride int, pretty bool) error {
 	stat, err := os.Stat(inputPath)
 	if err != nil {
 		return err
@@ -99,9 +99,12 @@ func epwingExportDb(inputPath, outputDir, title string, pretty bool) error {
 		"三省堂　スーパー大辞林": makeDaijirinExtractor(),
 	}
 
-	var terms dbTermList
-	var kanji dbKanjiList
-	var revisions []string
+	var (
+		terms     dbTermList
+		kanji     dbKanjiList
+		revisions []string
+		titles    []string
+	)
 
 	for _, subbook := range book.Subbooks {
 		if extractor, ok := epwingExtractors[subbook.Title]; ok {
@@ -138,9 +141,14 @@ func epwingExportDb(inputPath, outputDir, title string, pretty bool) error {
 			}
 
 			revisions = append(revisions, extractor.getRevision())
+			titles = append(titles, subbook.Title)
 		} else {
 			return fmt.Errorf("failed to find compatible extractor for '%s'", subbook.Title)
 		}
+	}
+
+	if title == "" {
+		title = strings.Join(titles, ", ")
 	}
 
 	return writeDb(
@@ -150,6 +158,7 @@ func epwingExportDb(inputPath, outputDir, title string, pretty bool) error {
 		terms.crush(),
 		kanji.crush(),
 		nil,
+		stride,
 		pretty,
 	)
 }

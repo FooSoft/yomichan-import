@@ -31,17 +31,16 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"time"
 )
 
 func usage() {
-	fmt.Fprintf(os.Stderr, "Usage:\n  %s [options] [edict|enamdict|kanjidic|epwing] input-path [output-dir]\n\n", path.Base(os.Args[0]))
+	fmt.Fprintf(os.Stderr, "Usage:\n  %s [options] input-path [output-dir]\n\n", path.Base(os.Args[0]))
 	fmt.Fprintf(os.Stderr, "Parameters:\n")
 	flag.PrintDefaults()
 }
 
-func exportDb(inputPath, outputDir, format, title string, pretty bool) error {
-	handlers := map[string]func(string, string, string, bool) error{
+func exportDb(inputPath, outputDir, format, title string, stride int, pretty bool) error {
+	handlers := map[string]func(string, string, string, int, bool) error{
 		"edict":    jmdictExportDb,
 		"enamdict": jmnedictExportDb,
 		"kanjidic": kanjidicExportDb,
@@ -53,39 +52,43 @@ func exportDb(inputPath, outputDir, format, title string, pretty bool) error {
 		return errors.New("unrecognized dictionray format")
 	}
 
-	log.Printf("converting '%s' to '%s'...", inputPath, outputDir)
-	return handler(inputPath, outputDir, title, pretty)
+	log.Printf("converting '%s' to '%s' in '%s' format...", inputPath, outputDir, format)
+	return handler(inputPath, outputDir, title, stride, pretty)
 }
 
 func serveDb(serveDir string, port int) error {
-	log.Printf("starting HTTP server on port %d...\n", port)
+	log.Printf("starting dictionary server on port %d...\n", port)
 	return http.ListenAndServe(fmt.Sprintf(":%d", port), http.FileServer(http.Dir(serveDir)))
 }
 
 func main() {
 	var (
-		serve  = flag.Bool("serve", false, "serve JSON over HTTP")
+		format = flag.String("format", "", "dictionary format [edict|enamdict|kanjidic|epwing]")
 		port   = flag.Int("port", 9876, "port to serve JSON on")
 		pretty = flag.Bool("pretty", false, "output prettified JSON")
+		serve  = flag.Bool("serve", false, "serve JSON over HTTP")
+		stride = flag.Int("stride", 10000, "dictionary bank stride")
 		title  = flag.String("title", "", "dictionary title")
 	)
 
 	flag.Usage = usage
 	flag.Parse()
 
-	if flag.NArg() != 2 && flag.NArg() != 3 {
+	if flag.NArg() != 1 && flag.NArg() != 2 {
 		usage()
 		os.Exit(2)
 	}
 
-	var (
-		format    = flag.Arg(0)
-		inputPath = flag.Arg(1)
-		outputDir string
-	)
+	inputPath := flag.Arg(0)
+	if *format == "" {
+		if *format = detectFormat(inputPath); *format == "" {
+			log.Fatal("failed to detect dictionary format")
+		}
+	}
 
-	if flag.NArg() == 3 {
-		outputDir = flag.Arg(2)
+	var outputDir string
+	if flag.NArg() == 2 {
+		outputDir = flag.Arg(1)
 	} else {
 		var err error
 		outputDir, err = ioutil.TempDir("", "yomichan_tmp_")
@@ -94,12 +97,7 @@ func main() {
 		}
 	}
 
-	if *title == "" {
-		t := time.Now()
-		*title = fmt.Sprintf("%s-%s", format, t.Format("20060102150405"))
-	}
-
-	if err := exportDb(inputPath, outputDir, format, *title, *pretty); err != nil {
+	if err := exportDb(inputPath, outputDir, *format, *title, *stride, *pretty); err != nil {
 		log.Fatal(err)
 	}
 

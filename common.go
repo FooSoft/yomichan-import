@@ -27,6 +27,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -114,9 +115,8 @@ func (kanji dbKanjiList) crush() [][]interface{} {
 	return results
 }
 
-func writeDb(outputDir, title string, revision string, termRecords [][]interface{}, kanjiRecords [][]interface{}, tagMeta map[string]dbTagMeta, pretty bool) error {
+func writeDb(outputDir, title string, revision string, termRecords [][]interface{}, kanjiRecords [][]interface{}, tagMeta map[string]dbTagMeta, stride int, pretty bool) error {
 	const DB_VERSION = 1
-	const BANK_STRIDE = 10000
 
 	marshalJson := func(obj interface{}, pretty bool) ([]byte, error) {
 		if pretty {
@@ -130,9 +130,9 @@ func writeDb(outputDir, title string, revision string, termRecords [][]interface
 		recordCount := len(records)
 		bankCount := 0
 
-		for i := 0; i < recordCount; i += BANK_STRIDE {
+		for i := 0; i < recordCount; i += stride {
 			indexSrc := i
-			indexDst := i + BANK_STRIDE
+			indexDst := i + stride
 			if indexDst > recordCount {
 				indexDst = recordCount
 			}
@@ -142,7 +142,7 @@ func writeDb(outputDir, title string, revision string, termRecords [][]interface
 				return 0, err
 			}
 
-			fp, err := os.Create(path.Join(outputDir, fmt.Sprintf("%s_bank_%d.json", prefix, i/BANK_STRIDE+1)))
+			fp, err := os.Create(path.Join(outputDir, fmt.Sprintf("%s_bank_%d.json", prefix, i/stride+1)))
 			if err != nil {
 				return 0, err
 			}
@@ -221,4 +221,30 @@ func hasString(needle string, haystack []string) bool {
 	}
 
 	return false
+}
+
+func detectFormat(path string) string {
+	info, err := os.Stat(path)
+	if err != nil {
+		return ""
+	}
+
+	if info.IsDir() {
+		_, err := os.Stat(filepath.Join(path, "CATALOGS"))
+		if err == nil {
+			return "epwing"
+		}
+	} else {
+		base := filepath.Base(path)
+		switch base {
+		case "JMdict_e.xml":
+			return "edict"
+		case "JMnedict.xml":
+			return "enamdict"
+		case "kanjidic2.xml":
+			return "kanjidic"
+		}
+	}
+
+	return ""
 }
