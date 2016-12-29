@@ -57,7 +57,7 @@ func exportDb(inputPath, outputDir, format, title string, stride int, pretty boo
 }
 
 func serveDb(serveDir string, port int) error {
-	log.Printf("starting dictionary server on port %d for extension...\n", port)
+	log.Printf("starting dictionary server on port %d...\n", port)
 	return http.ListenAndServe(fmt.Sprintf(":%d", port), http.FileServer(http.Dir(serveDir)))
 }
 
