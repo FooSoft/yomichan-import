@@ -23,9 +23,11 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -86,7 +88,39 @@ func epwingExportDb(inputPath, outputDir, title string, stride int, pretty bool)
 			return fmt.Errorf("failed to find zero-epwing in '%s'", toolPath)
 		}
 
-		data, err = exec.Command(toolPath, inputPath).Output()
+		cmd := exec.Command(toolPath, inputPath)
+
+		stdout, err := cmd.StdoutPipe()
+		if err != nil {
+			return err
+		}
+
+		stderr, err := cmd.StderrPipe()
+		if err != nil {
+			return err
+		}
+
+		log.Printf("invoking zero-epwing from '%s'...\n", toolPath)
+		if err := cmd.Start(); err != nil {
+			return err
+		}
+
+		go func() {
+			scanner := bufio.NewScanner(stderr)
+			for scanner.Scan() {
+				log.Printf("\t > %s\n", scanner.Text())
+			}
+		}()
+
+		if data, err = ioutil.ReadAll(stdout); err != nil {
+			return err
+		}
+
+		if err := cmd.Wait(); err != nil {
+			return err
+		}
+
+		log.Println("completed zero-epwing processing")
 	} else {
 		data, err = ioutil.ReadFile(inputPath)
 	}
