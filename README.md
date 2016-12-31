@@ -7,7 +7,7 @@ files. It currently supports the following formats:
 *   [JMnedict](http://www.edrdg.org/enamdict/enamdict_doc.html)
 *   [KANJIDIC2](http://www.edrdg.org/kanjidic/kanjd2index.html)
 *   [EPWING](https://ja.wikipedia.org/wiki/EPWING)
-    *       Daijirin (三省堂　スーパー大辞林)
+    *       [Daijirin](https://en.wikipedia.org/wiki/Daijirin) (三省堂　スーパー大辞林)
 
 Yomichan Import is continuously being expanded to support other EPWING dictionaries based on user demand. This is a
 mostly non-technical and (although laborious) process that requires writing regular expressions and creating font
@@ -55,10 +55,11 @@ dictionary based on the contents of the path:
 | **kanjidic** | file named `kanjidic2.xml`           |
 | **epwing**   | directory with file named `CATALOGS` |
 
-For example, if you wanted to process an EPWING dictionary titled Daijirin, you could do so with the following command:
+For example, if you wanted to process an EPWING dictionary titled Daijirin, you could do so with the following command
+(shown on Linux):
 
 ```
-./yomichan-import dict/Kokugo/Daijirin/
+$ ./yomichan-import dict/Kokugo/Daijirin/
 ```
 
 Yomichan Import will now begin the conversion process, which can take a couple of minutes to complete:
