@@ -15,10 +15,10 @@ tables; volunteer contributions are welcome.
 
 ## Installation ##
 
-Yomichan Import is available for Linux and Windows and can be [downloaded](https://foosoft.net/projects/yomichan-import/dl/yomichan-import.tar.gz) in a single,
-combined archive. MacOS X executables will be released at a later date, when I get access to Mac hardware (or somebody
-is nice enough to build [Zero-EPWING](https://foosoft.net/projects/zero-epwing) binaries for me). The packaged executables do not require
-installation and do not modify your system in any way.
+Yomichan Import is currently available for Windows and Linux; MacOS X executables will be released at a later date.
+
+*   [yomichan-import_windows.zip](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_windows.zip)
+*   [yomichan-import_linux.tar.gz](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_linux.tar.gz)
 
 ## Usage ##
 
@@ -26,7 +26,7 @@ Yomichan Import is a simple command line application. When invoked without any a
 Yomichan Import will output usage instructions:
 
 ```
-Usage: yomichan-import_linux [options] input-path [output-dir]
+Usage: yomichan-import [options] input-path [output-dir]
 https://foosoft.net/projects/yomichan-import/
 
 Parameters:
@@ -58,7 +58,7 @@ dictionary based on the contents of the path:
 For example, if you wanted to process an EPWING dictionary titled Daijirin, you could do so with the following command:
 
 ```
-$ ./yomichan-import_linux dict/Kokugo/Daijirin/
+./yomichan-import dict/Kokugo/Daijirin/
 ```
 
 Yomichan Import will now begin the conversion process, which can take a couple of minutes to complete:
