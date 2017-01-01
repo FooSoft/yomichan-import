@@ -1,0 +1,3 @@
+[submodule "zero-epwing"]
+	path = zero-epwing
+	url = https://github.com/FooSoft/zero-epwing

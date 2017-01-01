@@ -23,6 +23,7 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"flag"
 	"fmt"
@@ -31,6 +32,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strings"
 )
 
 func usage() {
@@ -75,38 +77,70 @@ func main() {
 	flag.Usage = usage
 	flag.Parse()
 
-	if flag.NArg() != 1 && flag.NArg() != 2 {
-		usage()
-		os.Exit(2)
-	}
+	var (
+		interactive bool
+		inputPath   string
+		outputDir   string
+	)
 
-	inputPath := flag.Arg(0)
-	if *format == "" {
-		if *format = detectFormat(inputPath); *format == "" {
-			log.Fatal("failed to detect dictionary format")
+	if flag.NArg() == 0 {
+		fmt.Print("Specify path of dictionary to convert: ")
+
+		reader := bufio.NewReader(os.Stdin)
+		inputPath, _ = reader.ReadString('\n')
+		inputPath = strings.Replace(inputPath, "\n", "", -1)
+		interactive = true
+
+		fmt.Print("\n")
+	} else {
+		inputPath = flag.Arg(0)
+		if flag.NArg() > 1 {
+			outputDir = flag.Arg(1)
 		}
 	}
 
-	var outputDir string
-	if flag.NArg() == 2 {
-		outputDir = flag.Arg(1)
-	} else {
+	terminate := func() {
+		if interactive {
+			fmt.Print("\nPress [ENTER] to terminate...")
+			reader := bufio.NewReader(os.Stdin)
+			reader.ReadString('\n')
+		}
+
+		os.Exit(1)
+	}
+
+	if _, err := os.Stat(inputPath); err != nil {
+		log.Printf("dictionary path '%s' does not exist", inputPath)
+		terminate()
+	}
+
+	if *format == "" {
+		if *format = detectFormat(inputPath); *format == "" {
+			log.Print("failed to detect dictionary format")
+			terminate()
+		}
+	}
+
+	if outputDir == "" {
 		var err error
 		outputDir, err = ioutil.TempDir("", "yomichan_tmp_")
 		if err != nil {
-			log.Fatal(err)
+			log.Print(err)
+			terminate()
 		}
 
 		*serve = true
 	}
 
 	if err := exportDb(inputPath, outputDir, *format, *title, *stride, *pretty); err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		terminate()
 	}
 
 	if *serve {
 		if err := serveDb(outputDir, *port); err != nil {
-			log.Fatal(err)
+			log.Print(err)
+			terminate()
 		}
 	}
 }
