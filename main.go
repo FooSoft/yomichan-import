@@ -89,6 +89,7 @@ func main() {
 		reader := bufio.NewReader(os.Stdin)
 		inputPath, _ = reader.ReadString('\n')
 		inputPath = strings.Replace(inputPath, "\n", "", -1)
+		inputPath = strings.Replace(inputPath, "\r", "", -1)
 		interactive = true
 
 		fmt.Print("\n")
@@ -101,7 +102,7 @@ func main() {
 
 	terminate := func() {
 		if interactive {
-			fmt.Print("\nPress [ENTER] to terminate...")
+			fmt.Print("\nPress [ENTER] to exit...")
 			reader := bufio.NewReader(os.Stdin)
 			reader.ReadString('\n')
 		}
