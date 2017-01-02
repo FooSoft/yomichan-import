@@ -9,9 +9,9 @@ files. It currently supports the following formats:
 *   [EPWING](https://ja.wikipedia.org/wiki/EPWING)
     *       [Daijirin](https://en.wikipedia.org/wiki/Daijirin) (三省堂　スーパー大辞林)
 
-Yomichan Import is continuously being expanded to support other EPWING dictionaries based on user demand. This is a
-mostly non-technical and (although laborious) process that requires writing regular expressions and creating font
-tables; volunteer contributions are welcome.
+Yomichan Import is being expanded to support other EPWING dictionaries based on user demand. This is a mostly
+non-technical and (although laborious) process that requires writing regular expressions and creating font tables;
+volunteer contributions are welcome.
 
 ## Installation ##
 
@@ -22,8 +22,11 @@ Yomichan Import is currently available for Windows and Linux; MacOS X executable
 
 ## Usage ##
 
-Yomichan Import is a simple command line application. When invoked without any arguments (or executed with `--help`),
-Yomichan Import will output usage instructions:
+Yomichan Import is a simple command line application. If you are a Windows user and are not comfortable using the
+terminal to input commands, you can use the provided `yomichan-import.bat` batch file instead of the
+`yomichan-import.exe` executable to run the application in interactive mode.
+
+When invoked without any arguments (or executed with `--help`), the application will output usage instructions:
 
 ```
 Usage: yomichan-import [options] input-path [output-dir]
@@ -68,9 +71,9 @@ Yomichan Import will now begin the conversion process, which can take a couple o
 2016/12/29 17:12:12 converting 'dict/Kokugo/Daijirin/' to '/tmp/yomichan_tmp_825860502' in 'epwing' format...
 ```
 
-After dictionary processing is complete, Yomichan Import will start a local HTTP server to enable the Yomichan for
-Chrome extension to retrieve the dictionary data. Users of Windows will likely see a firewall nag dialog at this point;
-access must be granted in order to make dictionary data accessible to the extension.
+After dictionary processing is complete, the tool will start a local web server to enable the Yomichan extension to
+retrieve dictionary data. Users of Windows will likely see a [firewall nag dialog](https://foosoft.net/projects/yomichan-import/img/firewall.png) at this point; you
+must grant network access in order to make the converted dictionary data accessible to the extension.
 
 ```
 2016/12/29 17:12:20 starting dictionary server on port 9876...
