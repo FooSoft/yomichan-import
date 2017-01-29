@@ -8,6 +8,7 @@ files. It currently supports the following formats:
 *   [KANJIDIC2](http://www.edrdg.org/kanjidic/kanjd2index.html)
 *   [EPWING](https://ja.wikipedia.org/wiki/EPWING)
     *       [Daijirin](https://en.wikipedia.org/wiki/Daijirin) (三省堂　スーパー大辞林)
+    *       [Daijisen](https://en.wikipedia.org/wiki/Daijisen) (大辞泉)
 
 Yomichan Import is being expanded to support other EPWING dictionaries based on user demand. This is a mostly
 non-technical and (although laborious) process that requires writing regular expressions and creating font tables;
