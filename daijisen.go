@@ -30,7 +30,7 @@ import (
 type daijisenExtractor struct {
 	partsExp     *regexp.Regexp
 	expShapesExp *regexp.Regexp
-	readVarExp   *regexp.Regexp
+	expVarExp    *regexp.Regexp
 	readGroupExp *regexp.Regexp
 	metaExp      *regexp.Regexp
 	v5Exp        *regexp.Regexp
@@ -41,8 +41,8 @@ func makeDaijisenExtractor() epwingExtractor {
 	return &daijisenExtractor{
 		partsExp:     regexp.MustCompile(`([^【]+)(?:【(.*)】)?`),
 		expShapesExp: regexp.MustCompile(`[×△]+`),
-		readVarExp:   regexp.MustCompile(`\(([^\)]*)\)`),
-		readGroupExp: regexp.MustCompile(`[-・]+`),
+		expVarExp:    regexp.MustCompile(`（([^）]*)）`),
+		readGroupExp: regexp.MustCompile(`[‐・]+`),
 		metaExp:      regexp.MustCompile(`［([^］]*)］`),
 		v5Exp:        regexp.MustCompile(`(動.[四五](［[^］]+］)?)|(動..二)`),
 		v1Exp:        regexp.MustCompile(`(動..一)`),
@@ -58,13 +58,20 @@ func (e *daijisenExtractor) extractTerms(entry epwingEntry) []dbTerm {
 	var expressions []string
 	if expression := matches[2]; len(expression) > 0 {
 		expression = e.expShapesExp.ReplaceAllString(expression, "")
-		expressions = strings.Split(expression, "・")
+		for _, split := range strings.Split(expression, "・") {
+			splitInc := e.expVarExp.ReplaceAllString(split, "$1")
+			expressions = append(expressions, splitInc)
+			if split != splitInc {
+				splitExc := e.expVarExp.ReplaceAllLiteralString(split, "")
+				expressions = append(expressions, splitExc)
+			}
+		}
 	}
 
 	var reading string
 	if reading = matches[1]; len(reading) > 0 {
 		reading = e.readGroupExp.ReplaceAllLiteralString(reading, "")
-		reading = e.readVarExp.ReplaceAllLiteralString(reading, "")
+		reading = e.expVarExp.ReplaceAllLiteralString(reading, "")
 	}
 
 	var tags []string
