@@ -137,6 +137,7 @@ func epwingExportDb(inputPath, outputDir, title string, stride int, pretty bool)
 	translateExp := regexp.MustCompile(`{{([nw])_(\d+)}}`)
 	epwingExtractors := map[string]epwingExtractor{
 		"三省堂　スーパー大辞林": makeDaijirinExtractor(),
+		"大辞泉":         makeDaijisenExtractor(),
 	}
 
 	var (

@@ -29,8 +29,9 @@ import (
 
 type daijisenExtractor struct {
 	partsExp     *regexp.Regexp
+	expShapesExp *regexp.Regexp
+	readVarExp   *regexp.Regexp
 	readGroupExp *regexp.Regexp
-	expVarExp    *regexp.Regexp
 	metaExp      *regexp.Regexp
 	v5Exp        *regexp.Regexp
 	v1Exp        *regexp.Regexp
@@ -38,10 +39,11 @@ type daijisenExtractor struct {
 
 func makeDaijisenExtractor() epwingExtractor {
 	return &daijisenExtractor{
-		partsExp:     regexp.MustCompile(`([^（【〖]+)(?:【(.*)】)?(?:〖(.*)〗)?(?:（(.*)）)?`),
+		partsExp:     regexp.MustCompile(`([^【]+)(?:【(.*)】)?`),
+		expShapesExp: regexp.MustCompile(`[×△]+`),
+		readVarExp:   regexp.MustCompile(`\(([^\)]*)\)`),
 		readGroupExp: regexp.MustCompile(`[-・]+`),
-		expVarExp:    regexp.MustCompile(`\(([^\)]*)\)`),
-		metaExp:      regexp.MustCompile(`（([^）]*)）`),
+		metaExp:      regexp.MustCompile(`［([^］]*)］`),
 		v5Exp:        regexp.MustCompile(`(動.[四五](［[^］]+］)?)|(動..二)`),
 		v1Exp:        regexp.MustCompile(`(動..一)`),
 	}
@@ -53,22 +55,16 @@ func (e *daijisenExtractor) extractTerms(entry epwingEntry) []dbTerm {
 		return nil
 	}
 
-	var expressions, readings []string
+	var expressions []string
 	if expression := matches[2]; len(expression) > 0 {
-		expression = e.metaExp.ReplaceAllLiteralString(expression, "")
-		for _, split := range strings.Split(expression, "・") {
-			splitInc := e.expVarExp.ReplaceAllString(split, "$1")
-			expressions = append(expressions, splitInc)
-			if split != splitInc {
-				splitExc := e.expVarExp.ReplaceAllLiteralString(split, "")
-				expressions = append(expressions, splitExc)
-			}
-		}
+		expression = e.expShapesExp.ReplaceAllString(expression, "")
+		expressions = strings.Split(expression, "・")
 	}
 
-	if reading := matches[1]; len(reading) > 0 {
+	var reading string
+	if reading = matches[1]; len(reading) > 0 {
 		reading = e.readGroupExp.ReplaceAllLiteralString(reading, "")
-		readings = append(readings, reading)
+		reading = e.readVarExp.ReplaceAllLiteralString(reading, "")
 	}
 
 	var tags []string
@@ -82,28 +78,24 @@ func (e *daijisenExtractor) extractTerms(entry epwingEntry) []dbTerm {
 
 	var terms []dbTerm
 	if len(expressions) == 0 {
-		for _, reading := range readings {
+		term := dbTerm{
+			Expression: reading,
+			Glossary:   []string{entry.Text},
+		}
+
+		e.exportRules(&term, tags)
+		terms = append(terms, term)
+
+	} else {
+		for _, expression := range expressions {
 			term := dbTerm{
-				Expression: reading,
+				Expression: expression,
+				Reading:    reading,
 				Glossary:   []string{entry.Text},
 			}
 
 			e.exportRules(&term, tags)
 			terms = append(terms, term)
-		}
-
-	} else {
-		for _, expression := range expressions {
-			for _, reading := range readings {
-				term := dbTerm{
-					Expression: expression,
-					Reading:    reading,
-					Glossary:   []string{entry.Text},
-				}
-
-				e.exportRules(&term, tags)
-				terms = append(terms, term)
-			}
 		}
 	}
 
