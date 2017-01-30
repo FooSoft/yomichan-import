@@ -18,8 +18,9 @@ volunteer contributions are welcome.
 
 Yomichan Import is currently available for Windows and Linux; MacOS X executables will be released at a later date.
 
-*   [yomichan-import_windows.zip](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_windows.zip)
 *   [yomichan-import_linux.tar.gz](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_linux.tar.gz)
+*   [yomichan-import_darwin.tar.gz](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_darwin.tar.gz)
+*   [yomichan-import_windows.zip](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_windows.zip)
 
 ## Usage ##
 
