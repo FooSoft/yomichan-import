@@ -50,8 +50,8 @@ func makeMeikyoExtractor() epwingExtractor {
 		expShapesExp:      regexp.MustCompile(`[▼▽]+`),
 		expBracketedExp:   regexp.MustCompile(`(?:[〈《])([^〉》]*)(?:[〉》])`),
 		expTermsExp:       regexp.MustCompile(`([^（]*)?(?:（(.*)）)?`),
-		metaExp:           regexp.MustCompile(`〘([^〙]*)〙`),
 		readGroupExp:      regexp.MustCompile(`[‐・]+`),
+		metaExp:           regexp.MustCompile(`〘([^〙]*)〙`),
 	}
 }
 
