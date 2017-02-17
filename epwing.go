@@ -138,6 +138,7 @@ func epwingExportDb(inputPath, outputDir, title string, stride int, pretty bool)
 	epwingExtractors := map[string]epwingExtractor{
 		"三省堂　スーパー大辞林": makeDaijirinExtractor(),
 		"大辞泉":         makeDaijisenExtractor(),
+		"明鏡国語辞典":      makeMeikyouExtractor(),
 	}
 
 	var (
