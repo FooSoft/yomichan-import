@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-type meikyoExtractor struct {
+type meikyouExtractor struct {
 	partsExp          *regexp.Regexp
 	expForeignMetaExp *regexp.Regexp
 	expShapesExp      *regexp.Regexp
@@ -15,7 +15,7 @@ type meikyoExtractor struct {
 	metaExp           *regexp.Regexp
 }
 
-func makeMeikyoExtractor() epwingExtractor {
+func makeMeikyouExtractor() epwingExtractor {
 	var foreignMeta = []string{
 		"和製",
 		"中国",
@@ -44,7 +44,7 @@ func makeMeikyoExtractor() epwingExtractor {
 		"サンスクリット",
 		"ポーランド",
 	}
-	return &meikyoExtractor{
+	return &meikyouExtractor{
 		partsExp:          regexp.MustCompile(`([^（【〖[]+)(?:【(.*)】)?(?:\[(.*)\])?(?:（(.*)）)?`),
 		expForeignMetaExp: regexp.MustCompile(strings.Join(foreignMeta, "|")),
 		expShapesExp:      regexp.MustCompile(`[▼▽]+`),
@@ -55,7 +55,7 @@ func makeMeikyoExtractor() epwingExtractor {
 	}
 }
 
-func (e *meikyoExtractor) extractTerms(entry epwingEntry) []dbTerm {
+func (e *meikyouExtractor) extractTerms(entry epwingEntry) []dbTerm {
 	matches := e.partsExp.FindStringSubmatch(entry.Heading)
 	if matches == nil {
 		return nil
@@ -129,11 +129,11 @@ func (e *meikyoExtractor) extractTerms(entry epwingEntry) []dbTerm {
 	return terms
 }
 
-func (e *meikyoExtractor) extractKanji(entry epwingEntry) []dbKanji {
+func (e *meikyouExtractor) extractKanji(entry epwingEntry) []dbKanji {
 	return nil
 }
 
-func (e *meikyoExtractor) exportRules(term *dbTerm, tags []string) {
+func (e *meikyouExtractor) exportRules(term *dbTerm, tags []string) {
 	for _, tag := range tags {
 		if tag == "名" {
 			term.addRules("n")
@@ -190,11 +190,11 @@ func (e *meikyoExtractor) exportRules(term *dbTerm, tags []string) {
 	}
 }
 
-func (*meikyoExtractor) getRevision() string {
-	return "meikyo1"
+func (*meikyouExtractor) getRevision() string {
+	return "meikyou1"
 }
 
-func (*meikyoExtractor) getFontNarrow() map[int]string {
+func (*meikyouExtractor) getFontNarrow() map[int]string {
 	return map[int]string{
 		41249: " ",
 		41250: "¡",
@@ -486,7 +486,7 @@ func (*meikyoExtractor) getFontNarrow() map[int]string {
 	}
 }
 
-func (*meikyoExtractor) getFontWide() map[int]string {
+func (*meikyouExtractor) getFontWide() map[int]string {
 	return map[int]string{
 		45089: "鄧",
 		45090: "疒",
