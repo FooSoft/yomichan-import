@@ -9,6 +9,7 @@ files. It currently supports the following formats:
 *   [EPWING](https://ja.wikipedia.org/wiki/EPWING)
     *       [Daijirin](https://en.wikipedia.org/wiki/Daijirin) (三省堂　スーパー大辞林)
     *       [Daijisen](https://en.wikipedia.org/wiki/Daijisen) (大辞泉)
+    *       [Meiikyou](https://ja.wikipedia.org/wiki/%E6%98%8E%E9%8F%A1%E5%9B%BD%E8%AA%9E%E8%BE%9E%E5%85%B8) (明鏡国語辞典)
 
 Yomichan Import is being expanded to support other EPWING dictionaries based on user demand. This is a mostly
 non-technical and (although laborious) process that requires writing regular expressions and creating font tables;
