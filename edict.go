@@ -29,7 +29,7 @@ import (
 	"github.com/FooSoft/jmdict"
 )
 
-const JMDICT_REVISION = "jmdict1"
+const JMDICT_REVISION = "jmdict2"
 
 func jmdictBuildRules(term *dbTerm) {
 	for _, tag := range term.Tags {
@@ -123,7 +123,8 @@ func jmdictExtractTerms(edictEntry jmdict.JmdictEntry) []dbTerm {
 			}
 		}
 
-		for _, sense := range edictEntry.Sense {
+		var partsOfSpeech []string
+		for index, sense := range edictEntry.Sense {
 			if sense.RestrictedReadings != nil && !hasString(reading.Reading, sense.RestrictedReadings) {
 				continue
 			}
@@ -138,6 +139,12 @@ func jmdictExtractTerms(edictEntry jmdict.JmdictEntry) []dbTerm {
 			term.addTags(sense.Fields...)
 			term.addTags(sense.Misc...)
 			term.addTags(sense.Dialects...)
+
+			if index == 0 {
+				partsOfSpeech = sense.PartsOfSpeech
+			} else {
+				term.addTags(partsOfSpeech...)
+			}
 
 			for _, glossary := range sense.Glossary {
 				term.Glossary = append(term.Glossary, glossary.Content)
