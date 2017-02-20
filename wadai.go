@@ -22,15 +22,79 @@
 
 package main
 
+import (
+	"regexp"
+	"strings"
+)
+
 type wadaiExtractor struct {
+	partsExp        *regexp.Regexp
+	literalPartsExp *regexp.Regexp
+	readPartsExp    *regexp.Regexp
+	quotedExp       *regexp.Regexp
+	alphaExp        *regexp.Regexp
 }
 
 func makeWadaiExtractor() epwingExtractor {
-	return &wadaiExtractor{}
+	return &wadaiExtractor{
+		partsExp:        regexp.MustCompile(`([^＜]+)(?:＜([^＞【]+)(?:【([^】]+)】)?＞)?`),
+		literalPartsExp: regexp.MustCompile(`(¶)?(.*)`),
+		readPartsExp:    regexp.MustCompile(`([^１２３４５６７８９０]+)(.*)`),
+		quotedExp:       regexp.MustCompile(`「?([^」]+)`),
+		alphaExp:        regexp.MustCompile(`[a-z]+`),
+	}
 }
 
 func (e *wadaiExtractor) extractTerms(entry epwingEntry) []dbTerm {
+	matches := e.partsExp.FindStringSubmatch(entry.Heading)
+	if matches == nil {
+		return nil
+	}
+
+	preset := false
+	literal := matches[1]
+	if literalMatches := e.literalPartsExp.FindStringSubmatch(literal); literalMatches != nil {
+		preset = len(literalMatches[1]) > 0
+		literal = literalMatches[2]
+	}
+
+	reading := matches[2]
+	if readMatches := e.readPartsExp.FindStringSubmatch(reading); readMatches != nil {
+		reading = readMatches[1]
+	}
+
+	expressions := strings.Split(matches[3], "・")
+	if len(expressions) == 0 {
+		expressions = append(expressions, "")
+	}
+
 	var terms []dbTerm
+	for _, expression := range expressions {
+		if preset {
+			expression = literal
+			reading = ""
+		} else if len(expression) == 0 {
+			expression = literal
+		}
+
+		if quotedMatches := e.quotedExp.FindStringSubmatch(reading); quotedMatches != nil {
+			reading = quotedMatches[1]
+		}
+
+		if alphaMatches := e.alphaExp.FindStringSubmatch(expression); alphaMatches != nil && len(reading) > 0 {
+			expression = reading
+			reading = ""
+		}
+
+		term := dbTerm{
+			Expression: expression,
+			Reading:    reading,
+			Glossary:   []string{entry.Text},
+		}
+
+		terms = append(terms, term)
+	}
+
 	return terms
 }
 
