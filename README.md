@@ -1,7 +1,7 @@
 # Yomichan-Import #
 
-Yomichan Import allows users of the [Yomichan for Chrome](https://foosoft.net/projects/yomichan-chrome) extension to import custom dictionary
-files. It currently supports the following formats:
+Yomichan Import allows users of the [Yomichan](https://foosoft.net/projects/yomichan) extension to import custom dictionary files. It currently
+supports the following formats:
 
 *   [JMdict](http://www.edrdg.org/jmdict/edict_doc.html)
 *   [JMnedict](http://www.edrdg.org/enamdict/enamdict_doc.html)
@@ -83,10 +83,10 @@ must grant network access in order to make the converted dictionary data accessi
 2016/12/29 17:12:20 starting dictionary server on port 9876...
 ```
 
-As a final step, open the Yomichan for Chrome options dialog and choose the *Local dictionary* item in the dictionary
-importer drop-down menu. When you see that `http://localhost:9876/index.json` displayed in the address text-box, you can
-press the *Import* button to begin the import process. Once the imported dictionary is displayed on the options screen,
-it is safe to terminate the Yomichan Import tool.
+As a final step, open the Yomichan options dialog and choose the *Local dictionary* item in the dictionary importer
+drop-down menu. When you see that `http://localhost:9876/index.json` displayed in the address text-box, you can press
+the *Import* button to begin the import process. Once the imported dictionary is displayed on the options screen, it is
+safe to terminate the Yomichan Import tool.
 
 ## License ##
 
