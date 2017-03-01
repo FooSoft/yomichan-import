@@ -1,4 +1,4 @@
-# Yomichan-Import #
+# Yomichan Import #
 
 Yomichan Import allows users of the [Yomichan](https://foosoft.net/projects/yomichan) extension to import custom dictionary files. It currently
 supports the following formats:
