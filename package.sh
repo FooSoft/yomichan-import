@@ -5,7 +5,7 @@ mkdir -p yomichan-import_windows/bin/windows
 mv yomichan-import_windows_386.exe yomichan-import_windows/yomichan-import.exe
 cp yomichan-import.bat yomichan-import_windows
 cp bin/windows/* yomichan-import_windows/bin/windows/
-7z a yomichan-import_windows.zip yomichan-import_windows
+7za a yomichan-import_windows.zip yomichan-import_windows
 rm -rf yomichan-import_windows
 
 mkdir -p yomichan-import_linux/bin/linux
