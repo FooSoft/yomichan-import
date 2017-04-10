@@ -111,7 +111,7 @@ func gui() error {
 				inputPath = path.Dir(inputPath)
 			}
 
-			if err := exportDb(pathEntry.Text(), outputDir, format, titleEntry.Text(), DEFAULT_STRIDE, false); err != nil {
+			if err := exportDb(inputPath, outputDir, format, titleEntry.Text(), DEFAULT_STRIDE, false); err != nil {
 				log.Print(err)
 				return
 			}
