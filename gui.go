@@ -23,10 +23,21 @@
 package main
 
 import (
+	"fmt"
+	"log"
 	"path"
 
 	"github.com/andlabs/ui"
 )
+
+type logger struct {
+	label *ui.Label
+}
+
+func (l logger) Write(p []byte) (n int, err error) {
+	l.label.SetText(fmt.Sprintf("%s%s", l.label.Text(), p))
+	return len(p), nil
+}
 
 func gui() error {
 	return ui.Main(func() {
@@ -73,6 +84,7 @@ func gui() error {
 			}
 		})
 
+		log.SetOutput(&logger{outputLabel})
 		importButton.OnClicked(func(*ui.Button) {
 			defer importButton.Enable()
 			importButton.Disable()
@@ -100,12 +112,12 @@ func gui() error {
 			}
 
 			if err := exportDb(pathEntry.Text(), outputDir, format, titleEntry.Text(), DEFAULT_STRIDE, false); err != nil {
-				ui.MsgBoxError(window, "Error", err.Error())
+				log.Print(err)
 				return
 			}
 
 			if err := serveDb(outputDir, portSpin.Value()); err != nil {
-				ui.MsgBoxError(window, "Error", err.Error())
+				log.Print(err)
 				return
 			}
 		})
