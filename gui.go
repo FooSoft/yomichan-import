@@ -35,7 +35,10 @@ type logger struct {
 }
 
 func (l logger) Write(p []byte) (n int, err error) {
-	l.label.SetText(fmt.Sprintf("%s%s", l.label.Text(), p))
+	ui.QueueMain(func() {
+		l.label.SetText(fmt.Sprintf("%s%s", l.label.Text(), p))
+	})
+
 	return len(p), nil
 }
 
@@ -64,10 +67,10 @@ func gui() error {
 		mainBox := ui.NewVerticalBox()
 		mainBox.Append(ui.NewLabel("Path to dictionary source (CATALOGS file for EPWING):"), false)
 		mainBox.Append(pathBox, false)
-		mainBox.Append(ui.NewLabel("Network port for extension server:"), false)
-		mainBox.Append(portSpin, false)
 		mainBox.Append(ui.NewLabel("Dictionary title (leave blank for default):"), false)
 		mainBox.Append(titleEntry, false)
+		mainBox.Append(ui.NewLabel("Network port for extension server:"), false)
+		mainBox.Append(portSpin, false)
 		mainBox.Append(ui.NewLabel("Dictionary format:"), false)
 		mainBox.Append(formatCombo, false)
 		mainBox.Append(ui.NewLabel("Application output:"), false)
@@ -86,7 +89,6 @@ func gui() error {
 
 		log.SetOutput(&logger{outputLabel})
 		importButton.OnClicked(func(*ui.Button) {
-			defer importButton.Enable()
 			importButton.Disable()
 			outputLabel.SetText("")
 
@@ -103,23 +105,30 @@ func gui() error {
 			inputPath := pathEntry.Text()
 			if len(inputPath) == 0 {
 				ui.MsgBoxError(window, "Error", "You must specify a dictionary source path.")
+				importButton.Enable()
 				return
 			}
 
-			format := []string{"epwing", "edict", "enamdict", "kanjidic"}[formatCombo.Selected()]
-			if format == "epwing" {
-				inputPath = path.Dir(inputPath)
-			}
+			go func() {
+				defer ui.QueueMain(func() {
+					importButton.Enable()
+				})
 
-			if err := exportDb(inputPath, outputDir, format, titleEntry.Text(), DEFAULT_STRIDE, false); err != nil {
-				log.Print(err)
-				return
-			}
+				format := []string{"epwing", "edict", "enamdict", "kanjidic"}[formatCombo.Selected()]
+				if format == "epwing" {
+					inputPath = path.Dir(inputPath)
+				}
 
-			if err := serveDb(outputDir, portSpin.Value()); err != nil {
-				log.Print(err)
-				return
-			}
+				if err := exportDb(inputPath, outputDir, format, titleEntry.Text(), DEFAULT_STRIDE, false); err != nil {
+					log.Print(err)
+					return
+				}
+
+				if err := serveDb(outputDir, portSpin.Value()); err != nil {
+					log.Print(err)
+					return
+				}
+			}()
 		})
 
 		window.OnClosing(func(*ui.Window) bool {
