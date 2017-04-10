@@ -81,8 +81,12 @@ func main() {
 	)
 
 	if flag.NArg() == 0 {
-		usage()
-		os.Exit(2)
+		if err := gui(); err == nil {
+			return
+		} else {
+			usage()
+			os.Exit(2)
+		}
 	} else {
 		inputPath = flag.Arg(0)
 		if flag.NArg() > 1 {
