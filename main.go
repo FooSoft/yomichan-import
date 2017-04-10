@@ -33,6 +33,11 @@ import (
 	"path"
 )
 
+const (
+	DEFAULT_STRIDE = 10000
+	DEFAULT_PORT   = 9876
+)
+
 func usage() {
 	fmt.Fprintf(os.Stderr, "Usage: %s [options] input-path [output-dir]\n", path.Base(os.Args[0]))
 	fmt.Fprint(os.Stderr, "https://foosoft.net/projects/yomichan-import/\n\n")
@@ -62,13 +67,17 @@ func serveDb(serveDir string, port int) error {
 	return http.ListenAndServe(fmt.Sprintf(":%d", port), http.FileServer(http.Dir(serveDir)))
 }
 
+func makeTmpDir() (string, error) {
+	return ioutil.TempDir("", "yomichan_tmp_")
+}
+
 func main() {
 	var (
 		format = flag.String("format", "", "dictionary format [edict|enamdict|kanjidic|epwing]")
-		port   = flag.Int("port", 9876, "port to serve dictionary JSON on")
+		port   = flag.Int("port", DEFAULT_PORT, "port to serve dictionary JSON on")
 		pretty = flag.Bool("pretty", false, "output prettified dictionary JSON")
 		serve  = flag.Bool("serve", false, "serve dictionary JSON for extension")
-		stride = flag.Int("stride", 10000, "dictionary bank stride")
+		stride = flag.Int("stride", DEFAULT_STRIDE, "dictionary bank stride")
 		title  = flag.String("title", "", "dictionary title")
 	)
 
@@ -106,7 +115,7 @@ func main() {
 
 	if outputDir == "" {
 		var err error
-		if outputDir, err = ioutil.TempDir("", "yomichan_tmp_"); err != nil {
+		if outputDir, err = makeTmpDir(); err != nil {
 			log.Fatal(err)
 		}
 

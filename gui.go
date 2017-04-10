@@ -23,6 +23,8 @@
 package main
 
 import (
+	"path"
+
 	"github.com/andlabs/ui"
 )
 
@@ -35,7 +37,7 @@ func gui() error {
 		pathBox.Append(browseButton, false)
 
 		portSpin := ui.NewSpinbox(0, 65535)
-		portSpin.SetValue(9876)
+		portSpin.SetValue(DEFAULT_PORT)
 
 		formatCombo := ui.NewCombobox()
 		formatCombo.Append("EPWING")
@@ -68,6 +70,43 @@ func gui() error {
 		browseButton.OnClicked(func(*ui.Button) {
 			if path := ui.OpenFile(window); len(path) > 0 {
 				pathEntry.SetText(path)
+			}
+		})
+
+		importButton.OnClicked(func(*ui.Button) {
+			defer importButton.Enable()
+			importButton.Disable()
+			outputLabel.SetText("")
+
+			var (
+				outputDir string
+				err       error
+			)
+
+			if outputDir, err = makeTmpDir(); err != nil {
+				ui.MsgBoxError(window, "Error", err.Error())
+				return
+			}
+
+			inputPath := pathEntry.Text()
+			if len(inputPath) == 0 {
+				ui.MsgBoxError(window, "Error", "You must specify a dictionary source path.")
+				return
+			}
+
+			format := []string{"epwing", "edict", "enamdict", "kanjidic"}[formatCombo.Selected()]
+			if format == "epwing" {
+				inputPath = path.Dir(inputPath)
+			}
+
+			if err := exportDb(pathEntry.Text(), outputDir, format, titleEntry.Text(), DEFAULT_STRIDE, false); err != nil {
+				ui.MsgBoxError(window, "Error", err.Error())
+				return
+			}
+
+			if err := serveDb(outputDir, portSpin.Value()); err != nil {
+				ui.MsgBoxError(window, "Error", err.Error())
+				return
 			}
 		})
 
