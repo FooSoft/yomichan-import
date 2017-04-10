@@ -45,7 +45,7 @@ func (l logger) Write(p []byte) (n int, err error) {
 func gui() error {
 	return ui.Main(func() {
 		pathEntry := ui.NewEntry()
-		browseButton := ui.NewButton("Browse")
+		browseButton := ui.NewButton("Browse...")
 		pathBox := ui.NewHorizontalBox()
 		pathBox.Append(pathEntry, true)
 		pathBox.Append(browseButton, false)
