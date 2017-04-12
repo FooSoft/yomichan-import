@@ -26,6 +26,7 @@ import (
 	"fmt"
 	"log"
 	"path"
+	"strings"
 
 	"github.com/andlabs/ui"
 )
@@ -36,7 +37,7 @@ type logger struct {
 
 func (l logger) Write(p []byte) (n int, err error) {
 	ui.QueueMain(func() {
-		l.label.SetText(fmt.Sprintf("%s%s", l.label.Text(), p))
+		l.label.SetText(strings.Trim(fmt.Sprintf("%s\n%s", l.label.Text(), p), "\n"))
 	})
 
 	return len(p), nil
@@ -62,7 +63,7 @@ func gui() error {
 
 		titleEntry := ui.NewEntry()
 		outputLabel := ui.NewLabel("")
-		importButton := ui.NewButton("Import...")
+		importButton := ui.NewButton("Import dictionary...")
 
 		mainBox := ui.NewVerticalBox()
 		mainBox.Append(ui.NewLabel("Path to dictionary source (CATALOGS file for EPWING):"), false)
