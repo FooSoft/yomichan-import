@@ -23,24 +23,30 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"path"
-	"strings"
+	"path/filepath"
 
 	"github.com/andlabs/ui"
 )
 
 type logger struct {
-	label *ui.Label
+	box   *ui.Box
+	count int
 }
 
-func (l logger) Write(p []byte) (n int, err error) {
+func (l *logger) Write(p []byte) (n int, err error) {
 	ui.QueueMain(func() {
-		l.label.SetText(strings.Trim(fmt.Sprintf("%s\n%s", l.label.Text(), p), "\n"))
+		l.box.Append(ui.NewLabel(string(p)), false)
+		l.count++
 	})
 
 	return len(p), nil
+}
+
+func (l *logger) clear() {
+	for ; l.count > 0; l.count-- {
+		l.box.Delete(0)
+	}
 }
 
 func gui() error {
@@ -62,7 +68,7 @@ func gui() error {
 		formatCombo.SetSelected(0)
 
 		titleEntry := ui.NewEntry()
-		outputLabel := ui.NewLabel("")
+		outputBox := ui.NewVerticalBox()
 		importButton := ui.NewButton("Import dictionary...")
 
 		mainBox := ui.NewVerticalBox()
@@ -75,7 +81,7 @@ func gui() error {
 		mainBox.Append(ui.NewLabel("Dictionary format:"), false)
 		mainBox.Append(formatCombo, false)
 		mainBox.Append(ui.NewLabel("Application output:"), false)
-		mainBox.Append(outputLabel, true)
+		mainBox.Append(outputBox, true)
 		mainBox.Append(importButton, false)
 
 		window := ui.NewWindow("Yomichan Import", 640, 480, false)
@@ -88,10 +94,12 @@ func gui() error {
 			}
 		})
 
-		log.SetOutput(&logger{outputLabel})
+		logger := &logger{outputBox, 0}
+		log.SetOutput(logger)
+
 		importButton.OnClicked(func(*ui.Button) {
 			importButton.Disable()
-			outputLabel.SetText("")
+			logger.clear()
 
 			var (
 				outputDir string
@@ -117,7 +125,7 @@ func gui() error {
 
 				format := []string{"epwing", "edict", "enamdict", "kanjidic"}[formatCombo.Selected()]
 				if format == "epwing" {
-					inputPath = path.Dir(inputPath)
+					inputPath = filepath.Dir(inputPath)
 				}
 
 				if err := exportDb(inputPath, outputDir, format, titleEntry.Text(), DEFAULT_STRIDE, false); err != nil {
