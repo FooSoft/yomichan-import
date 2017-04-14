@@ -145,6 +145,8 @@ func epwingExportDb(inputPath, outputDir, title string, stride int, pretty bool)
 		titles    []string
 	)
 
+	log.Println("formatting dictionary data...")
+
 	for _, subbook := range book.Subbooks {
 		if extractor, ok := epwingExtractors[subbook.Title]; ok {
 			fontNarrow := extractor.getFontNarrow()

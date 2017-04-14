@@ -31,24 +31,15 @@ import (
 )
 
 type logger struct {
-	box   *ui.Box
-	count int
+	entry *ui.Entry
 }
 
 func (l *logger) Write(p []byte) (n int, err error) {
-	data := strings.Trim(string(p), "\n")
 	ui.QueueMain(func() {
-		l.box.Append(ui.NewLabel(data), false)
-		l.count++
+		l.entry.SetText(strings.Trim(string(p), "\n"))
 	})
 
 	return len(p), nil
-}
-
-func (l *logger) clear() {
-	for ; l.count > 0; l.count-- {
-		l.box.Delete(0)
-	}
 }
 
 func gui() error {
@@ -70,7 +61,7 @@ func gui() error {
 		formatCombo.SetSelected(0)
 
 		titleEntry := ui.NewEntry()
-		outputBox := ui.NewVerticalBox()
+		outputEntry := ui.NewEntry()
 		importButton := ui.NewButton("Import dictionary...")
 
 		mainBox := ui.NewVerticalBox()
@@ -83,10 +74,11 @@ func gui() error {
 		mainBox.Append(ui.NewLabel("Dictionary format:"), false)
 		mainBox.Append(formatCombo, false)
 		mainBox.Append(ui.NewLabel("Application output:"), false)
-		mainBox.Append(outputBox, true)
+		mainBox.Append(outputEntry, false)
+		mainBox.Append(ui.NewVerticalBox(), true)
 		mainBox.Append(importButton, false)
 
-		window := ui.NewWindow("Yomichan Import", 640, 480, false)
+		window := ui.NewWindow("Yomichan Import", 640, 320, false)
 		window.SetMargined(true)
 		window.SetChild(mainBox)
 
@@ -96,12 +88,11 @@ func gui() error {
 			}
 		})
 
-		logger := &logger{outputBox, 0}
-		log.SetOutput(logger)
+		log.SetOutput(&logger{outputEntry})
 
 		importButton.OnClicked(func(*ui.Button) {
 			importButton.Disable()
-			logger.clear()
+			outputEntry.SetText("")
 
 			var (
 				outputDir string
