@@ -25,6 +25,7 @@ package main
 import (
 	"log"
 	"path/filepath"
+	"strings"
 
 	"github.com/andlabs/ui"
 )
@@ -35,8 +36,9 @@ type logger struct {
 }
 
 func (l *logger) Write(p []byte) (n int, err error) {
+	data := strings.Trim(string(p), "\n")
 	ui.QueueMain(func() {
-		l.box.Append(ui.NewLabel(string(p)), false)
+		l.box.Append(ui.NewLabel(data), false)
 		l.count++
 	})
 
