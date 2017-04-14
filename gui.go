@@ -120,22 +120,25 @@ func gui() error {
 				return
 			}
 
+			format := []string{"epwing", "edict", "enamdict", "kanjidic"}[formatCombo.Selected()]
+			if format == "epwing" {
+				inputPath = filepath.Dir(inputPath)
+			}
+
+			title := titleEntry.Text()
+			port := portSpin.Value()
+
 			go func() {
 				defer ui.QueueMain(func() {
 					importButton.Enable()
 				})
 
-				format := []string{"epwing", "edict", "enamdict", "kanjidic"}[formatCombo.Selected()]
-				if format == "epwing" {
-					inputPath = filepath.Dir(inputPath)
-				}
-
-				if err := exportDb(inputPath, outputDir, format, titleEntry.Text(), DEFAULT_STRIDE, false); err != nil {
+				if err := exportDb(inputPath, outputDir, format, title, DEFAULT_STRIDE, false); err != nil {
 					log.Print(err)
 					return
 				}
 
-				if err := serveDb(outputDir, portSpin.Value()); err != nil {
+				if err := serveDb(outputDir, port); err != nil {
 					log.Print(err)
 					return
 				}
