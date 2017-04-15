@@ -21,17 +21,15 @@ contributions are welcome.
 
 Yomichan Import is currently available for Linux, Mac OS X, and Windows:
 
-*   [yomichan-import_linux.tar.gz](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_linux.tar.gz)
+*   [yomichan-import_linux.tar.gz](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_linux.tar.gz) (GTK+ 3 required for GUI)
 *   [yomichan-import_darwin.tar.gz](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_darwin.tar.gz)
 *   [yomichan-import_windows.zip](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_windows.zip)
 
 ## Usage ##
 
-Yomichan Import is a simple command line application. If you are a Windows user and are not comfortable using the
-terminal to input commands, you can use the provided `yomichan-import.bat` batch file instead of the
-`yomichan-import.exe` executable to run the application in interactive mode.
-
-When invoked without any arguments (or executed with `--help`), the application will output usage instructions:
+Yomichan Import can be utilized as either a graphical or a command line application. For most purposes, it is sufficient
+to simply launch the executable without command line arguments and use the GUI. If, however you are interested in using
+this tool for batch conversion, you can execute it with the `--help` argument to display the usage instructions:
 
 ```
 Usage: yomichan-import [options] input-path [output-dir]
@@ -88,6 +86,10 @@ As a final step, open the Yomichan options dialog and choose the *Local dictiona
 drop-down menu. When you see that `http://localhost:9876/index.json` displayed in the address text-box, you can press
 the *Import* button to begin the import process. Once the imported dictionary is displayed on the options screen, it is
 safe to terminate the Yomichan Import tool.
+
+## Screenshots ##
+
+[![Import window](https://foosoft.net/projects/yomichan-import/img/import-thumb.png)](https://foosoft.net/projects/yomichan-import/img/import.png)
 
 ## License ##
 
