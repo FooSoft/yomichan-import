@@ -23,41 +23,41 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 
 	"github.com/FooSoft/jmdict"
 )
 
-const KANJIDIC_REVISION = "kanjidic1"
+const KANJIDIC_REVISION = "kanjidic2"
 
 func kanjidicExtractKanji(entry jmdict.KanjidicCharacter) dbKanji {
-	kanji := dbKanji{Character: entry.Literal}
+	kanji := dbKanji{
+		Character: entry.Literal,
+		Stats:     make(map[string]string),
+	}
 
 	if level := entry.Misc.JlptLevel; level != nil {
-		kanji.addTags(fmt.Sprintf("jlpt:%s", *level))
+		kanji.Stats["JLPT level"] = *level
 	}
 
 	if grade := entry.Misc.Grade; grade != nil {
-		kanji.addTags(fmt.Sprintf("grade:%s", *grade))
+		kanji.Stats["School grade"] = *grade
 		if gradeInt, err := strconv.Atoi(*grade); err == nil {
 			if gradeInt >= 1 && gradeInt <= 8 {
-				kanji.addTags("jouyou")
+				kanji.addTags("Jouyou")
 			} else if gradeInt >= 9 && gradeInt <= 10 {
-				kanji.addTags("jinmeiyou")
+				kanji.addTags("Jinmeiyou")
 			}
 		}
 	}
 
 	for _, number := range entry.DictionaryNumbers {
-		if number.Type == "heisig" {
-			kanji.addTags(fmt.Sprintf("heisig:%s", number.Value))
-		}
+		kanji.Stats[number.Type] = number.Value
 	}
 
 	if counts := entry.Misc.StrokeCounts; len(counts) > 0 {
-		kanji.addTags(fmt.Sprintf("strokes:%s", counts[0]))
+		kanji.Stats["Stroke count"] = counts[0]
 	}
 
 	if entry.ReadingMeaning != nil {

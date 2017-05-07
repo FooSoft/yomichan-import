@@ -82,6 +82,7 @@ type dbKanji struct {
 	Onyomi    []string
 	Kunyomi   []string
 	Tags      []string
+	Stats     map[string]string
 	Meanings  []string
 }
 
