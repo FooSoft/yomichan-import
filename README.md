@@ -19,17 +19,35 @@ contributions are welcome.
 
 ## Installation ##
 
-Yomichan Import is currently available for Linux, Mac OS X, and Windows (64 bit builds only):
+Builds of Yomichan Import are currently available for Linux, Mac OS X, and Windows. The required version of
+[Zero-EPWING](https://foosoft.net/projects/zero-epwing) is included for processing EPWING dictionaries.
 
 *   [yomichan-import_linux.tar.gz](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_linux.tar.gz): (GTK+ 3 required for GUI)
 *   [yomichan-import_darwin.tar.gz](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_darwin.tar.gz)
-*   [yomichan-import_windows.zip](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_windows.zip) (Vista and up, no console output)
+*   [yomichan-import_windows.zip](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_windows.zip) (64 bit Vista or above, no console output)
 
-## Usage ##
+## Using the Graphical Interface ##
 
-Yomichan Import can be utilized as either a graphical or a command line application. For most purposes, it is sufficient
-to simply launch the executable without command line arguments and use the GUI. If, however you are interested in using
-this tool for batch conversion, you can execute it with the `--help` argument to display the usage instructions:
+In most cases, it is sufficient to run the application without command line arguments and use the graphical interface.
+Follow the steps below to import your dictionary into Yomichan:
+
+1.  Launch the `yomichan-import` executable.
+2.  Specify the path to the dictionary you wish to convert (path to `CATALOGS` file for EPWING dictionaries).
+3.  Specify a network port to use (the default port `9876` should be fine for most configurations).
+4.  Specify the dictionary format from the provided options.
+5.  Press the button labeled *Import dictionary...* and wait for processing to complete.
+6.  Once you the message `starting dictionary server on port 9876...`, the dictionary data is ready to be imported.
+7.  In Yomichan, open the options page and select the *Local dictionary* item in the dictionary importer drop-down menu.
+8.  When `http://localhost:9876/index.json` is displayed in the address text-box, press the *Import* button to begin import.
+9.  Wait for the import progress to complete (a progress bar is displayed during dictionary processing).
+9.  Close Yomichan Import once the import process has finished.
+
+[![Import window](https://foosoft.net/projects/yomichan-import/img/import-thumb.png)](https://foosoft.net/projects/yomichan-import/img/import.png)
+
+## Using the Command Line ##
+
+Yomichan Import can be used as a command line application. When executed with the `--help` argument, usage instructions
+will be displayed (except on Windows).
 
 ```
 Usage: yomichan-import [options] input-path [output-dir]
@@ -50,9 +68,9 @@ Parameters:
     	dictionary title
 ```
 
-In the vast majority of cases it is enough to simply provide the path to the dictionary resource you wish to process,
-without explicitly specifying a format. Yomichan Import will attempt to automatically determine the format of the
-dictionary based on the contents of the path:
+In most cases it is sufficient to simply provide the path to the dictionary resource you wish to process, without
+explicitly specifying a format. Yomichan Import will attempt to automatically determine the format of the dictionary
+based on the contents of the path:
 
 | Format       | Resource                             |
 | ------------ | ------------------------------------ |
@@ -68,28 +86,9 @@ For example, if you wanted to process an EPWING dictionary titled Daijirin, you 
 $ ./yomichan-import dict/Kokugo/Daijirin/
 ```
 
-Yomichan Import will now begin the conversion process, which can take a couple of minutes to complete:
-
-```
-2016/12/29 17:12:12 converting 'dict/Kokugo/Daijirin/' to '/tmp/yomichan_tmp_825860502' in 'epwing' format...
-```
-
-After dictionary processing is complete, the tool will start a local web server to enable the Yomichan extension to
-retrieve dictionary data. Users of Windows will likely see a [firewall nag dialog](https://foosoft.net/projects/yomichan-import/img/firewall.png) at this point; you
-must grant network access in order to make the converted dictionary data accessible to the extension.
-
-```
-2016/12/29 17:12:20 starting dictionary server on port 9876...
-```
-
-As a final step, open the Yomichan options dialog and choose the *Local dictionary* item in the dictionary importer
-drop-down menu. When you see that `http://localhost:9876/index.json` displayed in the address text-box, you can press
-the *Import* button to begin the import process. Once the imported dictionary is displayed on the options screen, it is
-safe to terminate the Yomichan Import tool.
-
-## Screenshots ##
-
-[![Import window](https://foosoft.net/projects/yomichan-import/img/import-thumb.png)](https://foosoft.net/projects/yomichan-import/img/import.png)
+Yomichan Import will now begin the conversion process, which can take a couple of minutes to complete. Once you see the
+message `starting dictionary server on port 9876...` output to your console, you can use Yomichan to import the
+processed dictionary data using the same steps as described in the *Using the Graphical Interface* section.
 
 ## License ##
 
