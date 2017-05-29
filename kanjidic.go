@@ -38,16 +38,16 @@ func kanjidicExtractKanji(entry jmdict.KanjidicCharacter) dbKanji {
 	}
 
 	if level := entry.Misc.JlptLevel; level != nil {
-		kanji.Stats["JLPT level"] = *level
+		kanji.Stats["jlpt level"] = *level
 	}
 
 	if grade := entry.Misc.Grade; grade != nil {
-		kanji.Stats["School grade"] = *grade
+		kanji.Stats["school grade"] = *grade
 		if gradeInt, err := strconv.Atoi(*grade); err == nil {
 			if gradeInt >= 1 && gradeInt <= 8 {
-				kanji.addTags("Jouyou")
+				kanji.addTags("jouyou")
 			} else if gradeInt >= 9 && gradeInt <= 10 {
-				kanji.addTags("Jinmeiyou")
+				kanji.addTags("jinmeiyou")
 			}
 		}
 	}
@@ -57,7 +57,7 @@ func kanjidicExtractKanji(entry jmdict.KanjidicCharacter) dbKanji {
 	}
 
 	if counts := entry.Misc.StrokeCounts; len(counts) > 0 {
-		kanji.Stats["Stroke count"] = counts[0]
+		kanji.Stats["stroke count"] = counts[0]
 	}
 
 	if entry.ReadingMeaning != nil {
@@ -100,10 +100,6 @@ func kanjidicExportDb(inputPath, outputDir, title string, stride int, pretty boo
 	tagMeta := map[string]dbTagMeta{
 		"jouyou":    {Notes: "included in list of regular-use characters", Category: "frequent", Order: -5},
 		"jinmeiyou": {Notes: "included in list of characters for use in personal names", Category: "frequent", Order: -5},
-		"jlpt":      {Notes: "corresponding Japanese Language Proficiency Test level"},
-		"grade":     {Notes: "school grade level at which the character is taught"},
-		"strokes":   {Notes: "number of strokes needed to write the character"},
-		"heisig":    {Notes: "frame number in Remembering the Kanji"},
 	}
 
 	if title == "" {

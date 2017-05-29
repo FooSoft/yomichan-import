@@ -99,11 +99,16 @@ func (kanji *dbKanji) addTags(tags ...string) {
 func (kanji dbKanjiList) crush() [][]interface{} {
 	var results [][]interface{}
 	for _, k := range kanji {
+		tags := k.Tags
+		for name, value := range k.Stats {
+			tags = append(tags, fmt.Sprintf("%s:%s", name, value))
+		}
+
 		result := []interface{}{
 			k.Character,
 			strings.Join(k.Onyomi, " "),
 			strings.Join(k.Kunyomi, " "),
-			strings.Join(k.Tags, " "),
+			strings.Join(tags, " "),
 		}
 
 		for _, meaning := range k.Meanings {
