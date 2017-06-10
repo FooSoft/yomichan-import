@@ -124,7 +124,7 @@ func gui() error {
 					importButton.Enable()
 				})
 
-				if err := exportDb(inputPath, outputDir, format, title, DEFAULT_STRIDE, false); err != nil {
+				if err := exportDb(inputPath, outputDir, format, "english", title, DEFAULT_STRIDE, false); err != nil {
 					log.Print(err)
 					return
 				}

@@ -97,7 +97,7 @@ func jmdictBuildTagMeta(entities map[string]string) map[string]dbTagMeta {
 	return tags
 }
 
-func jmdictExtractTerms(edictEntry jmdict.JmdictEntry) []dbTerm {
+func jmdictExtractTerms(edictEntry jmdict.JmdictEntry, language string) []dbTerm {
 	var terms []dbTerm
 
 	convert := func(reading jmdict.JmdictReading, kanji *jmdict.JmdictKanji) {
@@ -133,7 +133,21 @@ func jmdictExtractTerms(edictEntry jmdict.JmdictEntry) []dbTerm {
 				continue
 			}
 
-			term := dbTerm{Reading: termBase.Reading, Expression: termBase.Expression}
+			term := dbTerm{
+				Reading:    termBase.Reading,
+				Expression: termBase.Expression,
+			}
+
+			for _, glossary := range sense.Glossary {
+				if glossary.Language == nil && language == "" || glossary.Language != nil && language == *glossary.Language {
+					term.Glossary = append(term.Glossary, glossary.Content)
+				}
+			}
+
+			if len(term.Glossary) == 0 {
+				continue
+			}
+
 			term.addTags(termBase.Tags...)
 			term.addTags(sense.PartsOfSpeech...)
 			term.addTags(sense.Fields...)
@@ -144,10 +158,6 @@ func jmdictExtractTerms(edictEntry jmdict.JmdictEntry) []dbTerm {
 				partsOfSpeech = sense.PartsOfSpeech
 			} else {
 				term.addTags(partsOfSpeech...)
-			}
-
-			for _, glossary := range sense.Glossary {
-				term.Glossary = append(term.Glossary, glossary.Content)
 			}
 
 			jmdictBuildRules(&term)
@@ -172,7 +182,7 @@ func jmdictExtractTerms(edictEntry jmdict.JmdictEntry) []dbTerm {
 	return terms
 }
 
-func jmdictExportDb(inputPath, outputDir, title string, stride int, pretty bool) error {
+func jmdictExportDb(inputPath, outputDir, language, title string, stride int, pretty bool) error {
 	reader, err := os.Open(inputPath)
 	if err != nil {
 		return err
@@ -184,9 +194,11 @@ func jmdictExportDb(inputPath, outputDir, title string, stride int, pretty bool)
 		return err
 	}
 
+	langTag := convertLanguage(language)
+
 	var terms dbTermList
 	for _, entry := range dict.Entries {
-		terms = append(terms, jmdictExtractTerms(entry)...)
+		terms = append(terms, jmdictExtractTerms(entry, langTag)...)
 	}
 
 	if title == "" {

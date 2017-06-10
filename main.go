@@ -45,8 +45,8 @@ func usage() {
 	flag.PrintDefaults()
 }
 
-func exportDb(inputPath, outputDir, format, title string, stride int, pretty bool) error {
-	handlers := map[string]func(string, string, string, int, bool) error{
+func exportDb(inputPath, outputDir, format, language, title string, stride int, pretty bool) error {
+	handlers := map[string]func(string, string, string, string, int, bool) error{
 		"edict":    jmdictExportDb,
 		"enamdict": jmnedictExportDb,
 		"kanjidic": kanjidicExportDb,
@@ -59,7 +59,7 @@ func exportDb(inputPath, outputDir, format, title string, stride int, pretty boo
 	}
 
 	log.Printf("converting '%s' to '%s' in '%s' format...", inputPath, outputDir, format)
-	return handler(inputPath, outputDir, title, stride, pretty)
+	return handler(inputPath, outputDir, language, title, stride, pretty)
 }
 
 func serveDb(serveDir string, port int) error {
@@ -73,12 +73,13 @@ func makeTmpDir() (string, error) {
 
 func main() {
 	var (
-		format = flag.String("format", "", "dictionary format [edict|enamdict|kanjidic|epwing]")
-		port   = flag.Int("port", DEFAULT_PORT, "port to serve dictionary JSON on")
-		pretty = flag.Bool("pretty", false, "output prettified dictionary JSON")
-		serve  = flag.Bool("serve", false, "serve dictionary JSON for extension")
-		stride = flag.Int("stride", DEFAULT_STRIDE, "dictionary bank stride")
-		title  = flag.String("title", "", "dictionary title")
+		format   = flag.String("format", "", "dictionary format [edict|enamdict|kanjidic|epwing]")
+		language = flag.String("language", "english", "dictionary language (if applicable)")
+		title    = flag.String("title", "", "dictionary title")
+		port     = flag.Int("port", DEFAULT_PORT, "port to serve dictionary JSON on")
+		stride   = flag.Int("stride", DEFAULT_STRIDE, "dictionary bank stride")
+		pretty   = flag.Bool("pretty", false, "output prettified dictionary JSON")
+		serve    = flag.Bool("serve", false, "serve dictionary JSON for extension")
 	)
 
 	flag.Usage = usage
@@ -122,7 +123,7 @@ func main() {
 		*serve = true
 	}
 
-	if err := exportDb(inputPath, outputDir, *format, *title, *stride, *pretty); err != nil {
+	if err := exportDb(inputPath, outputDir, *format, *language, *title, *stride, *pretty); err != nil {
 		log.Fatal(err)
 	}
 
