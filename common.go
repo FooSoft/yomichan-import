@@ -115,7 +115,7 @@ func (kanji dbKanjiList) crush() [][]interface{} {
 	return results
 }
 
-func writeDb(outputDir, title string, revision string, termRecords [][]interface{}, kanjiRecords [][]interface{}, tagMeta map[string]dbTagMeta, stride int, pretty bool) error {
+func writeDb(outputDir, title, revision string, termRecords [][]interface{}, kanjiRecords [][]interface{}, tagMeta map[string]dbTagMeta, stride int, pretty bool) error {
 	const DB_VERSION = 1
 
 	marshalJson := func(obj interface{}, pretty bool) ([]byte, error) {
