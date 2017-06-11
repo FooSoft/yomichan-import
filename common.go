@@ -253,28 +253,3 @@ func detectFormat(path string) string {
 
 	return ""
 }
-
-func convertLanguage(language string) string {
-	switch language {
-	case "dutch":
-		return "dut"
-	case "french":
-		return "fre"
-	case "german":
-		return "ger"
-	case "hungarian":
-		return "hun"
-	case "italian":
-		return "ita"
-	case "russian":
-		return "rus"
-	case "slovenian":
-		return "slv"
-	case "spanish":
-		return "spa"
-	case "swedish":
-		return "swe"
-	default:
-		return ""
-	}
-}

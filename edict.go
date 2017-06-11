@@ -194,7 +194,27 @@ func jmdictExportDb(inputPath, outputDir, language, title string, stride int, pr
 		return err
 	}
 
-	langTag := convertLanguage(language)
+	var langTag string
+	switch language {
+	case "dutch":
+		langTag = "dut"
+	case "french":
+		langTag = "fre"
+	case "german":
+		langTag = "ger"
+	case "hungarian":
+		langTag = "hun"
+	case "italian":
+		langTag = "ita"
+	case "russian":
+		langTag = "rus"
+	case "slovenian":
+		langTag = "slv"
+	case "spanish":
+		langTag = "spa"
+	case "swedish":
+		langTag = "swe"
+	}
 
 	var terms dbTermList
 	for _, entry := range dict.Entries {
