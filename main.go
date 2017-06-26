@@ -28,7 +28,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"path"
 )
@@ -61,11 +60,6 @@ func exportDb(inputPath, outputPath, format, language, title string, stride int,
 
 	log.Printf("converting '%s' to '%s' in '%s' format...", inputPath, outputPath, format)
 	return handler(inputPath, outputPath, language, title, stride, pretty)
-}
-
-func serveDb(serveDir string, port int) error {
-	log.Printf("starting dictionary server on port %d...\n", port)
-	return http.ListenAndServe(fmt.Sprintf(":%d", port), http.FileServer(http.Dir(serveDir)))
 }
 
 func makeTmpDir() (string, error) {
