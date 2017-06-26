@@ -56,27 +56,21 @@ func gui() error {
 		pathTargetBox.Append(pathTargetEntry, true)
 		pathTargetBox.Append(pathTargetButton, false)
 
-		formatCombo := ui.NewCombobox()
-		formatCombo.Append("EPWING")
-		formatCombo.Append("EDICT")
-		formatCombo.Append("ENAMDICT")
-		formatCombo.Append("KANJIDIC")
-		formatCombo.SetSelected(0)
-
 		titleEntry := ui.NewEntry()
+		languageEntry := ui.NewEntry()
 		outputEntry := ui.NewEntry()
 		importButton := ui.NewButton("Import dictionary...")
 
 		mainBox := ui.NewVerticalBox()
-		mainBox.Append(ui.NewLabel("Path to dictionary source (CATALOGS file for EPWING):"), false)
+		mainBox.Append(ui.NewLabel("Path to dictionary source (CATALOGS file for EPWING)"), false)
 		mainBox.Append(pathSourceBox, false)
 		mainBox.Append(ui.NewLabel("Path to dictionary target ZIP file"), false)
 		mainBox.Append(pathTargetBox, false)
-		mainBox.Append(ui.NewLabel("Dictionary title (leave blank for default):"), false)
+		mainBox.Append(ui.NewLabel("Dictionary display title (blank for default)"), false)
 		mainBox.Append(titleEntry, false)
-		mainBox.Append(ui.NewLabel("Dictionary format:"), false)
-		mainBox.Append(formatCombo, false)
-		mainBox.Append(ui.NewLabel("Application output:"), false)
+		mainBox.Append(ui.NewLabel("Dictionary glossary language (blank for English)"), false)
+		mainBox.Append(languageEntry, false)
+		mainBox.Append(ui.NewLabel("Application output"), false)
 		mainBox.Append(outputEntry, false)
 		mainBox.Append(ui.NewVerticalBox(), true)
 		mainBox.Append(importButton, false)
@@ -109,31 +103,38 @@ func gui() error {
 
 			inputPath := pathSourceEntry.Text()
 			if len(inputPath) == 0 {
-				ui.MsgBoxError(window, "Error", "You must specify a dictionary source path.")
+				ui.MsgBoxError(window, "Error", "You must specify a dictionary source path")
 				importButton.Enable()
 				return
 			}
 
 			outputPath := pathTargetEntry.Text()
 			if len(outputPath) == 0 {
-				ui.MsgBoxError(window, "Error", "You must specify a dictionary target path.")
+				ui.MsgBoxError(window, "Error", "You must specify a dictionary target path")
 				importButton.Enable()
 				return
 			}
 
-			format := []string{"epwing", "edict", "enamdict", "kanjidic"}[formatCombo.Selected()]
+			format, err := detectFormat(inputPath)
+			if err != nil {
+				ui.MsgBoxError(window, "Error", "Unable to detect dictionary format")
+				importButton.Enable()
+				return
+			}
+
 			if format == "epwing" {
 				inputPath = filepath.Dir(inputPath)
 			}
 
 			title := titleEntry.Text()
+			language := languageEntry.Text()
 
 			go func() {
 				defer ui.QueueMain(func() {
 					importButton.Enable()
 				})
 
-				if err := exportDb(inputPath, outputPath, format, "english", title, DEFAULT_STRIDE, false); err != nil {
+				if err := exportDb(inputPath, outputPath, format, language, title, DEFAULT_STRIDE, false); err != nil {
 					log.Print(err)
 				}
 			}()

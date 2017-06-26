@@ -26,6 +26,7 @@ import (
 	"archive/zip"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -232,33 +233,31 @@ func hasString(needle string, haystack []string) bool {
 	return false
 }
 
-func detectFormat(path string) string {
+func detectFormat(path string) (string, error) {
+	base := filepath.Base(path)
+	fmt.Print(base)
+	switch base {
+	case "JMdict", "JMdict.xml", "JMdict_e", "JMdict_e.xml":
+		return "edict", nil
+	case "JMnedict", "JMnedict.xml":
+		return "enamdict", nil
+	case "kanjidic2", "kanjidic2.xml":
+		return "kanjidic", nil
+	case "CATALOGS":
+		return "epwing", nil
+	}
+
 	info, err := os.Stat(path)
 	if err != nil {
-		return ""
+		return "", err
 	}
 
 	if info.IsDir() {
 		_, err := os.Stat(filepath.Join(path, "CATALOGS"))
 		if err == nil {
-			return "epwing"
-		}
-	} else {
-		base := filepath.Base(path)
-		switch base {
-		case "JMdict":
-		case "JMdict.xml":
-		case "JMdict_e":
-		case "JMdict_e.xml":
-			return "edict"
-		case "JMnedict":
-		case "JMnedict.xml":
-			return "enamdict"
-		case "kanjidic2":
-		case "kanjidic2.xml":
-			return "kanjidic"
+			return "epwing", nil
 		}
 	}
 
-	return ""
+	return "", errors.New("unrecognized dictionary format")
 }

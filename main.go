@@ -30,6 +30,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"strings"
 )
 
 const (
@@ -53,13 +54,13 @@ func exportDb(inputPath, outputPath, format, language, title string, stride int,
 		"epwing":   epwingExportDb,
 	}
 
-	handler, ok := handlers[format]
+	handler, ok := handlers[strings.ToLower(format)]
 	if !ok {
-		return errors.New("unrecognized dictionray format")
+		return errors.New("unrecognized dictionary format")
 	}
 
 	log.Printf("converting '%s' to '%s' in '%s' format...", inputPath, outputPath, format)
-	return handler(inputPath, outputPath, language, title, stride, pretty)
+	return handler(inputPath, outputPath, strings.ToLower(language), title, stride, pretty)
 }
 
 func makeTmpDir() (string, error) {
@@ -97,8 +98,9 @@ func main() {
 	}
 
 	if *format == "" {
-		if *format = detectFormat(inputPath); *format == "" {
-			log.Fatal("failed to detect dictionary format")
+		var err error
+		if *format, err = detectFormat(inputPath); err != nil {
+			log.Fatal(err)
 		}
 	}
 
