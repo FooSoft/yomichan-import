@@ -122,10 +122,6 @@ func gui() error {
 				return
 			}
 
-			if format == "epwing" {
-				inputPath = filepath.Dir(inputPath)
-			}
-
 			title := titleEntry.Text()
 			language := languageEntry.Text()
 

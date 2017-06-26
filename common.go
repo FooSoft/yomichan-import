@@ -234,9 +234,7 @@ func hasString(needle string, haystack []string) bool {
 }
 
 func detectFormat(path string) (string, error) {
-	base := filepath.Base(path)
-	fmt.Print(base)
-	switch base {
+	switch filepath.Base(path) {
 	case "JMdict", "JMdict.xml", "JMdict_e", "JMdict_e.xml":
 		return "edict", nil
 	case "JMnedict", "JMnedict.xml":
