@@ -182,7 +182,7 @@ func jmdictExtractTerms(edictEntry jmdict.JmdictEntry, language string) []dbTerm
 	return terms
 }
 
-func jmdictExportDb(inputPath, outputDir, language, title string, stride int, pretty bool) error {
+func jmdictExportDb(inputPath, outputPath, language, title string, stride int, pretty bool) error {
 	reader, err := os.Open(inputPath)
 	if err != nil {
 		return err
@@ -226,7 +226,7 @@ func jmdictExportDb(inputPath, outputDir, language, title string, stride int, pr
 	}
 
 	return writeDb(
-		outputDir,
+		outputPath,
 		title,
 		JMDICT_REVISION,
 		terms.crush(),

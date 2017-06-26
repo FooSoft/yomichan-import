@@ -97,7 +97,7 @@ func jmnedictExtractTerms(enamdictEntry jmdict.JmnedictEntry) []dbTerm {
 	return terms
 }
 
-func jmnedictExportDb(inputPath, outputDir, language, title string, stride int, pretty bool) error {
+func jmnedictExportDb(inputPath, outputPath, language, title string, stride int, pretty bool) error {
 	reader, err := os.Open(inputPath)
 	if err != nil {
 		return err
@@ -119,7 +119,7 @@ func jmnedictExportDb(inputPath, outputDir, language, title string, stride int, 
 	}
 
 	return writeDb(
-		outputDir,
+		outputPath,
 		title,
 		JMNEDICT_REVISION,
 		terms.crush(),

@@ -86,7 +86,7 @@ func kanjidicExtractKanji(entry jmdict.KanjidicCharacter, language string) *dbKa
 	return &kanji
 }
 
-func kanjidicExportDb(inputPath, outputDir, language, title string, stride int, pretty bool) error {
+func kanjidicExportDb(inputPath, outputPath, language, title string, stride int, pretty bool) error {
 	reader, err := os.Open(inputPath)
 	if err != nil {
 		return err
@@ -130,7 +130,7 @@ func kanjidicExportDb(inputPath, outputDir, language, title string, stride int, 
 	}
 
 	return writeDb(
-		outputDir,
+		outputPath,
 		title,
 		KANJIDIC_REVISION,
 		nil,

@@ -40,13 +40,13 @@ const (
 )
 
 func usage() {
-	fmt.Fprintf(os.Stderr, "Usage: %s [options] input-path [output-dir]\n", path.Base(os.Args[0]))
+	fmt.Fprintf(os.Stderr, "Usage: %s [options] input-path output-path\n", path.Base(os.Args[0]))
 	fmt.Fprint(os.Stderr, "https://foosoft.net/projects/yomichan-import/\n\n")
 	fmt.Fprint(os.Stderr, "Parameters:\n")
 	flag.PrintDefaults()
 }
 
-func exportDb(inputPath, outputDir, format, language, title string, stride int, pretty bool) error {
+func exportDb(inputPath, outputPath, format, language, title string, stride int, pretty bool) error {
 	handlers := map[string]func(string, string, string, string, int, bool) error{
 		"edict":    jmdictExportDb,
 		"enamdict": jmnedictExportDb,
@@ -59,8 +59,8 @@ func exportDb(inputPath, outputDir, format, language, title string, stride int, 
 		return errors.New("unrecognized dictionray format")
 	}
 
-	log.Printf("converting '%s' to '%s' in '%s' format...", inputPath, outputDir, format)
-	return handler(inputPath, outputDir, language, title, stride, pretty)
+	log.Printf("converting '%s' to '%s' in '%s' format...", inputPath, outputPath, format)
+	return handler(inputPath, outputPath, language, title, stride, pretty)
 }
 
 func serveDb(serveDir string, port int) error {
@@ -75,35 +75,28 @@ func makeTmpDir() (string, error) {
 func main() {
 	var (
 		format   = flag.String("format", "", "dictionary format [edict|enamdict|kanjidic|epwing]")
-		language = flag.String("language", DEFAULT_LANGUAGE, "dictionary language (if applicable)")
+		language = flag.String("language", DEFAULT_LANGUAGE, "dictionary language (if supported)")
 		title    = flag.String("title", "", "dictionary title")
-		port     = flag.Int("port", DEFAULT_PORT, "port to serve dictionary JSON on")
 		stride   = flag.Int("stride", DEFAULT_STRIDE, "dictionary bank stride")
 		pretty   = flag.Bool("pretty", false, "output prettified dictionary JSON")
-		serve    = flag.Bool("serve", false, "serve dictionary JSON for extension")
 	)
 
 	flag.Usage = usage
 	flag.Parse()
 
-	var (
-		inputPath string
-		outputDir string
-	)
-
-	if flag.NArg() == 0 {
+	if flag.NArg() != 2 {
 		if err := gui(); err == nil {
 			return
 		} else {
 			usage()
 			os.Exit(2)
 		}
-	} else {
-		inputPath = flag.Arg(0)
-		if flag.NArg() > 1 {
-			outputDir = flag.Arg(1)
-		}
 	}
+
+	var (
+		inputPath  = flag.Arg(0)
+		outputPath = flag.Arg(1)
+	)
 
 	if _, err := os.Stat(inputPath); err != nil {
 		log.Fatalf("dictionary path '%s' does not exist", inputPath)
@@ -115,22 +108,7 @@ func main() {
 		}
 	}
 
-	if outputDir == "" {
-		var err error
-		if outputDir, err = makeTmpDir(); err != nil {
-			log.Fatal(err)
-		}
-
-		*serve = true
-	}
-
-	if err := exportDb(inputPath, outputDir, *format, *language, *title, *stride, *pretty); err != nil {
+	if err := exportDb(inputPath, outputPath, *format, *language, *title, *stride, *pretty); err != nil {
 		log.Fatal(err)
-	}
-
-	if *serve {
-		if err := serveDb(outputDir, *port); err != nil {
-			log.Fatal(err)
-		}
 	}
 }

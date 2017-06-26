@@ -62,7 +62,7 @@ type epwingExtractor interface {
 	getRevision() string
 }
 
-func epwingExportDb(inputPath, outputDir, language, title string, stride int, pretty bool) error {
+func epwingExportDb(inputPath, outputPath, language, title string, stride int, pretty bool) error {
 	stat, err := os.Stat(inputPath)
 	if err != nil {
 		return err
@@ -193,7 +193,7 @@ func epwingExportDb(inputPath, outputDir, language, title string, stride int, pr
 	}
 
 	return writeDb(
-		outputDir,
+		outputPath,
 		title,
 		strings.Join(revisions, ";"),
 		terms.crush(),

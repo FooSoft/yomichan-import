@@ -23,10 +23,11 @@
 package main
 
 import (
+	"archive/zip"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 )
@@ -115,8 +116,11 @@ func (kanji dbKanjiList) crush() [][]interface{} {
 	return results
 }
 
-func writeDb(outputDir, title, revision string, termRecords [][]interface{}, kanjiRecords [][]interface{}, tagMeta map[string]dbTagMeta, stride int, pretty bool) error {
+func writeDb(outputPath, title, revision string, termRecords [][]interface{}, kanjiRecords [][]interface{}, tagMeta map[string]dbTagMeta, stride int, pretty bool) error {
 	const DB_VERSION = 1
+
+	var zbuff bytes.Buffer
+	zip := zip.NewWriter(&zbuff)
 
 	marshalJson := func(obj interface{}, pretty bool) ([]byte, error) {
 		if pretty {
@@ -142,13 +146,12 @@ func writeDb(outputDir, title, revision string, termRecords [][]interface{}, kan
 				return 0, err
 			}
 
-			fp, err := os.Create(path.Join(outputDir, fmt.Sprintf("%s_bank_%d.json", prefix, i/stride+1)))
+			zw, err := zip.Create(fmt.Sprintf("%s_bank_%d.json", prefix, i/stride+1))
 			if err != nil {
 				return 0, err
 			}
-			defer fp.Close()
 
-			if _, err = fp.Write(bytes); err != nil {
+			if _, err := zw.Write(bytes); err != nil {
 				return 0, err
 			}
 
@@ -156,10 +159,6 @@ func writeDb(outputDir, title, revision string, termRecords [][]interface{}, kan
 		}
 
 		return bankCount, nil
-	}
-
-	if err := os.MkdirAll(outputDir, 0755); err != nil {
-		return err
 	}
 
 	var err error
@@ -190,17 +189,27 @@ func writeDb(outputDir, title, revision string, termRecords [][]interface{}, kan
 		return err
 	}
 
-	fp, err := os.Create(path.Join(outputDir, "index.json"))
+	zw, err := zip.Create("index.json")
 	if err != nil {
 		return err
 	}
-	defer fp.Close()
 
-	if _, err := fp.Write(bytes); err != nil {
+	if _, err := zw.Write(bytes); err != nil {
 		return err
 	}
 
-	return nil
+	zip.Close()
+
+	fp, err := os.Create(outputPath)
+	if err != nil {
+		return err
+	}
+
+	if _, err := fp.Write(zbuff.Bytes()); err != nil {
+		return err
+	}
+
+	return fp.Close()
 }
 
 func appendStringUnique(target []string, source ...string) []string {
