@@ -130,13 +130,17 @@ func gui() error {
 			language := languageEntry.Text()
 
 			go func() {
+				var success bool
 				defer ui.QueueMain(func() {
 					importButton.Enable()
+					if success {
+						ui.MsgBox(window, "Success", "Conversion process complete")
+					} else {
+						ui.MsgBox(window, "Error", "Conversion process failed")
+					}
 				})
 
-				if err := exportDb(inputPath, outputPath, format, language, title, DEFAULT_STRIDE, false); err != nil {
-					log.Print(err)
-				}
+				success = exportDb(inputPath, outputPath, format, language, title, DEFAULT_STRIDE, false) == nil
 			}()
 		})
 

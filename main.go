@@ -60,7 +60,13 @@ func exportDb(inputPath, outputPath, format, language, title string, stride int,
 	}
 
 	log.Printf("converting '%s' to '%s' in '%s' format...", inputPath, outputPath, format)
-	return handler(inputPath, outputPath, strings.ToLower(language), title, stride, pretty)
+	if err := handler(inputPath, outputPath, strings.ToLower(language), title, stride, pretty); err != nil {
+		log.Printf("conversion process failed: %s", err.Error())
+		return err
+	}
+
+	log.Print("conversion process complete")
+	return nil
 }
 
 func makeTmpDir() (string, error) {
