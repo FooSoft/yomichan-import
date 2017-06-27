@@ -23,26 +23,24 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 
 	"github.com/FooSoft/jmdict"
 )
 
-const KANJIDIC_REVISION = "kanjidic2"
+const KANJIDIC_REVISION = "kanjidic1"
 
 func kanjidicExtractKanji(entry jmdict.KanjidicCharacter) dbKanji {
-	kanji := dbKanji{
-		Character: entry.Literal,
-		Stats:     make(map[string]string),
-	}
+	kanji := dbKanji{Character: entry.Literal}
 
 	if level := entry.Misc.JlptLevel; level != nil {
-		kanji.Stats["jlpt level"] = *level
+		kanji.addTags(fmt.Sprintf("jlpt:%s", *level))
 	}
 
 	if grade := entry.Misc.Grade; grade != nil {
-		kanji.Stats["school grade"] = *grade
+		kanji.addTags(fmt.Sprintf("grade:%s", *grade))
 		if gradeInt, err := strconv.Atoi(*grade); err == nil {
 			if gradeInt >= 1 && gradeInt <= 8 {
 				kanji.addTags("jouyou")
@@ -53,11 +51,13 @@ func kanjidicExtractKanji(entry jmdict.KanjidicCharacter) dbKanji {
 	}
 
 	for _, number := range entry.DictionaryNumbers {
-		kanji.Stats[number.Type] = number.Value
+		if number.Type == "heisig" {
+			kanji.addTags(fmt.Sprintf("heisig:%s", number.Value))
+		}
 	}
 
 	if counts := entry.Misc.StrokeCounts; len(counts) > 0 {
-		kanji.Stats["stroke count"] = counts[0]
+		kanji.addTags(fmt.Sprintf("strokes:%s", counts[0]))
 	}
 
 	if entry.ReadingMeaning != nil {
@@ -98,32 +98,12 @@ func kanjidicExportDb(inputPath, outputDir, title string, stride int, pretty boo
 	}
 
 	tagMeta := map[string]dbTagMeta{
-		"jouyou":           {Notes: "included in list of regular-use characters", Category: "frequent", Order: -5},
-		"jinmeiyou":        {Notes: "included in list of characters for use in personal names", Category: "frequent", Order: -5},
-		"nelson_c":         {Notes: "Modern Reader's Japanese-English Character Dictionary"},
-		"nelson_n":         {Notes: "The New Nelson Japanese-English Character Dictionary"},
-		"halpern_njecd":    {Notes: "New Japanese-English Character Dictionary"},
-		"halpern_kkd":      {Notes: "Kodansha Kanji Dictionary"},
-		"halpern_kkld":     {Notes: "Kanji Learners Dictionary"},
-		"halpern_kkld_2ed": {Notes: "Kanji Learners Dictionary"},
-		"heisig":           {Notes: "Remembering The  Kanji"},
-		"heisig6":          {Notes: "Remembering The  Kanji, Sixth Ed."},
-		"gakken":           {Notes: "A New Dictionary of Kanji Usage"},
-		"oneill_names":     {Notes: "Japanese Names"},
-		"oneill_kk":        {Notes: "Essential Kanji"},
-		"moro":             {Notes: "Daikanwajiten"},
-		"henshall":         {Notes: "A Guide To Remembering Japanese Characters"},
-		"sh_kk":            {Notes: "Kanji and Kana"},
-		"sh_kk2":           {Notes: "Kanji and Kana"},
-		"sakade":           {Notes: "A Guide To Reading and Writing Japanese"},
-		"jf_cards":         {Notes: "Japanese Kanji Flashcards"},
-		"henshall3":        {Notes: "A Guide To Reading and Writing Japanese"},
-		"tutt_cards":       {Notes: "Tuttle Kanji Cards"},
-		"crowley":          {Notes: "The Kanji Way to Japanese Language Power"},
-		"kanji_in_context": {Notes: "Kanji in Context"},
-		"busy_people":      {Notes: "Japanese For Busy People"},
-		"kodansha_compact": {Notes: "Kodansha Compact Kanji Guide"},
-		"maniette":         {Notes: "Les Kanjis dans la tete"},
+		"jouyou":    {Notes: "included in list of regular-use characters", Category: "frequent", Order: -5},
+		"jinmeiyou": {Notes: "included in list of characters for use in personal names", Category: "frequent", Order: -5},
+		"jlpt":      {Notes: "corresponding Japanese Language Proficiency Test level"},
+		"grade":     {Notes: "school grade level at which the character is taught"},
+		"strokes":   {Notes: "number of strokes needed to write the character"},
+		"heisig":    {Notes: "frame number in Remembering the Kanji"},
 	}
 
 	if title == "" {

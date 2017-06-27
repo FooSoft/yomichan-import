@@ -82,7 +82,6 @@ type dbKanji struct {
 	Onyomi    []string
 	Kunyomi   []string
 	Tags      []string
-	Stats     map[string]string
 	Meanings  []string
 }
 
@@ -99,16 +98,11 @@ func (kanji *dbKanji) addTags(tags ...string) {
 func (kanji dbKanjiList) crush() [][]interface{} {
 	var results [][]interface{}
 	for _, k := range kanji {
-		tags := k.Tags
-		for name, value := range k.Stats {
-			tags = append(tags, fmt.Sprintf("%s:%s", name, value))
-		}
-
 		result := []interface{}{
 			k.Character,
 			strings.Join(k.Onyomi, " "),
 			strings.Join(k.Kunyomi, " "),
-			strings.Join(tags, " "),
+			strings.Join(k.Tags, " "),
 		}
 
 		for _, meaning := range k.Meanings {
