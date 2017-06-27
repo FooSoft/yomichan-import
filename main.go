@@ -28,43 +28,45 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"path"
+	"strings"
 )
 
 const (
-	DEFAULT_STRIDE = 10000
-	DEFAULT_PORT   = 9876
+	DEFAULT_STRIDE   = 10000
+	DEFAULT_PORT     = 9876
+	DEFAULT_LANGUAGE = "english"
 )
 
 func usage() {
-	fmt.Fprintf(os.Stderr, "Usage: %s [options] input-path [output-dir]\n", path.Base(os.Args[0]))
+	fmt.Fprintf(os.Stderr, "Usage: %s [options] input-path output-path\n", path.Base(os.Args[0]))
 	fmt.Fprint(os.Stderr, "https://foosoft.net/projects/yomichan-import/\n\n")
 	fmt.Fprint(os.Stderr, "Parameters:\n")
 	flag.PrintDefaults()
 }
 
-func exportDb(inputPath, outputDir, format, title string, stride int, pretty bool) error {
-	handlers := map[string]func(string, string, string, int, bool) error{
+func exportDb(inputPath, outputPath, format, language, title string, stride int, pretty bool) error {
+	handlers := map[string]func(string, string, string, string, int, bool) error{
 		"edict":    jmdictExportDb,
 		"enamdict": jmnedictExportDb,
 		"kanjidic": kanjidicExportDb,
 		"epwing":   epwingExportDb,
 	}
 
-	handler, ok := handlers[format]
+	handler, ok := handlers[strings.ToLower(format)]
 	if !ok {
-		return errors.New("unrecognized dictionray format")
+		return errors.New("unrecognized dictionary format")
 	}
 
-	log.Printf("converting '%s' to '%s' in '%s' format...", inputPath, outputDir, format)
-	return handler(inputPath, outputDir, title, stride, pretty)
-}
+	log.Printf("converting '%s' to '%s' in '%s' format...", inputPath, outputPath, format)
+	if err := handler(inputPath, outputPath, strings.ToLower(language), title, stride, pretty); err != nil {
+		log.Printf("conversion process failed: %s", err.Error())
+		return err
+	}
 
-func serveDb(serveDir string, port int) error {
-	log.Printf("starting dictionary server on port %d...\n", port)
-	return http.ListenAndServe(fmt.Sprintf(":%d", port), http.FileServer(http.Dir(serveDir)))
+	log.Print("conversion process complete")
+	return nil
 }
 
 func makeTmpDir() (string, error) {
@@ -73,62 +75,42 @@ func makeTmpDir() (string, error) {
 
 func main() {
 	var (
-		format = flag.String("format", "", "dictionary format [edict|enamdict|kanjidic|epwing]")
-		port   = flag.Int("port", DEFAULT_PORT, "port to serve dictionary JSON on")
-		pretty = flag.Bool("pretty", false, "output prettified dictionary JSON")
-		serve  = flag.Bool("serve", false, "serve dictionary JSON for extension")
-		stride = flag.Int("stride", DEFAULT_STRIDE, "dictionary bank stride")
-		title  = flag.String("title", "", "dictionary title")
+		format   = flag.String("format", "", "dictionary format [edict|enamdict|kanjidic|epwing]")
+		language = flag.String("language", DEFAULT_LANGUAGE, "dictionary language (if supported)")
+		title    = flag.String("title", "", "dictionary title")
+		stride   = flag.Int("stride", DEFAULT_STRIDE, "dictionary bank stride")
+		pretty   = flag.Bool("pretty", false, "output prettified dictionary JSON")
 	)
 
 	flag.Usage = usage
 	flag.Parse()
 
-	var (
-		inputPath string
-		outputDir string
-	)
-
-	if flag.NArg() == 0 {
+	if flag.NArg() != 2 {
 		if err := gui(); err == nil {
 			return
 		} else {
 			usage()
 			os.Exit(2)
 		}
-	} else {
-		inputPath = flag.Arg(0)
-		if flag.NArg() > 1 {
-			outputDir = flag.Arg(1)
-		}
 	}
+
+	var (
+		inputPath  = flag.Arg(0)
+		outputPath = flag.Arg(1)
+	)
 
 	if _, err := os.Stat(inputPath); err != nil {
 		log.Fatalf("dictionary path '%s' does not exist", inputPath)
 	}
 
 	if *format == "" {
-		if *format = detectFormat(inputPath); *format == "" {
-			log.Fatal("failed to detect dictionary format")
-		}
-	}
-
-	if outputDir == "" {
 		var err error
-		if outputDir, err = makeTmpDir(); err != nil {
+		if *format, err = detectFormat(inputPath); err != nil {
 			log.Fatal(err)
 		}
-
-		*serve = true
 	}
 
-	if err := exportDb(inputPath, outputDir, *format, *title, *stride, *pretty); err != nil {
+	if err := exportDb(inputPath, outputPath, *format, *language, *title, *stride, *pretty); err != nil {
 		log.Fatal(err)
-	}
-
-	if *serve {
-		if err := serveDb(outputDir, *port); err != nil {
-			log.Fatal(err)
-		}
 	}
 }

@@ -32,8 +32,22 @@ import (
 
 const KANJIDIC_REVISION = "kanjidic1"
 
-func kanjidicExtractKanji(entry jmdict.KanjidicCharacter) dbKanji {
+func kanjidicExtractKanji(entry jmdict.KanjidicCharacter, language string) *dbKanji {
+	if entry.ReadingMeaning == nil {
+		return nil
+	}
+
 	kanji := dbKanji{Character: entry.Literal}
+
+	for _, m := range entry.ReadingMeaning.Meanings {
+		if m.Language == nil && language == "" || m.Language != nil && language == *m.Language {
+			kanji.Meanings = append(kanji.Meanings, m.Meaning)
+		}
+	}
+
+	if len(kanji.Meanings) == 0 {
+		return nil
+	}
 
 	if level := entry.Misc.JlptLevel; level != nil {
 		kanji.addTags(fmt.Sprintf("jlpt:%s", *level))
@@ -60,27 +74,19 @@ func kanjidicExtractKanji(entry jmdict.KanjidicCharacter) dbKanji {
 		kanji.addTags(fmt.Sprintf("strokes:%s", counts[0]))
 	}
 
-	if entry.ReadingMeaning != nil {
-		for _, m := range entry.ReadingMeaning.Meanings {
-			if m.Language == nil || *m.Language == "en" {
-				kanji.Meanings = append(kanji.Meanings, m.Meaning)
-			}
-		}
-
-		for _, r := range entry.ReadingMeaning.Readings {
-			switch r.Type {
-			case "ja_on":
-				kanji.Onyomi = append(kanji.Onyomi, r.Value)
-			case "ja_kun":
-				kanji.Kunyomi = append(kanji.Kunyomi, r.Value)
-			}
+	for _, r := range entry.ReadingMeaning.Readings {
+		switch r.Type {
+		case "ja_on":
+			kanji.Onyomi = append(kanji.Onyomi, r.Value)
+		case "ja_kun":
+			kanji.Kunyomi = append(kanji.Kunyomi, r.Value)
 		}
 	}
 
-	return kanji
+	return &kanji
 }
 
-func kanjidicExportDb(inputPath, outputDir, title string, stride int, pretty bool) error {
+func kanjidicExportDb(inputPath, outputPath, language, title string, stride int, pretty bool) error {
 	reader, err := os.Open(inputPath)
 	if err != nil {
 		return err
@@ -92,9 +98,22 @@ func kanjidicExportDb(inputPath, outputDir, title string, stride int, pretty boo
 		return err
 	}
 
+	var langTag string
+	switch language {
+	case "french":
+		langTag = "fr"
+	case "spanish":
+		langTag = "es"
+	case "portuguese":
+		langTag = "pt"
+	}
+
 	var kanji dbKanjiList
 	for _, entry := range dict.Characters {
-		kanji = append(kanji, kanjidicExtractKanji(entry))
+		kanjiCurr := kanjidicExtractKanji(entry, langTag)
+		if kanjiCurr != nil {
+			kanji = append(kanji, *kanjiCurr)
+		}
 	}
 
 	tagMeta := map[string]dbTagMeta{
@@ -111,7 +130,7 @@ func kanjidicExportDb(inputPath, outputDir, title string, stride int, pretty boo
 	}
 
 	return writeDb(
-		outputDir,
+		outputPath,
 		title,
 		KANJIDIC_REVISION,
 		nil,
