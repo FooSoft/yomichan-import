@@ -234,6 +234,10 @@ func hasString(needle string, haystack []string) bool {
 }
 
 func detectFormat(path string) (string, error) {
+	if filepath.Ext(path) == ".sqlite" {
+		return "rikai", nil
+	}
+
 	switch filepath.Base(path) {
 	case "JMdict", "JMdict.xml", "JMdict_e", "JMdict_e.xml":
 		return "edict", nil
