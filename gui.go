@@ -44,36 +44,33 @@ func (l *logger) Write(p []byte) (n int, err error) {
 
 func gui() error {
 	return ui.Main(func() {
-		pathEntry := ui.NewEntry()
-		browseButton := ui.NewButton("Browse...")
-		pathBox := ui.NewHorizontalBox()
-		pathBox.Append(pathEntry, true)
-		pathBox.Append(browseButton, false)
+		pathSourceEntry := ui.NewEntry()
+		pathSourceButton := ui.NewButton("Browse...")
+		pathSourceBox := ui.NewHorizontalBox()
+		pathSourceBox.Append(pathSourceEntry, true)
+		pathSourceBox.Append(pathSourceButton, false)
 
-		portSpin := ui.NewSpinbox(0, 65535)
-		portSpin.SetValue(DEFAULT_PORT)
-
-		formatCombo := ui.NewCombobox()
-		formatCombo.Append("EPWING")
-		formatCombo.Append("EDICT")
-		formatCombo.Append("ENAMDICT")
-		formatCombo.Append("KANJIDIC")
-		formatCombo.SetSelected(0)
+		pathTargetEntry := ui.NewEntry()
+		pathTargetButton := ui.NewButton("Browse...")
+		pathTargetBox := ui.NewHorizontalBox()
+		pathTargetBox.Append(pathTargetEntry, true)
+		pathTargetBox.Append(pathTargetButton, false)
 
 		titleEntry := ui.NewEntry()
+		languageEntry := ui.NewEntry()
 		outputEntry := ui.NewEntry()
 		importButton := ui.NewButton("Import dictionary...")
 
 		mainBox := ui.NewVerticalBox()
-		mainBox.Append(ui.NewLabel("Path to dictionary source (CATALOGS file for EPWING):"), false)
-		mainBox.Append(pathBox, false)
-		mainBox.Append(ui.NewLabel("Dictionary title (leave blank for default):"), false)
+		mainBox.Append(ui.NewLabel("Path to dictionary source (CATALOGS file for EPWING)"), false)
+		mainBox.Append(pathSourceBox, false)
+		mainBox.Append(ui.NewLabel("Path to dictionary target ZIP file"), false)
+		mainBox.Append(pathTargetBox, false)
+		mainBox.Append(ui.NewLabel("Dictionary display title (blank for default)"), false)
 		mainBox.Append(titleEntry, false)
-		mainBox.Append(ui.NewLabel("Network port for extension server:"), false)
-		mainBox.Append(portSpin, false)
-		mainBox.Append(ui.NewLabel("Dictionary format:"), false)
-		mainBox.Append(formatCombo, false)
-		mainBox.Append(ui.NewLabel("Application output:"), false)
+		mainBox.Append(ui.NewLabel("Dictionary glossary language (blank for English)"), false)
+		mainBox.Append(languageEntry, false)
+		mainBox.Append(ui.NewLabel("Application output"), false)
 		mainBox.Append(outputEntry, false)
 		mainBox.Append(ui.NewVerticalBox(), true)
 		mainBox.Append(importButton, false)
@@ -82,9 +79,19 @@ func gui() error {
 		window.SetMargined(true)
 		window.SetChild(mainBox)
 
-		browseButton.OnClicked(func(*ui.Button) {
+		pathSourceButton.OnClicked(func(*ui.Button) {
 			if path := ui.OpenFile(window); len(path) > 0 {
-				pathEntry.SetText(path)
+				pathSourceEntry.SetText(path)
+			}
+		})
+
+		pathTargetButton.OnClicked(func(*ui.Button) {
+			if path := ui.SaveFile(window); len(path) > 0 {
+				if len(filepath.Ext(path)) == 0 {
+					path += ".zip"
+				}
+
+				pathTargetEntry.SetText(path)
 			}
 		})
 
@@ -94,45 +101,42 @@ func gui() error {
 			importButton.Disable()
 			outputEntry.SetText("")
 
-			var (
-				outputDir string
-				err       error
-			)
-
-			if outputDir, err = makeTmpDir(); err != nil {
-				ui.MsgBoxError(window, "Error", err.Error())
-				return
-			}
-
-			inputPath := pathEntry.Text()
+			inputPath := pathSourceEntry.Text()
 			if len(inputPath) == 0 {
-				ui.MsgBoxError(window, "Error", "You must specify a dictionary source path.")
+				ui.MsgBoxError(window, "Error", "You must specify a dictionary source path")
 				importButton.Enable()
 				return
 			}
 
-			format := []string{"epwing", "edict", "enamdict", "kanjidic"}[formatCombo.Selected()]
-			if format == "epwing" {
-				inputPath = filepath.Dir(inputPath)
+			outputPath := pathTargetEntry.Text()
+			if len(outputPath) == 0 {
+				ui.MsgBoxError(window, "Error", "You must specify a dictionary target path")
+				importButton.Enable()
+				return
+			}
+
+			format, err := detectFormat(inputPath)
+			if err != nil {
+				ui.MsgBoxError(window, "Error", "Unable to detect dictionary format")
+				importButton.Enable()
+				return
 			}
 
 			title := titleEntry.Text()
-			port := portSpin.Value()
+			language := languageEntry.Text()
 
 			go func() {
+				var success bool
 				defer ui.QueueMain(func() {
 					importButton.Enable()
+					if success {
+						ui.MsgBox(window, "Success", "Conversion process complete")
+					} else {
+						ui.MsgBox(window, "Error", "Conversion process failed")
+					}
 				})
 
-				if err := exportDb(inputPath, outputDir, format, title, DEFAULT_STRIDE, false); err != nil {
-					log.Print(err)
-					return
-				}
-
-				if err := serveDb(outputDir, port); err != nil {
-					log.Print(err)
-					return
-				}
+				success = exportDb(inputPath, outputPath, format, language, title, DEFAULT_STRIDE, false) == nil
 			}()
 		})
 

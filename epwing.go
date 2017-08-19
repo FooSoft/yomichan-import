@@ -62,14 +62,22 @@ type epwingExtractor interface {
 	getRevision() string
 }
 
-func epwingExportDb(inputPath, outputDir, title string, stride int, pretty bool) error {
+func epwingExportDb(inputPath, outputPath, language, title string, stride int, pretty bool) error {
 	stat, err := os.Stat(inputPath)
 	if err != nil {
 		return err
 	}
 
-	var data []byte
+	var toolExec bool
 	if stat.IsDir() {
+		toolExec = true
+	} else if filepath.Base(inputPath) == "CATALOGS" {
+		inputPath = filepath.Dir(inputPath)
+		toolExec = true
+	}
+
+	var data []byte
+	if toolExec {
 		toolPath := filepath.Join("bin", runtime.GOOS, "zero-epwing")
 		if runtime.GOOS == "windows" {
 			toolPath += ".exe"
@@ -193,7 +201,7 @@ func epwingExportDb(inputPath, outputDir, title string, stride int, pretty bool)
 	}
 
 	return writeDb(
-		outputDir,
+		outputPath,
 		title,
 		strings.Join(revisions, ";"),
 		terms.crush(),
