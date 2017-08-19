@@ -49,8 +49,9 @@ func exportDb(inputPath, outputDir, format, title string, stride int, pretty boo
 	handlers := map[string]func(string, string, string, int, bool) error{
 		"edict":    jmdictExportDb,
 		"enamdict": jmnedictExportDb,
-		"kanjidic": kanjidicExportDb,
 		"epwing":   epwingExportDb,
+		"kanjidic": kanjidicExportDb,
+		"rikai":    rikaiExportDb,
 	}
 
 	handler, ok := handlers[format]
@@ -73,7 +74,7 @@ func makeTmpDir() (string, error) {
 
 func main() {
 	var (
-		format = flag.String("format", "", "dictionary format [edict|enamdict|kanjidic|epwing]")
+		format = flag.String("format", "", "dictionary format [edict|enamdict|epwing|kanjidic|rikai]")
 		port   = flag.Int("port", DEFAULT_PORT, "port to serve dictionary JSON on")
 		pretty = flag.Bool("pretty", false, "output prettified dictionary JSON")
 		serve  = flag.Bool("serve", false, "serve dictionary JSON for extension")

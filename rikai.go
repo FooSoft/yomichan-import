@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Alex Yatskov <alex@foosoft.net>
+ * Copyright (c) 2017 Alex Yatskov <alex@foosoft.net>
  * Author: Alex Yatskov <alex@foosoft.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -23,8 +23,11 @@
 package main
 
 import (
-	"os"
+	"database/sql"
+	"log"
 	"strings"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 const RIKAI_REVISION = "rikai1"
@@ -56,67 +59,41 @@ func rikaiBuildScore(term *dbTerm) {
 	}
 }
 
-func rikaiBuildTagMeta(entities map[string]string) map[string]dbTagMeta {
-	tags := map[string]dbTagMeta{
-		"news": {Notes: "appears frequently in Mainichi Shimbun", Category: "frequent", Order: -2},
-		"ichi": {Notes: "listed as common in Ichimango Goi Bunruishuu", Category: "frequent", Order: -2},
-		"spec": {Notes: "common words not included in frequency lists", Category: "frequent", Order: -2},
-		"gai":  {Notes: "common loanword", Category: "frequent", Order: -2},
-		"P":    {Notes: "popular term", Category: "popular", Order: -10},
+func rikaiExportDb(inputPath, outputDir, title string, stride int, pretty bool) error {
+	db, err := sql.Open("sqlite3", inputPath)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	dictRows, err := db.Query("SELECT kanji, kana, entry FROM dict")
+	if err != nil {
+		return err
 	}
 
-	for name, value := range entities {
-		tag := dbTagMeta{Notes: value}
-
-		switch name {
-		case "exp", "id":
-			tag.Category = "expression"
-			tag.Order = -5
-		case "arch", "iK":
-			tag.Category = "archaism"
-			tag.Order = -5
+	for dictRows.Next() {
+		var kanji, kana, entry *string
+		if err := dictRows.Scan(&kanji, &kana, &entry); err != nil {
+			return err
 		}
 
-		tags[name] = tag
-	}
-
-	return tags
-}
-
-func rikaiExtractTerms(edictEntry rikai.rikaiEntry) []dbTerm {
-
-	return terms
-}
-
-func rikaiExportDb(inputPath, outputDir, title string, stride int, pretty bool) error {
-	reader, err := os.Open(inputPath)
-	if err != nil {
-		return err
-	}
-	defer reader.Close()
-
-	dict, entities, err := rikai.LoadrikaiNoTransform(reader)
-	if err != nil {
-		return err
-	}
-
-	var terms dbTermList
-	for _, entry := range dict.Entries {
-		terms = append(terms, rikaiExtractTerms(entry)...)
+		log.Print(kanji, kana, entry)
 	}
 
 	if title == "" {
-		title = "rikai"
+		title = "Rikai"
 	}
 
-	return writeDb(
-		outputDir,
-		title,
-		RIKAI_REVISION,
-		terms.crush(),
-		nil,
-		rikaiBuildTagMeta(entities),
-		stride,
-		pretty,
-	)
+	return nil
+
+	// return writeDb(
+	// 	outputDir,
+	// 	title,
+	// 	RIKAI_REVISION,
+	// 	terms.crush(),
+	// 	nil,
+	// 	rikaiBuildTagMeta(entities),
+	// 	stride,
+	// 	pretty,
+	// )
 }
