@@ -88,7 +88,7 @@ func jmdictBuildTagMeta(entities map[string]string) map[string]dbTagMeta {
 			tag.Order = -5
 		case "arch", "iK":
 			tag.Category = "archaism"
-			tag.Order = -5
+			tag.Order = 5
 		}
 
 		tags[name] = tag
