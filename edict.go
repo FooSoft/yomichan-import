@@ -29,7 +29,7 @@ import (
 	"github.com/FooSoft/jmdict"
 )
 
-const JMDICT_REVISION = "jmdict2"
+const JMDICT_REVISION = "jmdict3"
 
 func jmdictBuildRules(term *dbTerm) {
 	for _, tag := range term.Tags {
@@ -47,13 +47,14 @@ func jmdictBuildRules(term *dbTerm) {
 }
 
 func jmdictBuildScore(term *dbTerm) {
-	term.Score = 0
 	for _, tag := range term.Tags {
 		switch tag {
+		case "news", "ichi", "spec", "gai":
+			term.Score += 100
 		case "P":
-			term.Score += 5
+			term.Score += 500
 		case "arch", "iK":
-			term.Score -= 1
+			term.Score -= 100
 		}
 	}
 }
@@ -88,7 +89,7 @@ func jmdictBuildTagMeta(entities map[string]string) map[string]dbTagMeta {
 			tag.Order = -5
 		case "arch", "iK":
 			tag.Category = "archaism"
-			tag.Order = 5
+			tag.Order = -4
 		}
 
 		tags[name] = tag
@@ -136,6 +137,7 @@ func jmdictExtractTerms(edictEntry jmdict.JmdictEntry, language string) []dbTerm
 			term := dbTerm{
 				Reading:    termBase.Reading,
 				Expression: termBase.Expression,
+				Score:      len(edictEntry.Sense) - index,
 			}
 
 			for _, glossary := range sense.Glossary {

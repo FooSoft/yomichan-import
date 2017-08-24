@@ -30,7 +30,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const RIKAI_REVISION = "rikai1"
+const RIKAI_REVISION = "rikai2"
 
 type rikaiEntry struct {
 	kanji string
@@ -54,9 +54,10 @@ func rikaiBuildRules(term *dbTerm) {
 }
 
 func rikaiBuildScore(term *dbTerm) {
-	term.Score = 0
 	for _, tag := range term.Tags {
 		switch tag {
+		case "news", "ichi", "spec", "gai":
+			term.Score += 1
 		case "P":
 			term.Score += 5
 		case "arch", "iK":
@@ -161,8 +162,8 @@ func rikaiExportDb(inputPath, outputPath, language, title string, stride int, pr
 		"P":    {Category: "popular", Order: -10},
 		"exp":  {Category: "expression", Order: -5},
 		"id":   {Category: "expression", Order: -5},
-		"arch": {Category: "archaism", Order: 5},
-		"iK":   {Category: "archaism", Order: 5},
+		"arch": {Category: "archaism", Order: -4},
+		"iK":   {Category: "archaism", Order: -4},
 	}
 
 	return writeDb(
