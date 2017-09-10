@@ -131,7 +131,7 @@ func kanjidicExportDb(inputPath, outputPath, language, title string, stride int,
 
 	recordData := map[string]dbRecordList{
 		"kanji": kanji.crush(),
-		"tags":  tags.crush(),
+		"tag":   tags.crush(),
 	}
 
 	return writeDb(

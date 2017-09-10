@@ -262,10 +262,10 @@ func detectFormat(path string) (string, error) {
 	switch filepath.Ext(path) {
 	case ".sqlite":
 		return "rikai", nil
-	case ".kanji_freq":
-		return "kanji_freq", nil
-	case ".term_freq":
-		return "term_freq", nil
+	case ".kanjifreq":
+		return "kanjifreq", nil
+	case ".termfreq":
+		return "termfreq", nil
 	}
 
 	switch filepath.Base(path) {

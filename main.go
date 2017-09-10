@@ -47,11 +47,13 @@ func usage() {
 
 func exportDb(inputPath, outputPath, format, language, title string, stride int, pretty bool) error {
 	handlers := map[string]func(string, string, string, string, int, bool) error{
-		"edict":    jmdictExportDb,
-		"enamdict": jmnedictExportDb,
-		"epwing":   epwingExportDb,
-		"kanjidic": kanjidicExportDb,
-		"rikai":    rikaiExportDb,
+		"edict":     jmdictExportDb,
+		"enamdict":  jmnedictExportDb,
+		"epwing":    epwingExportDb,
+		"kanjidic":  kanjidicExportDb,
+		"rikai":     rikaiExportDb,
+		"kanjifreq": frequencyKanjiExportDb,
+		"termfreq":  frequencyTermsExportDb,
 	}
 
 	handler, ok := handlers[strings.ToLower(format)]

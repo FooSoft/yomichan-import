@@ -31,7 +31,15 @@ import (
 
 const frequencyRevision = "frequency1"
 
-func frequncyExportDb(inputPath, outputPath, language, title string, stride int, pretty bool) error {
+func frequencyTermsExportDb(inputPath, outputPath, language, title string, stride int, pretty bool) error {
+	return frequncyExportDb(inputPath, outputPath, language, title, stride, pretty, "termfreq")
+}
+
+func frequencyKanjiExportDb(inputPath, outputPath, language, title string, stride int, pretty bool) error {
+	return frequncyExportDb(inputPath, outputPath, language, title, stride, pretty, "kanjifreq")
+}
+
+func frequncyExportDb(inputPath, outputPath, language, title string, stride int, pretty bool, key string) error {
 	reader, err := os.Open(inputPath)
 	if err != nil {
 		return err
@@ -60,7 +68,7 @@ func frequncyExportDb(inputPath, outputPath, language, title string, stride int,
 	}
 
 	recordData := map[string]dbRecordList{
-		"frequencies": frequencies.crush(),
+		key: frequencies.crush(),
 	}
 
 	return writeDb(

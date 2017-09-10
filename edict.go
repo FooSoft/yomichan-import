@@ -228,8 +228,8 @@ func jmdictExportDb(inputPath, outputPath, language, title string, stride int, p
 	}
 
 	recordData := map[string]dbRecordList{
-		"terms": terms.crush(),
-		"tags":  jmdictBuildTagMeta(entities).crush(),
+		"term": terms.crush(),
+		"tag":  jmdictBuildTagMeta(entities).crush(),
 	}
 
 	return writeDb(

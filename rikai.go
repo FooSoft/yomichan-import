@@ -167,8 +167,8 @@ func rikaiExportDb(inputPath, outputPath, language, title string, stride int, pr
 	}
 
 	recordData := map[string]dbRecordList{
-		"terms": terms.crush(),
-		"tags":  tags.crush(),
+		"term": terms.crush(),
+		"tag":  tags.crush(),
 	}
 
 	return writeDb(

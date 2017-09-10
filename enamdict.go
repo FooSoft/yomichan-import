@@ -119,8 +119,8 @@ func jmnedictExportDb(inputPath, outputPath, language, title string, stride int,
 	}
 
 	recordData := map[string]dbRecordList{
-		"terms": terms.crush(),
-		"tags":  jmnedictBuildTagMeta(entities).crush(),
+		"term": terms.crush(),
+		"tag":  jmnedictBuildTagMeta(entities).crush(),
 	}
 
 	return writeDb(

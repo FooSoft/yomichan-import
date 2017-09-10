@@ -202,7 +202,7 @@ func epwingExportDb(inputPath, outputPath, language, title string, stride int, p
 
 	recordData := map[string]dbRecordList{
 		"kanji": kanji.crush(),
-		"terms": terms.crush(),
+		"term":  terms.crush(),
 	}
 
 	return writeDb(
