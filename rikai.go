@@ -30,7 +30,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const RIKAI_REVISION = "rikai2"
+const rikaiRevision = "rikai2"
 
 type rikaiEntry struct {
 	kanji string
@@ -158,21 +158,24 @@ func rikaiExportDb(inputPath, outputPath, language, title string, stride int, pr
 		title = "Rikai"
 	}
 
-	entities := map[string]dbTagMeta{
-		"P":    {Category: "popular", Order: -10},
-		"exp":  {Category: "expression", Order: -5},
-		"id":   {Category: "expression", Order: -5},
-		"arch": {Category: "archaism", Order: -4},
-		"iK":   {Category: "archaism", Order: -4},
+	tags := dbTagList{
+		dbTag{Name: "P", Category: "popular", Order: -10},
+		dbTag{Name: "exp", Category: "expression", Order: -5},
+		dbTag{Name: "id", Category: "expression", Order: -5},
+		dbTag{Name: "arch", Category: "archaism", Order: -4},
+		dbTag{Name: "iK", Category: "archaism", Order: -4},
+	}
+
+	recordData := map[string]dbRecordList{
+		"terms": terms.crush(),
+		"tags":  tags.crush(),
 	}
 
 	return writeDb(
 		outputPath,
 		title,
-		RIKAI_REVISION,
-		terms.crush(),
-		nil,
-		entities,
+		rikaiRevision,
+		recordData,
 		stride,
 		pretty,
 	)

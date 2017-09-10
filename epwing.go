@@ -200,13 +200,16 @@ func epwingExportDb(inputPath, outputPath, language, title string, stride int, p
 		title = strings.Join(titles, ", ")
 	}
 
+	recordData := map[string]dbRecordList{
+		"kanji": kanji.crush(),
+		"terms": terms.crush(),
+	}
+
 	return writeDb(
 		outputPath,
 		title,
 		strings.Join(revisions, ";"),
-		terms.crush(),
-		kanji.crush(),
-		nil,
+		recordData,
 		stride,
 		pretty,
 	)

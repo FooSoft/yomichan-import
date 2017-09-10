@@ -33,10 +33,43 @@ import (
 	"strings"
 )
 
-type dbTagMeta struct {
-	Category string `json:"category,omitempty"`
-	Notes    string `json:"notes,omitempty"`
-	Order    int    `json:"order,omitempty"`
+const databaseVersion = 2
+
+type dbRecord []interface{}
+type dbRecordList []dbRecord
+
+type dbTag struct {
+	Name     string
+	Category string
+	Order    int
+	Notes    string
+}
+
+type dbTagList []dbTag
+
+func (meta dbTagList) crush() dbRecordList {
+	var results dbRecordList
+	for _, m := range meta {
+		results = append(results, dbRecord{m.Name, m.Category, m.Order, m.Notes})
+	}
+
+	return results
+}
+
+type dbFrequency struct {
+	Expression string
+	Count      int
+}
+
+type dbFrequencyList []dbFrequency
+
+func (freqs dbFrequencyList) crush() dbRecordList {
+	var results dbRecordList
+	for _, f := range freqs {
+		results = append(results, dbRecord{f.Expression, f.Count})
+	}
+
+	return results
 }
 
 type dbTerm struct {
@@ -58,10 +91,10 @@ func (term *dbTerm) addRules(rules ...string) {
 	term.Rules = appendStringUnique(term.Rules, rules...)
 }
 
-func (terms dbTermList) crush() [][]interface{} {
-	var results [][]interface{}
+func (terms dbTermList) crush() dbRecordList {
+	var results dbRecordList
 	for _, t := range terms {
-		result := []interface{}{
+		result := dbRecord{
 			t.Expression,
 			t.Reading,
 			strings.Join(t.Tags, " "),
@@ -97,10 +130,10 @@ func (kanji *dbKanji) addTags(tags ...string) {
 	}
 }
 
-func (kanji dbKanjiList) crush() [][]interface{} {
-	var results [][]interface{}
+func (kanji dbKanjiList) crush() dbRecordList {
+	var results dbRecordList
 	for _, k := range kanji {
-		result := []interface{}{
+		result := dbRecord{
 			k.Character,
 			strings.Join(k.Onyomi, " "),
 			strings.Join(k.Kunyomi, " "),
@@ -117,13 +150,11 @@ func (kanji dbKanjiList) crush() [][]interface{} {
 	return results
 }
 
-func writeDb(outputPath, title, revision string, termRecords [][]interface{}, kanjiRecords [][]interface{}, tagMeta map[string]dbTagMeta, stride int, pretty bool) error {
-	const DB_VERSION = 1
-
+func writeDb(outputPath, title, revision string, recordData map[string]dbRecordList, stride int, pretty bool) error {
 	var zbuff bytes.Buffer
 	zip := zip.NewWriter(&zbuff)
 
-	marshalJson := func(obj interface{}, pretty bool) ([]byte, error) {
+	marshalJSON := func(obj interface{}, pretty bool) ([]byte, error) {
 		if pretty {
 			return json.MarshalIndent(obj, "", "    ")
 		}
@@ -131,7 +162,7 @@ func writeDb(outputPath, title, revision string, termRecords [][]interface{}, ka
 		return json.Marshal(obj)
 	}
 
-	writeDbRecords := func(prefix string, records [][]interface{}) (int, error) {
+	writeDbRecords := func(prefix string, records dbRecordList) (int, error) {
 		recordCount := len(records)
 		bankCount := 0
 
@@ -142,7 +173,7 @@ func writeDb(outputPath, title, revision string, termRecords [][]interface{}, ka
 				indexDst = recordCount
 			}
 
-			bytes, err := marshalJson(records[indexSrc:indexDst], pretty)
+			bytes, err := marshalJSON(records[indexSrc:indexDst], pretty)
 			if err != nil {
 				return 0, err
 			}
@@ -156,7 +187,7 @@ func writeDb(outputPath, title, revision string, termRecords [][]interface{}, ka
 				return 0, err
 			}
 
-			bankCount += 1
+			bankCount++
 		}
 
 		return bankCount, nil
@@ -164,28 +195,22 @@ func writeDb(outputPath, title, revision string, termRecords [][]interface{}, ka
 
 	var err error
 	var db struct {
-		Title      string               `json:"title"`
-		Version    int                  `json:"version"`
-		Revision   string               `json:"revision"`
-		TagMeta    map[string]dbTagMeta `json:"tagMeta"`
-		TermBanks  int                  `json:"termBanks"`
-		KanjiBanks int                  `json:"kanjiBanks"`
+		Title    string `json:"title"`
+		Version  int    `json:"version"`
+		Revision string `json:"revision"`
 	}
 
 	db.Title = title
-	db.Version = DB_VERSION
+	db.Version = databaseVersion
 	db.Revision = revision
-	db.TagMeta = tagMeta
 
-	if db.TermBanks, err = writeDbRecords("term", termRecords); err != nil {
-		return err
+	for recordType, recordEntries := range recordData {
+		if _, err := writeDbRecords(recordType, recordEntries); err != nil {
+			return err
+		}
 	}
 
-	if db.KanjiBanks, err = writeDbRecords("kanji", kanjiRecords); err != nil {
-		return err
-	}
-
-	bytes, err := marshalJson(db, pretty)
+	bytes, err := marshalJSON(db, pretty)
 	if err != nil {
 		return err
 	}
@@ -234,8 +259,13 @@ func hasString(needle string, haystack []string) bool {
 }
 
 func detectFormat(path string) (string, error) {
-	if filepath.Ext(path) == ".sqlite" {
+	switch filepath.Ext(path) {
+	case ".sqlite":
 		return "rikai", nil
+	case ".kanji_freq":
+		return "kanji_freq", nil
+	case ".term_freq":
+		return "term_freq", nil
 	}
 
 	switch filepath.Base(path) {

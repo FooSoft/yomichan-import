@@ -1,0 +1,74 @@
+/*
+ * Copyright (c) 2017 Alex Yatskov <alex@foosoft.net>
+ * Author: Alex Yatskov <alex@foosoft.net>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+package main
+
+import (
+	"bufio"
+	"os"
+	"strconv"
+	"strings"
+)
+
+const frequencyRevision = "frequency1"
+
+func frequncyExportDb(inputPath, outputPath, language, title string, stride int, pretty bool) error {
+	reader, err := os.Open(inputPath)
+	if err != nil {
+		return err
+	}
+	defer reader.Close()
+
+	var frequencies dbFrequencyList
+	for scanner := bufio.NewScanner(reader); scanner.Scan(); {
+		line := scanner.Text()
+		if strings.HasPrefix(line, "#") {
+			continue
+		}
+
+		parts := strings.Split(line, "\t")
+		if len(parts) != 2 {
+			continue
+		}
+
+		expression := parts[0]
+		count, err := strconv.Atoi(parts[1])
+		if err != nil {
+			continue
+		}
+
+		frequencies = append(frequencies, dbFrequency{expression, count})
+	}
+
+	recordData := map[string]dbRecordList{
+		"frequencies": frequencies.crush(),
+	}
+
+	return writeDb(
+		outputPath,
+		title,
+		frequencyRevision,
+		recordData,
+		stride,
+		pretty,
+	)
+}

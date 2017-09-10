@@ -29,7 +29,7 @@ import (
 	"github.com/FooSoft/jmdict"
 )
 
-const JMDICT_REVISION = "jmdict3"
+const jmdictRevision = "jmdict3"
 
 func jmdictBuildRules(term *dbTerm) {
 	for _, tag := range term.Tags {
@@ -71,17 +71,17 @@ func jmdictAddPriorities(term *dbTerm, priorities ...string) {
 	}
 }
 
-func jmdictBuildTagMeta(entities map[string]string) map[string]dbTagMeta {
-	tags := map[string]dbTagMeta{
-		"news": {Notes: "appears frequently in Mainichi Shimbun", Category: "frequent", Order: -2},
-		"ichi": {Notes: "listed as common in Ichimango Goi Bunruishuu", Category: "frequent", Order: -2},
-		"spec": {Notes: "common words not included in frequency lists", Category: "frequent", Order: -2},
-		"gai":  {Notes: "common loanword", Category: "frequent", Order: -2},
-		"P":    {Notes: "popular term", Category: "popular", Order: -10},
+func jmdictBuildTagMeta(entities map[string]string) dbTagList {
+	tags := dbTagList{
+		dbTag{Name: "news", Notes: "appears frequently in Mainichi Shimbun", Category: "frequent", Order: -2},
+		dbTag{Name: "ichi", Notes: "listed as common in Ichimango Goi Bunruishuu", Category: "frequent", Order: -2},
+		dbTag{Name: "spec", Notes: "common words not included in frequency lists", Category: "frequent", Order: -2},
+		dbTag{Name: "gai", Notes: "common loanword", Category: "frequent", Order: -2},
+		dbTag{Name: "P", Notes: "popular term", Category: "popular", Order: -10},
 	}
 
 	for name, value := range entities {
-		tag := dbTagMeta{Notes: value}
+		tag := dbTag{Name: name, Notes: value}
 
 		switch name {
 		case "exp", "id":
@@ -92,7 +92,7 @@ func jmdictBuildTagMeta(entities map[string]string) map[string]dbTagMeta {
 			tag.Order = -4
 		}
 
-		tags[name] = tag
+		tags = append(tags, tag)
 	}
 
 	return tags
@@ -227,13 +227,16 @@ func jmdictExportDb(inputPath, outputPath, language, title string, stride int, p
 		title = "JMdict"
 	}
 
+	recordData := map[string]dbRecordList{
+		"terms": terms.crush(),
+		"tags":  jmdictBuildTagMeta(entities).crush(),
+	}
+
 	return writeDb(
 		outputPath,
 		title,
-		JMDICT_REVISION,
-		terms.crush(),
-		nil,
-		jmdictBuildTagMeta(entities),
+		jmdictRevision,
+		recordData,
 		stride,
 		pretty,
 	)

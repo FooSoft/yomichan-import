@@ -28,13 +28,13 @@ import (
 	"github.com/FooSoft/jmdict"
 )
 
-const JMNEDICT_REVISION = "jmnedict1"
+const jmnedictRevision = "jmnedict1"
 
-func jmnedictBuildTagMeta(entities map[string]string) map[string]dbTagMeta {
-	tags := make(map[string]dbTagMeta)
+func jmnedictBuildTagMeta(entities map[string]string) dbTagList {
+	var tags dbTagList
 
 	for name, value := range entities {
-		tag := dbTagMeta{Notes: value}
+		tag := dbTag{Name: name, Notes: value}
 
 		switch name {
 		case "company", "fem", "given", "masc", "organization", "person", "place", "product", "station", "surname", "unclass", "work":
@@ -42,7 +42,7 @@ func jmnedictBuildTagMeta(entities map[string]string) map[string]dbTagMeta {
 			tag.Order = 4
 		}
 
-		tags[name] = tag
+		tags = append(tags, tag)
 	}
 
 	return tags
@@ -118,13 +118,16 @@ func jmnedictExportDb(inputPath, outputPath, language, title string, stride int,
 		title = "JMnedict"
 	}
 
+	recordData := map[string]dbRecordList{
+		"terms": terms.crush(),
+		"tags":  jmnedictBuildTagMeta(entities).crush(),
+	}
+
 	return writeDb(
 		outputPath,
 		title,
-		JMNEDICT_REVISION,
-		terms.crush(),
-		nil,
-		jmnedictBuildTagMeta(entities),
+		jmnedictRevision,
+		recordData,
 		stride,
 		pretty,
 	)
