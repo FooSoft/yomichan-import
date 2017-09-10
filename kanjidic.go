@@ -116,6 +116,10 @@ func kanjidicExportDb(inputPath, outputPath, language, title string, stride int,
 		}
 	}
 
+	if title == "" {
+		title = "KANJIDIC2"
+	}
+
 	tags := dbTagList{
 		dbTag{Name: "jouyou", Notes: "included in list of regular-use characters", Category: "frequent", Order: -5},
 		dbTag{Name: "jinmeiyou", Notes: "included in list of characters for use in personal names", Category: "frequent", Order: -5},
@@ -123,10 +127,6 @@ func kanjidicExportDb(inputPath, outputPath, language, title string, stride int,
 		dbTag{Name: "grade", Notes: "school grade level at which the character is taught"},
 		dbTag{Name: "strokes", Notes: "number of strokes needed to write the character"},
 		dbTag{Name: "heisig", Notes: "frame number in Remembering the Kanji"},
-	}
-
-	if title == "" {
-		title = "KANJIDIC2"
 	}
 
 	recordData := map[string]dbRecordList{

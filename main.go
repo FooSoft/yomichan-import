@@ -34,9 +34,8 @@ import (
 )
 
 const (
-	DEFAULT_STRIDE   = 10000
-	DEFAULT_PORT     = 9876
-	DEFAULT_LANGUAGE = "english"
+	defaultStride   = 10000
+	defaultLanguage = "english"
 )
 
 func usage() {
@@ -77,9 +76,9 @@ func makeTmpDir() (string, error) {
 func main() {
 	var (
 		format   = flag.String("format", "", "dictionary format [edict|enamdict|epwing|kanjidic|rikai]")
-		language = flag.String("language", DEFAULT_LANGUAGE, "dictionary language (if supported)")
+		language = flag.String("language", defaultLanguage, "dictionary language (if supported)")
 		title    = flag.String("title", "", "dictionary title")
-		stride   = flag.Int("stride", DEFAULT_STRIDE, "dictionary bank stride")
+		stride   = flag.Int("stride", defaultStride, "dictionary bank stride")
 		pretty   = flag.Bool("pretty", false, "output prettified dictionary JSON")
 	)
 
@@ -89,10 +88,10 @@ func main() {
 	if flag.NArg() != 2 {
 		if err := gui(); err == nil {
 			return
-		} else {
-			usage()
-			os.Exit(2)
 		}
+
+		usage()
+		os.Exit(2)
 	}
 
 	var (

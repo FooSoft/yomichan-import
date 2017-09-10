@@ -57,11 +57,11 @@ func rikaiBuildScore(term *dbTerm) {
 	for _, tag := range term.Tags {
 		switch tag {
 		case "news", "ichi", "spec", "gai":
-			term.Score += 1
+			term.Score++
+		case "arch", "iK":
+			term.Score--
 		case "P":
 			term.Score += 5
-		case "arch", "iK":
-			term.Score -= 1
 		}
 	}
 }

@@ -136,7 +136,7 @@ func gui() error {
 					}
 				})
 
-				success = exportDb(inputPath, outputPath, format, language, title, DEFAULT_STRIDE, false) == nil
+				success = exportDb(inputPath, outputPath, format, language, title, defaultStride, false) == nil
 			}()
 		})
 
