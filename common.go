@@ -33,7 +33,7 @@ import (
 	"strings"
 )
 
-const databaseVersion = 2
+const databaseVersion = 1
 
 type dbRecord []interface{}
 type dbRecordList []dbRecord

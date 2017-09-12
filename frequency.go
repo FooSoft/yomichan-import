@@ -67,6 +67,10 @@ func frequncyExportDb(inputPath, outputPath, language, title string, stride int,
 		frequencies = append(frequencies, dbFrequency{expression, count})
 	}
 
+	if title == "" {
+		title = "Frequency"
+	}
+
 	recordData := map[string]dbRecordList{
 		key: frequencies.crush(),
 	}
