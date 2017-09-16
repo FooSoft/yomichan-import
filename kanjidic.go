@@ -23,7 +23,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 
@@ -37,7 +36,11 @@ func kanjidicExtractKanji(entry jmdict.KanjidicCharacter, language string) *dbKa
 		return nil
 	}
 
-	kanji := dbKanji{Character: entry.Literal}
+	kanji := dbKanji{
+		Character: entry.Literal,
+		Indices:   make(map[string]string),
+		Stats:     make(map[string]string),
+	}
 
 	for _, m := range entry.ReadingMeaning.Meanings {
 		if m.Language == nil && language == "" || m.Language != nil && language == *m.Language {
@@ -49,12 +52,24 @@ func kanjidicExtractKanji(entry jmdict.KanjidicCharacter, language string) *dbKa
 		return nil
 	}
 
+	for _, number := range entry.DictionaryNumbers {
+		kanji.Indices[number.Type] = number.Value
+	}
+
+	if frequency := entry.Misc.Frequency; frequency != nil {
+		kanji.Stats["Frequency"] = *frequency
+	}
+
 	if level := entry.Misc.JlptLevel; level != nil {
-		kanji.addTags(fmt.Sprintf("jlpt:%s", *level))
+		kanji.Stats["JLPT Level"] = *level
+	}
+
+	if counts := entry.Misc.StrokeCounts; len(counts) > 0 {
+		kanji.Stats["Strokes"] = counts[0]
 	}
 
 	if grade := entry.Misc.Grade; grade != nil {
-		kanji.addTags(fmt.Sprintf("grade:%s", *grade))
+		kanji.Stats["Grade"] = *grade
 		if gradeInt, err := strconv.Atoi(*grade); err == nil {
 			if gradeInt >= 1 && gradeInt <= 8 {
 				kanji.addTags("jouyou")
@@ -62,16 +77,6 @@ func kanjidicExtractKanji(entry jmdict.KanjidicCharacter, language string) *dbKa
 				kanji.addTags("jinmeiyou")
 			}
 		}
-	}
-
-	for _, number := range entry.DictionaryNumbers {
-		if number.Type == "heisig" {
-			kanji.addTags(fmt.Sprintf("heisig:%s", number.Value))
-		}
-	}
-
-	if counts := entry.Misc.StrokeCounts; len(counts) > 0 {
-		kanji.addTags(fmt.Sprintf("strokes:%s", counts[0]))
 	}
 
 	for _, r := range entry.ReadingMeaning.Readings {
@@ -123,10 +128,6 @@ func kanjidicExportDb(inputPath, outputPath, language, title string, stride int,
 	tags := dbTagList{
 		dbTag{Name: "jouyou", Notes: "included in list of regular-use characters", Category: "frequent", Order: -5},
 		dbTag{Name: "jinmeiyou", Notes: "included in list of characters for use in personal names", Category: "frequent", Order: -5},
-		dbTag{Name: "jlpt", Notes: "corresponding Japanese Language Proficiency Test level"},
-		dbTag{Name: "grade", Notes: "school grade level at which the character is taught"},
-		dbTag{Name: "strokes", Notes: "number of strokes needed to write the character"},
-		dbTag{Name: "heisig", Notes: "frame number in Remembering the Kanji"},
 	}
 
 	recordData := map[string]dbRecordList{

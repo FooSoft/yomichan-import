@@ -100,10 +100,7 @@ func (terms dbTermList) crush() dbRecordList {
 			strings.Join(t.Tags, " "),
 			strings.Join(t.Rules, " "),
 			t.Score,
-		}
-
-		for _, gloss := range t.Glossary {
-			result = append(result, gloss)
+			t.Glossary,
 		}
 
 		results = append(results, result)
@@ -118,6 +115,8 @@ type dbKanji struct {
 	Kunyomi   []string
 	Tags      []string
 	Meanings  []string
+	Indices   map[string]string
+	Stats     map[string]string
 }
 
 type dbKanjiList []dbKanji
@@ -138,10 +137,9 @@ func (kanji dbKanjiList) crush() dbRecordList {
 			strings.Join(k.Onyomi, " "),
 			strings.Join(k.Kunyomi, " "),
 			strings.Join(k.Tags, " "),
-		}
-
-		for _, meaning := range k.Meanings {
-			result = append(result, meaning)
+			k.Meanings,
+			k.Indices,
+			k.Stats,
 		}
 
 		results = append(results, result)
