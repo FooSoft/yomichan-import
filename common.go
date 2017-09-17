@@ -33,7 +33,7 @@ import (
 	"strings"
 )
 
-const databaseVersion = 1
+const databaseFormat = 2
 
 type dbRecord []interface{}
 type dbRecordList []dbRecord
@@ -194,12 +194,12 @@ func writeDb(outputPath, title, revision string, recordData map[string]dbRecordL
 	var err error
 	var db struct {
 		Title    string `json:"title"`
-		Version  int    `json:"version"`
+		Format   int    `json:"format"`
 		Revision string `json:"revision"`
 	}
 
 	db.Title = title
-	db.Version = databaseVersion
+	db.Format = databaseFormat
 	db.Revision = revision
 
 	for recordType, recordEntries := range recordData {
