@@ -29,7 +29,7 @@ import (
 	"github.com/FooSoft/jmdict"
 )
 
-const kanjidicRevision = "kanjidic1"
+const kanjidicRevision = "kanjidic2"
 
 func kanjidicExtractKanji(entry jmdict.KanjidicCharacter, language string) *dbKanji {
 	if entry.ReadingMeaning == nil {
@@ -57,19 +57,19 @@ func kanjidicExtractKanji(entry jmdict.KanjidicCharacter, language string) *dbKa
 	}
 
 	if frequency := entry.Misc.Frequency; frequency != nil {
-		kanji.Stats["Frequency"] = *frequency
+		kanji.Stats["freq"] = *frequency
 	}
 
 	if level := entry.Misc.JlptLevel; level != nil {
-		kanji.Stats["JLPT Level"] = *level
+		kanji.Stats["jlpt"] = *level
 	}
 
 	if counts := entry.Misc.StrokeCounts; len(counts) > 0 {
-		kanji.Stats["Strokes"] = counts[0]
+		kanji.Stats["strokes"] = counts[0]
 	}
 
 	if grade := entry.Misc.Grade; grade != nil {
-		kanji.Stats["Grade"] = *grade
+		kanji.Stats["grade"] = *grade
 		if gradeInt, err := strconv.Atoi(*grade); err == nil {
 			if gradeInt >= 1 && gradeInt <= 8 {
 				kanji.addTags("jouyou")
@@ -128,6 +128,30 @@ func kanjidicExportDb(inputPath, outputPath, language, title string, stride int,
 	tags := dbTagList{
 		dbTag{Name: "jouyou", Notes: "included in list of regular-use characters", Category: "frequent", Order: -5},
 		dbTag{Name: "jinmeiyou", Notes: "included in list of characters for use in personal names", Category: "frequent", Order: -5},
+
+		dbTag{Name: "freq", Notes: "Frequency", Category: "frequent"},
+		dbTag{Name: "grade", Notes: "Grade Level", Category: "frequent"},
+		dbTag{Name: "jlpt", Notes: "JLPT Level", Category: "frequent"},
+		dbTag{Name: "strokes", Notes: "Stroke Count", Category: "frequent"},
+
+		dbTag{Name: "busy_people", Notes: "Japanese for Busy People"},
+		dbTag{Name: "crowley", Notes: "The Kanji Way to Japanese Language Power"},
+		dbTag{Name: "gakken", Notes: "A New Dictionary of Kanji Usage"},
+		dbTag{Name: "halpern_kkld", Notes: "Kanji Learners Dictionary"},
+		dbTag{Name: "halpern_njecd", Notes: "New Japanese English Character Dictionary"},
+		dbTag{Name: "heisig", Notes: "Remembering The Kanji"},
+		dbTag{Name: "henshall", Notes: "A Guide To Remembering Japanese Characters"},
+		dbTag{Name: "henshall3", Notes: "A Guide To Reading and Writing Japanese 3rd ed."},
+		dbTag{Name: "jf_cards", Notes: "Japanese Kanji Flashcards"},
+		dbTag{Name: "kanji_in_context", Notes: "Kanji in Context"},
+		dbTag{Name: "kodansha_compact", Notes: "Kodansha Compact Kanji Guide"},
+		dbTag{Name: "nelson_c", Notes: "Classic Nelson"},
+		dbTag{Name: "nelson_n", Notes: "New Nelson"},
+		dbTag{Name: "oneill_kk", Notes: "Essential Kanji"},
+		dbTag{Name: "oneill_names", Notes: "Japanese Names"},
+		dbTag{Name: "sakade", Notes: "A Guide To Reading and Writing Japanese"},
+		dbTag{Name: "sh_kk", Notes: "Kanji and Kana"},
+		dbTag{Name: "tutt_cards", Notes: "Tuttle Kanji Cards"},
 	}
 
 	recordData := map[string]dbRecordList{
