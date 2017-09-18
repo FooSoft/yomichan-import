@@ -38,7 +38,6 @@ func kanjidicExtractKanji(entry jmdict.KanjidicCharacter, language string) *dbKa
 
 	kanji := dbKanji{
 		Character: entry.Literal,
-		Indices:   make(map[string]string),
 		Stats:     make(map[string]string),
 	}
 
@@ -53,7 +52,7 @@ func kanjidicExtractKanji(entry jmdict.KanjidicCharacter, language string) *dbKa
 	}
 
 	for _, number := range entry.DictionaryNumbers {
-		kanji.Indices[number.Type] = number.Value
+		kanji.Stats[number.Type] = number.Value
 	}
 
 	if frequency := entry.Misc.Frequency; frequency != nil {
@@ -66,6 +65,14 @@ func kanjidicExtractKanji(entry jmdict.KanjidicCharacter, language string) *dbKa
 
 	if counts := entry.Misc.StrokeCounts; len(counts) > 0 {
 		kanji.Stats["strokes"] = counts[0]
+	}
+
+	for _, code := range entry.Codepoint {
+		kanji.Stats[code.Type] = code.Value
+	}
+
+	for _, code := range entry.QueryCode {
+		kanji.Stats[code.Type] = code.Value
 	}
 
 	if grade := entry.Misc.Grade; grade != nil {
@@ -129,35 +136,46 @@ func kanjidicExportDb(inputPath, outputPath, language, title string, stride int,
 		dbTag{Name: "jouyou", Notes: "included in list of regular-use characters", Category: "frequent", Order: -5},
 		dbTag{Name: "jinmeiyou", Notes: "included in list of characters for use in personal names", Category: "frequent", Order: -5},
 
-		dbTag{Name: "freq", Notes: "Frequency", Category: "frequent"},
-		dbTag{Name: "grade", Notes: "Grade Level", Category: "frequent"},
-		dbTag{Name: "jlpt", Notes: "JLPT Level", Category: "frequent"},
-		dbTag{Name: "strokes", Notes: "Stroke Count", Category: "frequent"},
+		dbTag{Name: "freq", Notes: "Frequency", Category: "misc"},
+		dbTag{Name: "grade", Notes: "Grade Level", Category: "misc"},
+		dbTag{Name: "jlpt", Notes: "JLPT Level", Category: "misc"},
+		dbTag{Name: "strokes", Notes: "Stroke Count", Category: "misc"},
 
-		dbTag{Name: "busy_people", Notes: "Japanese For Busy People"},
-		dbTag{Name: "crowley", Notes: "The Kanji Way to Japanese Language Power"},
-		dbTag{Name: "gakken", Notes: "A  New Dictionary of Kanji Usage"},
-		dbTag{Name: "halpern_kkd", Notes: "Kodansha Kanji Dictionary"},
-		dbTag{Name: "halpern_kkld", Notes: "Kanji Learners Dictionary"},
-		dbTag{Name: "halpern_kkld_2ed", Notes: "Kanji Learners Dictionary"},
-		dbTag{Name: "halpern_njecd", Notes: "New Japanese-English Character Dictionary"},
-		dbTag{Name: "heisig", Notes: "Remembering The  Kanji"},
-		dbTag{Name: "heisig6", Notes: "Remembering The  Kanji, Sixth Ed."},
-		dbTag{Name: "henshall", Notes: "A Guide To Remembering Japanese Characters"},
-		dbTag{Name: "henshall3", Notes: "A Guide To Reading and Writing Japanese"},
-		dbTag{Name: "jf_cards", Notes: "Japanese Kanji Flashcards"},
-		dbTag{Name: "kanji_in_context", Notes: "Kanji in Context"},
-		dbTag{Name: "kodansha_compact", Notes: "Kodansha Compact Kanji Guide"},
-		dbTag{Name: "maniette", Notes: "Les Kanjis dans la tete"},
-		dbTag{Name: "moro", Notes: "Daikanwajiten"},
-		dbTag{Name: "nelson_c", Notes: "Modern Reader's Japanese-English Character Dictionary"},
-		dbTag{Name: "nelson_n", Notes: "The New Nelson Japanese-English Character Dictionary"},
-		dbTag{Name: "oneill_kk", Notes: "Essential Kanji"},
-		dbTag{Name: "oneill_names", Notes: "Japanese Names"},
-		dbTag{Name: "sakade", Notes: "A Guide To Reading and Writing Japanese"},
-		dbTag{Name: "sh_kk", Notes: "Kanji and Kana"},
-		dbTag{Name: "sh_kk2", Notes: "Kanji and Kana"},
-		dbTag{Name: "tutt_cards", Notes: "Tuttle Kanji Cards"},
+		dbTag{Name: "jis208", Notes: "JIS X 0208-1997", Category: "code"},
+		dbTag{Name: "jis212", Notes: "JIS X 0212-1990", Category: "code"},
+		dbTag{Name: "jis213", Notes: "JIS X 0213-2000", Category: "code"},
+		dbTag{Name: "ucs", Notes: "Unicode Hex Coding", Category: "code"},
+
+		dbTag{Name: "deroo", Notes: "De Roo Code", Category: "query"},
+		dbTag{Name: "four_corner", Notes: "Four Corner Code", Category: "query"},
+		dbTag{Name: "misclass", Notes: "Misclassification Code", Category: "query"},
+		dbTag{Name: "sh_desc", Notes: "Descriptor Code", Category: "query"},
+		dbTag{Name: "skip", Notes: "Halpern's SKIP Code", Category: "query"},
+
+		dbTag{Name: "busy_people", Notes: "Japanese For Busy People", Category: "index"},
+		dbTag{Name: "crowley", Notes: "The Kanji Way to Japanese Language Power", Category: "index"},
+		dbTag{Name: "gakken", Notes: "A  New Dictionary of Kanji Usage", Category: "index"},
+		dbTag{Name: "halpern_kkd", Notes: "Kodansha Kanji Dictionary", Category: "index"},
+		dbTag{Name: "halpern_kkld", Notes: "Kanji Learners Dictionary", Category: "index"},
+		dbTag{Name: "halpern_kkld_2ed", Notes: "Kanji Learners Dictionary", Category: "index"},
+		dbTag{Name: "halpern_njecd", Notes: "New Japanese-English Character Dictionary", Category: "index"},
+		dbTag{Name: "heisig", Notes: "Remembering The  Kanji", Category: "index"},
+		dbTag{Name: "heisig6", Notes: "Remembering The  Kanji, Sixth Ed.", Category: "index"},
+		dbTag{Name: "henshall", Notes: "A Guide To Remembering Japanese Characters", Category: "index"},
+		dbTag{Name: "henshall3", Notes: "A Guide To Reading and Writing Japanese", Category: "index"},
+		dbTag{Name: "jf_cards", Notes: "Japanese Kanji Flashcards", Category: "index"},
+		dbTag{Name: "kanji_in_context", Notes: "Kanji in Context", Category: "index"},
+		dbTag{Name: "kodansha_compact", Notes: "Kodansha Compact Kanji Guide", Category: "index"},
+		dbTag{Name: "maniette", Notes: "Les Kanjis dans la tete", Category: "index"},
+		dbTag{Name: "moro", Notes: "Daikanwajiten", Category: "index"},
+		dbTag{Name: "nelson_c", Notes: "Modern Reader's Japanese-English Character Dictionary", Category: "index"},
+		dbTag{Name: "nelson_n", Notes: "The New Nelson Japanese-English Character Dictionary", Category: "index"},
+		dbTag{Name: "oneill_kk", Notes: "Essential Kanji", Category: "index"},
+		dbTag{Name: "oneill_names", Notes: "Japanese Names", Category: "index"},
+		dbTag{Name: "sakade", Notes: "A Guide To Reading and Writing Japanese", Category: "index"},
+		dbTag{Name: "sh_kk", Notes: "Kanji and Kana", Category: "index"},
+		dbTag{Name: "sh_kk2", Notes: "Kanji and Kana", Category: "index"},
+		dbTag{Name: "tutt_cards", Notes: "Tuttle Kanji Cards", Category: "index"},
 	}
 
 	recordData := map[string]dbRecordList{

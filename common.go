@@ -115,7 +115,6 @@ type dbKanji struct {
 	Kunyomi   []string
 	Tags      []string
 	Meanings  []string
-	Indices   map[string]string
 	Stats     map[string]string
 }
 
@@ -138,7 +137,6 @@ func (kanji dbKanjiList) crush() dbRecordList {
 			strings.Join(k.Kunyomi, " "),
 			strings.Join(k.Tags, " "),
 			k.Meanings,
-			k.Indices,
 			k.Stats,
 		}
 
