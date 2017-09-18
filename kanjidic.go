@@ -145,6 +145,7 @@ func kanjidicExportDb(inputPath, outputPath, language, title string, stride int,
 		dbTag{Name: "heisig6", Notes: "Remembering The  Kanji, Sixth Ed."},
 		dbTag{Name: "henshall", Notes: "A Guide To Remembering Japanese Characters"},
 		dbTag{Name: "henshall3", Notes: "A Guide To Reading and Writing Japanese"},
+		dbTag{Name: "jf_cards", Notes: "Japanese Kanji Flashcards"},
 		dbTag{Name: "kanji_in_context", Notes: "Kanji in Context"},
 		dbTag{Name: "kodansha_compact", Notes: "Kodansha Compact Kanji Guide"},
 		dbTag{Name: "maniette", Notes: "Les Kanjis dans la tete"},
@@ -156,6 +157,7 @@ func kanjidicExportDb(inputPath, outputPath, language, title string, stride int,
 		dbTag{Name: "sakade", Notes: "A Guide To Reading and Writing Japanese"},
 		dbTag{Name: "sh_kk", Notes: "Kanji and Kana"},
 		dbTag{Name: "sh_kk2", Notes: "Kanji and Kana"},
+		dbTag{Name: "tutt_cards", Notes: "Tuttle Kanji Cards"},
 	}
 
 	recordData := map[string]dbRecordList{
