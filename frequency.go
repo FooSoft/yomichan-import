@@ -54,14 +54,18 @@ func frequncyExportDb(inputPath, outputPath, language, title string, stride int,
 		}
 
 		parts := strings.Split(line, "\t")
-		if len(parts) != 2 {
+		if len(parts) < 2 {
 			continue
 		}
 
 		expression := parts[0]
 		count, err := strconv.Atoi(parts[1])
 		if err != nil {
-			continue
+			expression = parts[1]
+			count, err = strconv.Atoi(parts[0])
+			if err != nil {
+				continue
+			}
 		}
 
 		frequencies = append(frequencies, dbMeta{expression, "freq", count})
