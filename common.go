@@ -56,17 +56,18 @@ func (meta dbTagList) crush() dbRecordList {
 	return results
 }
 
-type dbFrequency struct {
+type dbMeta struct {
 	Expression string
-	Count      int
+	Mode       string
+	Data       interface{}
 }
 
-type dbFrequencyList []dbFrequency
+type dbMetaList []dbMeta
 
-func (freqs dbFrequencyList) crush() dbRecordList {
+func (freqs dbMetaList) crush() dbRecordList {
 	var results dbRecordList
 	for _, f := range freqs {
-		results = append(results, dbRecord{f.Expression, f.Count})
+		results = append(results, dbRecord{f.Expression, f.Mode, f.Data})
 	}
 
 	return results

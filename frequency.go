@@ -32,11 +32,11 @@ import (
 const frequencyRevision = "frequency1"
 
 func frequencyTermsExportDb(inputPath, outputPath, language, title string, stride int, pretty bool) error {
-	return frequncyExportDb(inputPath, outputPath, language, title, stride, pretty, "termfreq")
+	return frequncyExportDb(inputPath, outputPath, language, title, stride, pretty, "term_meta")
 }
 
 func frequencyKanjiExportDb(inputPath, outputPath, language, title string, stride int, pretty bool) error {
-	return frequncyExportDb(inputPath, outputPath, language, title, stride, pretty, "kanjifreq")
+	return frequncyExportDb(inputPath, outputPath, language, title, stride, pretty, "kanji_meta")
 }
 
 func frequncyExportDb(inputPath, outputPath, language, title string, stride int, pretty bool, key string) error {
@@ -46,7 +46,7 @@ func frequncyExportDb(inputPath, outputPath, language, title string, stride int,
 	}
 	defer reader.Close()
 
-	var frequencies dbFrequencyList
+	var frequencies dbMetaList
 	for scanner := bufio.NewScanner(reader); scanner.Scan(); {
 		line := scanner.Text()
 		if strings.HasPrefix(line, "#") {
@@ -64,7 +64,7 @@ func frequncyExportDb(inputPath, outputPath, language, title string, stride int,
 			continue
 		}
 
-		frequencies = append(frequencies, dbFrequency{expression, count})
+		frequencies = append(frequencies, dbMeta{expression, "freq", count})
 	}
 
 	if title == "" {
