@@ -37,7 +37,12 @@ Please follow the steps outlined below to import your custom dictionary into Yom
 5.  On the Yomichan options page, browse to the dictionary ZIP archive file you created.
 6.  Wait for the import progress to complete before closing the options page.
 
-[![Importer](https://foosoft.net/projects/yomichan-import/img/import-thumb.png)](https://foosoft.net/projects/yomichan-import/img/import.png)
+**Notice**: When converting EPWING dictionaries on Windows, it is important that the dictionary path you provide does
+not contain non-ASCII characters (including Japanese characters). This problem is due to the fact that the EPWING
+library used by Zero-EPWING, does not support such paths. Attempts to convert dictionaries stored in paths containing
+illegal characters will cause the conversion process to fail.
+
+[![](https://foosoft.net/projects/yomichan-import/img/import-thumb.png)](https://foosoft.net/projects/yomichan-import/img/import.png)
 
 ## License ##
 
