@@ -30,7 +30,7 @@ Builds of Yomichan Import are currently available for Linux, Mac OS X, and Windo
 
 Please follow the steps outlined below to import your custom dictionary into Yomichan:
 
-1.  Launch the `yomichan-import` executable.
+1.  Launch the `yomichan-import` executable after extracting the entire archive.
 2.  Specify the source path of the dictionary you wish to convert.
 3.  Specify the target path of the dictionary ZIP archive that you wish to create.
 4.  Press the button labeled *Import dictionary...* and wait for processing to complete.
