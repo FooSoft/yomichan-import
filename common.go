@@ -80,6 +80,7 @@ type dbTerm struct {
 	Rules      []string
 	Score      int
 	Glossary   []string
+	Sequence   int
 }
 
 type dbTermList []dbTerm
@@ -102,6 +103,7 @@ func (terms dbTermList) crush() dbRecordList {
 			strings.Join(t.Rules, " "),
 			t.Score,
 			t.Glossary,
+			t.Sequence,
 		}
 
 		results = append(results, result)

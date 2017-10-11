@@ -29,7 +29,7 @@ import (
 	"github.com/FooSoft/jmdict"
 )
 
-const jmdictRevision = "jmdict3"
+const jmdictRevision = "jmdict4"
 
 func jmdictBuildRules(term *dbTerm) {
 	for _, tag := range term.Tags {
@@ -138,6 +138,7 @@ func jmdictExtractTerms(edictEntry jmdict.JmdictEntry, language string) []dbTerm
 				Reading:    termBase.Reading,
 				Expression: termBase.Expression,
 				Score:      len(edictEntry.Sense) - index,
+				Sequence:   edictEntry.Sequence,
 			}
 
 			for _, glossary := range sense.Glossary {
