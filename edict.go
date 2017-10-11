@@ -63,10 +63,10 @@ func jmdictAddPriorities(term *dbTerm, priorities ...string) {
 	for _, priority := range priorities {
 		switch priority {
 		case "news1", "ichi1", "spec1", "gai1":
-			term.addTags("P")
+			term.addTermTags("P")
 			fallthrough
 		case "news2", "ichi2", "spec2", "gai2":
-			term.addTags(priority[:len(priority)-1])
+			term.addTermTags(priority[:len(priority)-1])
 		}
 	}
 }
@@ -107,7 +107,7 @@ func jmdictExtractTerms(edictEntry jmdict.JmdictEntry, language string) []dbTerm
 		}
 
 		var termBase dbTerm
-		termBase.addTags(reading.Information...)
+		termBase.addTermTags(reading.Information...)
 
 		if kanji == nil {
 			termBase.Expression = reading.Reading
@@ -115,7 +115,7 @@ func jmdictExtractTerms(edictEntry jmdict.JmdictEntry, language string) []dbTerm
 		} else {
 			termBase.Expression = kanji.Expression
 			termBase.Reading = reading.Reading
-			termBase.addTags(kanji.Information...)
+			termBase.addTermTags(kanji.Information...)
 
 			for _, priority := range kanji.Priorities {
 				if hasString(priority, reading.Priorities) {
@@ -152,6 +152,7 @@ func jmdictExtractTerms(edictEntry jmdict.JmdictEntry, language string) []dbTerm
 			}
 
 			term.addTags(termBase.Tags...)
+			term.addTermTags(termBase.TermTags...)
 			term.addTags(sense.PartsOfSpeech...)
 			term.addTags(sense.Fields...)
 			term.addTags(sense.Misc...)
