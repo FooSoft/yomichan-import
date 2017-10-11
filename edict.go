@@ -49,11 +49,17 @@ func jmdictBuildRules(term *dbTerm) {
 func jmdictBuildScore(term *dbTerm) {
 	for _, tag := range term.Tags {
 		switch tag {
-		case "news", "ichi", "spec", "gai":
+		case "arch":
+			term.Score -= 100
+		}
+	}
+	for _, tag := range term.TermTags {
+		switch tag {
+		case "news", "ichi", "spec", "gai1":
 			term.Score += 100
 		case "P":
 			term.Score += 500
-		case "arch", "iK":
+		case "iK", "ik":
 			term.Score -= 100
 		}
 	}
