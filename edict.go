@@ -174,7 +174,14 @@ func jmdictExtractTerms(edictEntry jmdict.JmdictEntry, language string) []dbTerm
 	if len(edictEntry.Kanji) > 0 {
 		for _, kanji := range edictEntry.Kanji {
 			for _, reading := range edictEntry.Readings {
-				convert(reading, &kanji)
+				if reading.NoKanji == nil {
+					convert(reading, &kanji)
+				}
+			}
+		}
+		for _, reading := range edictEntry.Readings {
+			if reading.NoKanji != nil  {
+				convert(reading, nil)
 			}
 		}
 	} else {
