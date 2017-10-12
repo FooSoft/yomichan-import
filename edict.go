@@ -59,7 +59,7 @@ func jmdictBuildScore(term *dbTerm) {
 			term.Score += 100
 		case "P":
 			term.Score += 500
-		case "iK", "ik":
+		case "iK":
 			term.Score -= 100
 		}
 	}
@@ -96,6 +96,14 @@ func jmdictBuildTagMeta(entities map[string]string) dbTagList {
 		case "arch", "iK":
 			tag.Category = "archaism"
 			tag.Order = -4
+		case "adj-f", "adj-i", "adj-ix", "adj-ku", "adj-na", "adj-nari", "adj-no", "adj-pn", "adj-shiku", "adj-t", "adv", "adv-to", "aux-adj",
+			"aux", "aux-v", "conj", "cop-da", "ctr", "int", "n-adv", "n", "n-pref", "n-pr", "n-suf", "n-t", "num", "pn", "pref", "prt", "suf",
+			"unc", "v1", "v1-s", "v2a-s", "v2b-k", "v2d-s", "v2g-k", "v2g-s", "v2h-k", "v2h-s", "v2k-k", "v2k-s", "v2m-s", "v2n-s", "v2r-k",
+			"v2r-s", "v2s-s", "v2t-k", "v2t-s", "v2w-s", "v2y-k", "v2y-s", "v2z-s", "v4b", "v4h", "v4k", "v4m", "v4r", "v4s", "v4t", "v5aru",
+			"v5b", "v5g", "v5k", "v5k-s", "v5m", "v5n", "v5r-i", "v5r", "v5s", "v5t", "v5u", "v5u-s", "vi", "vk", "vn", "vr", "vs-c", "vs-i",
+			"vs", "vs-s", "vt", "vz":
+			tag.Category = "pos"
+			tag.Order = -3
 		}
 
 		tags = append(tags, tag)
