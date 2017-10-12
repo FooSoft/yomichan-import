@@ -131,6 +131,7 @@ func jmdictExtractTerms(edictEntry jmdict.JmdictEntry, language string) []dbTerm
 		}
 
 		var partsOfSpeech []string
+		var misc []string
 		for index, sense := range edictEntry.Sense {
 			if sense.RestrictedReadings != nil && !hasString(reading.Reading, sense.RestrictedReadings) {
 				continue
@@ -157,18 +158,20 @@ func jmdictExtractTerms(edictEntry jmdict.JmdictEntry, language string) []dbTerm
 				continue
 			}
 
+			if len(sense.PartsOfSpeech) != 0 {
+				partsOfSpeech = sense.PartsOfSpeech
+			}
+
+			if len(sense.Misc) != 0 {
+				misc = sense.Misc
+			}
+
 			term.addTags(termBase.Tags...)
 			term.addTermTags(termBase.TermTags...)
-			term.addTags(sense.PartsOfSpeech...)
+			term.addTags(partsOfSpeech...)
 			term.addTags(sense.Fields...)
-			term.addTags(sense.Misc...)
+			term.addTags(misc...)
 			term.addTags(sense.Dialects...)
-
-			if index == 0 {
-				partsOfSpeech = sense.PartsOfSpeech
-			} else {
-				term.addTags(partsOfSpeech...)
-			}
 
 			jmdictBuildRules(&term)
 			jmdictBuildScore(&term)
