@@ -32,7 +32,7 @@ import (
 const jmdictRevision = "jmdict4"
 
 func jmdictBuildRules(term *dbTerm) {
-	for _, tag := range term.Tags {
+	for _, tag := range term.DefinitionTags {
 		switch tag {
 		case "adj-i", "v1", "vk":
 			term.addRules(tag)
@@ -47,7 +47,7 @@ func jmdictBuildRules(term *dbTerm) {
 }
 
 func jmdictBuildScore(term *dbTerm) {
-	for _, tag := range term.Tags {
+	for _, tag := range term.DefinitionTags {
 		switch tag {
 		case "arch":
 			term.Score -= 100
@@ -170,12 +170,12 @@ func jmdictExtractTerms(edictEntry jmdict.JmdictEntry, language string) []dbTerm
 				continue
 			}
 
-			term.addTags(termBase.Tags...)
+			term.addDefinitionTags(termBase.DefinitionTags...)
 			term.addTermTags(termBase.TermTags...)
-			term.addTags(partsOfSpeech...)
-			term.addTags(sense.Fields...)
-			term.addTags(sense.Misc...)
-			term.addTags(sense.Dialects...)
+			term.addDefinitionTags(partsOfSpeech...)
+			term.addDefinitionTags(sense.Fields...)
+			term.addDefinitionTags(sense.Misc...)
+			term.addDefinitionTags(sense.Dialects...)
 
 			jmdictBuildRules(&term)
 			jmdictBuildScore(&term)
