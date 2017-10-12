@@ -57,26 +57,26 @@ func jmnedictExtractTerms(enamdictEntry jmdict.JmnedictEntry) []dbTerm {
 		}
 
 		var term dbTerm
-		term.addTags(reading.Information...)
+		term.Sequence = enamdictEntry.Sequence
+		term.addTermTags(reading.Information...)
 
 		if kanji == nil {
 			term.Expression = reading.Reading
-			term.addTags(reading.Information...)
 		} else {
 			term.Expression = kanji.Expression
 			term.Reading = reading.Reading
-			term.addTags(kanji.Information...)
+			term.addTermTags(kanji.Information...)
 
 			for _, priority := range kanji.Priorities {
 				if hasString(priority, reading.Priorities) {
-					term.addTags(priority)
+					term.addTermTags(priority)
 				}
 			}
 		}
 
 		for _, trans := range enamdictEntry.Translations {
 			term.Glossary = append(term.Glossary, trans.Translations...)
-			term.addTags(trans.NameTypes...)
+			term.addDefinitionTags(trans.NameTypes...)
 		}
 
 		terms = append(terms, term)

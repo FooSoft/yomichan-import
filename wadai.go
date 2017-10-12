@@ -45,7 +45,7 @@ func makeWadaiExtractor() epwingExtractor {
 	}
 }
 
-func (e *wadaiExtractor) extractTerms(entry epwingEntry) []dbTerm {
+func (e *wadaiExtractor) extractTerms(entry epwingEntry, sequence int) []dbTerm {
 	matches := e.partsExp.FindStringSubmatch(entry.Heading)
 	if matches == nil {
 		return nil
@@ -90,6 +90,7 @@ func (e *wadaiExtractor) extractTerms(entry epwingEntry) []dbTerm {
 			Expression: expression,
 			Reading:    reading,
 			Glossary:   []string{entry.Text},
+			Sequence:   sequence,
 		}
 
 		terms = append(terms, term)

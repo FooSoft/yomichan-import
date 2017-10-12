@@ -55,7 +55,7 @@ type epwingBook struct {
 }
 
 type epwingExtractor interface {
-	extractTerms(entry epwingEntry) []dbTerm
+	extractTerms(entry epwingEntry, sequence int) []dbTerm
 	extractKanji(entry epwingEntry) []dbKanji
 	getFontNarrow() map[int]string
 	getFontWide() map[int]string
@@ -155,6 +155,8 @@ func epwingExportDb(inputPath, outputPath, language, title string, stride int, p
 
 	log.Println("formatting dictionary data...")
 
+	var sequence int
+
 	for _, subbook := range book.Subbooks {
 		if extractor, ok := epwingExtractors[subbook.Title]; ok {
 			fontNarrow := extractor.getFontNarrow()
@@ -185,8 +187,10 @@ func epwingExportDb(inputPath, outputPath, language, title string, stride int, p
 				entry.Heading = translate(entry.Heading)
 				entry.Text = translate(entry.Text)
 
-				terms = append(terms, extractor.extractTerms(entry)...)
+				terms = append(terms, extractor.extractTerms(entry, sequence)...)
 				kanji = append(kanji, extractor.extractKanji(entry)...)
+
+				sequence++
 			}
 
 			revisions = append(revisions, extractor.getRevision())

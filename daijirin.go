@@ -47,7 +47,7 @@ func makeDaijirinExtractor() epwingExtractor {
 	}
 }
 
-func (e *daijirinExtractor) extractTerms(entry epwingEntry) []dbTerm {
+func (e *daijirinExtractor) extractTerms(entry epwingEntry, sequence int) []dbTerm {
 	matches := e.partsExp.FindStringSubmatch(entry.Heading)
 	if matches == nil {
 		return nil
@@ -86,6 +86,7 @@ func (e *daijirinExtractor) extractTerms(entry epwingEntry) []dbTerm {
 			term := dbTerm{
 				Expression: reading,
 				Glossary:   []string{entry.Text},
+				Sequence:   sequence,
 			}
 
 			e.exportRules(&term, tags)
@@ -99,6 +100,7 @@ func (e *daijirinExtractor) extractTerms(entry epwingEntry) []dbTerm {
 					Expression: expression,
 					Reading:    reading,
 					Glossary:   []string{entry.Text},
+					Sequence:   sequence,
 				}
 
 				e.exportRules(&term, tags)

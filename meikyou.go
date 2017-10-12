@@ -77,7 +77,7 @@ func makeMeikyouExtractor() epwingExtractor {
 	}
 }
 
-func (e *meikyouExtractor) extractTerms(entry epwingEntry) []dbTerm {
+func (e *meikyouExtractor) extractTerms(entry epwingEntry, sequence int) []dbTerm {
 	matches := e.partsExp.FindStringSubmatch(entry.Heading)
 	if matches == nil {
 		return nil
@@ -127,6 +127,7 @@ func (e *meikyouExtractor) extractTerms(entry epwingEntry) []dbTerm {
 			term := dbTerm{
 				Expression: reading,
 				Glossary:   []string{entry.Text},
+				Sequence:   sequence,
 			}
 
 			e.exportRules(&term, tags)
@@ -140,6 +141,7 @@ func (e *meikyouExtractor) extractTerms(entry epwingEntry) []dbTerm {
 					Expression: expression,
 					Reading:    reading,
 					Glossary:   []string{entry.Text},
+					Sequence:   sequence,
 				}
 
 				e.exportRules(&term, tags)
