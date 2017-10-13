@@ -43,7 +43,7 @@ func makeKotowazaExtractor() epwingExtractor {
 	}
 }
 
-func (e *kotowazaExtractor) extractTerms(entry epwingEntry) []dbTerm {
+func (e *kotowazaExtractor) extractTerms(entry epwingEntry, sequence int) []dbTerm {
 	heading := entry.Heading
 
 	queue := []string{heading}
@@ -93,6 +93,7 @@ func (e *kotowazaExtractor) extractTerms(entry epwingEntry) []dbTerm {
 				Expression: expression,
 				Reading:    reading,
 				Glossary:   []string{entry.Text},
+				Sequence:   sequence,
 			}
 
 			terms = append(terms, term)

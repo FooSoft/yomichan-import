@@ -74,18 +74,24 @@ func (freqs dbMetaList) crush() dbRecordList {
 }
 
 type dbTerm struct {
-	Expression string
-	Reading    string
-	Tags       []string
-	Rules      []string
-	Score      int
-	Glossary   []string
+	Expression     string
+	Reading        string
+	DefinitionTags []string
+	Rules          []string
+	Score          int
+	Glossary       []string
+	Sequence       int
+	TermTags       []string
 }
 
 type dbTermList []dbTerm
 
-func (term *dbTerm) addTags(tags ...string) {
-	term.Tags = appendStringUnique(term.Tags, tags...)
+func (term *dbTerm) addDefinitionTags(tags ...string) {
+	term.DefinitionTags = appendStringUnique(term.DefinitionTags, tags...)
+}
+
+func (term *dbTerm) addTermTags(tags ...string) {
+	term.TermTags = appendStringUnique(term.TermTags, tags...)
 }
 
 func (term *dbTerm) addRules(rules ...string) {
@@ -98,10 +104,12 @@ func (terms dbTermList) crush() dbRecordList {
 		result := dbRecord{
 			t.Expression,
 			t.Reading,
-			strings.Join(t.Tags, " "),
+			strings.Join(t.DefinitionTags, " "),
 			strings.Join(t.Rules, " "),
 			t.Score,
 			t.Glossary,
+			t.Sequence,
+			strings.Join(t.TermTags, " "),
 		}
 
 		results = append(results, result)

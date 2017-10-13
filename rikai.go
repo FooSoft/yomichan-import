@@ -39,7 +39,7 @@ type rikaiEntry struct {
 }
 
 func rikaiBuildRules(term *dbTerm) {
-	for _, tag := range term.Tags {
+	for _, tag := range term.DefinitionTags {
 		switch tag {
 		case "adj-i", "v1", "vk":
 			term.addRules(tag)
@@ -54,7 +54,7 @@ func rikaiBuildRules(term *dbTerm) {
 }
 
 func rikaiBuildScore(term *dbTerm) {
-	for _, tag := range term.Tags {
+	for _, tag := range term.DefinitionTags {
 		switch tag {
 		case "news", "ichi", "spec", "gai":
 			term.Score++
@@ -72,6 +72,8 @@ func rikaiExtractTerms(rows *sql.Rows) (dbTermList, error) {
 	dfnExp := regexp.MustCompile(`^(?:＊\(KC\) )?((?:\((?:[\w\-\,\:]*)*\)\s*)*)(.*)$`)
 	readExp := regexp.MustCompile(`\[([^\]]+)\]`)
 	tagExp := regexp.MustCompile(`[\s\(\),]`)
+
+	var sequence int
 
 	for rows.Next() {
 		var (
@@ -104,6 +106,7 @@ func rikaiExtractTerms(rows *sql.Rows) (dbTermList, error) {
 		}
 
 		var term dbTerm
+		term.Sequence = sequence
 		if kana != nil {
 			term.Expression = *kana
 			term.Reading = *kana
@@ -118,7 +121,7 @@ func rikaiExtractTerms(rows *sql.Rows) (dbTermList, error) {
 			if dfnMatch := dfnExp.FindStringSubmatch(segment); dfnMatch != nil {
 				for _, tag := range tagExp.Split(dfnMatch[1], -1) {
 					if rikaiTagParsed(tag) {
-						term.addTags(tag)
+						term.addDefinitionTags(tag)
 					}
 				}
 
@@ -132,6 +135,8 @@ func rikaiExtractTerms(rows *sql.Rows) (dbTermList, error) {
 		rikaiBuildScore(&term)
 
 		terms = append(terms, term)
+
+		sequence++
 	}
 
 	return terms, nil

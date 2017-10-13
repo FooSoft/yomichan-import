@@ -29,10 +29,10 @@ import (
 	"github.com/FooSoft/jmdict"
 )
 
-const jmdictRevision = "jmdict3"
+const jmdictRevision = "jmdict4"
 
 func jmdictBuildRules(term *dbTerm) {
-	for _, tag := range term.Tags {
+	for _, tag := range term.DefinitionTags {
 		switch tag {
 		case "adj-i", "v1", "vk":
 			term.addRules(tag)
@@ -47,13 +47,19 @@ func jmdictBuildRules(term *dbTerm) {
 }
 
 func jmdictBuildScore(term *dbTerm) {
-	for _, tag := range term.Tags {
+	for _, tag := range term.DefinitionTags {
 		switch tag {
-		case "news", "ichi", "spec", "gai":
+		case "arch":
+			term.Score -= 100
+		}
+	}
+	for _, tag := range term.TermTags {
+		switch tag {
+		case "news", "ichi", "spec", "gai1":
 			term.Score += 100
 		case "P":
 			term.Score += 500
-		case "arch", "iK":
+		case "iK":
 			term.Score -= 100
 		}
 	}
@@ -63,10 +69,10 @@ func jmdictAddPriorities(term *dbTerm, priorities ...string) {
 	for _, priority := range priorities {
 		switch priority {
 		case "news1", "ichi1", "spec1", "gai1":
-			term.addTags("P")
+			term.addTermTags("P")
 			fallthrough
 		case "news2", "ichi2", "spec2", "gai2":
-			term.addTags(priority[:len(priority)-1])
+			term.addTermTags(priority[:len(priority)-1])
 		}
 	}
 }
@@ -90,6 +96,14 @@ func jmdictBuildTagMeta(entities map[string]string) dbTagList {
 		case "arch", "iK":
 			tag.Category = "archaism"
 			tag.Order = -4
+		case "adj-f", "adj-i", "adj-ix", "adj-ku", "adj-na", "adj-nari", "adj-no", "adj-pn", "adj-shiku", "adj-t", "adv", "adv-to", "aux-adj",
+			"aux", "aux-v", "conj", "cop-da", "ctr", "int", "n-adv", "n", "n-pref", "n-pr", "n-suf", "n-t", "num", "pn", "pref", "prt", "suf",
+			"unc", "v1", "v1-s", "v2a-s", "v2b-k", "v2d-s", "v2g-k", "v2g-s", "v2h-k", "v2h-s", "v2k-k", "v2k-s", "v2m-s", "v2n-s", "v2r-k",
+			"v2r-s", "v2s-s", "v2t-k", "v2t-s", "v2w-s", "v2y-k", "v2y-s", "v2z-s", "v4b", "v4h", "v4k", "v4m", "v4r", "v4s", "v4t", "v5aru",
+			"v5b", "v5g", "v5k", "v5k-s", "v5m", "v5n", "v5r-i", "v5r", "v5s", "v5t", "v5u", "v5u-s", "vi", "vk", "vn", "vr", "vs-c", "vs-i",
+			"vs", "vs-s", "vt", "vz":
+			tag.Category = "partOfSpeech"
+			tag.Order = -3
 		}
 
 		tags = append(tags, tag)
@@ -107,7 +121,7 @@ func jmdictExtractTerms(edictEntry jmdict.JmdictEntry, language string) []dbTerm
 		}
 
 		var termBase dbTerm
-		termBase.addTags(reading.Information...)
+		termBase.addTermTags(reading.Information...)
 
 		if kanji == nil {
 			termBase.Expression = reading.Reading
@@ -115,7 +129,7 @@ func jmdictExtractTerms(edictEntry jmdict.JmdictEntry, language string) []dbTerm
 		} else {
 			termBase.Expression = kanji.Expression
 			termBase.Reading = reading.Reading
-			termBase.addTags(kanji.Information...)
+			termBase.addTermTags(kanji.Information...)
 
 			for _, priority := range kanji.Priorities {
 				if hasString(priority, reading.Priorities) {
@@ -126,6 +140,11 @@ func jmdictExtractTerms(edictEntry jmdict.JmdictEntry, language string) []dbTerm
 
 		var partsOfSpeech []string
 		for index, sense := range edictEntry.Sense {
+
+			if len(sense.PartsOfSpeech) != 0 {
+				partsOfSpeech = sense.PartsOfSpeech
+			}
+
 			if sense.RestrictedReadings != nil && !hasString(reading.Reading, sense.RestrictedReadings) {
 				continue
 			}
@@ -138,6 +157,7 @@ func jmdictExtractTerms(edictEntry jmdict.JmdictEntry, language string) []dbTerm
 				Reading:    termBase.Reading,
 				Expression: termBase.Expression,
 				Score:      len(edictEntry.Sense) - index,
+				Sequence:   edictEntry.Sequence,
 			}
 
 			for _, glossary := range sense.Glossary {
@@ -150,17 +170,12 @@ func jmdictExtractTerms(edictEntry jmdict.JmdictEntry, language string) []dbTerm
 				continue
 			}
 
-			term.addTags(termBase.Tags...)
-			term.addTags(sense.PartsOfSpeech...)
-			term.addTags(sense.Fields...)
-			term.addTags(sense.Misc...)
-			term.addTags(sense.Dialects...)
-
-			if index == 0 {
-				partsOfSpeech = sense.PartsOfSpeech
-			} else {
-				term.addTags(partsOfSpeech...)
-			}
+			term.addDefinitionTags(termBase.DefinitionTags...)
+			term.addTermTags(termBase.TermTags...)
+			term.addDefinitionTags(partsOfSpeech...)
+			term.addDefinitionTags(sense.Fields...)
+			term.addDefinitionTags(sense.Misc...)
+			term.addDefinitionTags(sense.Dialects...)
 
 			jmdictBuildRules(&term)
 			jmdictBuildScore(&term)
@@ -172,7 +187,14 @@ func jmdictExtractTerms(edictEntry jmdict.JmdictEntry, language string) []dbTerm
 	if len(edictEntry.Kanji) > 0 {
 		for _, kanji := range edictEntry.Kanji {
 			for _, reading := range edictEntry.Readings {
-				convert(reading, &kanji)
+				if reading.NoKanji == nil {
+					convert(reading, &kanji)
+				}
+			}
+		}
+		for _, reading := range edictEntry.Readings {
+			if reading.NoKanji != nil  {
+				convert(reading, nil)
 			}
 		}
 	} else {
