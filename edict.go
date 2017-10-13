@@ -102,7 +102,7 @@ func jmdictBuildTagMeta(entities map[string]string) dbTagList {
 			"v2r-s", "v2s-s", "v2t-k", "v2t-s", "v2w-s", "v2y-k", "v2y-s", "v2z-s", "v4b", "v4h", "v4k", "v4m", "v4r", "v4s", "v4t", "v5aru",
 			"v5b", "v5g", "v5k", "v5k-s", "v5m", "v5n", "v5r-i", "v5r", "v5s", "v5t", "v5u", "v5u-s", "vi", "vk", "vn", "vr", "vs-c", "vs-i",
 			"vs", "vs-s", "vt", "vz":
-			tag.Category = "pos"
+			tag.Category = "partOfSpeech"
 			tag.Order = -3
 		}
 
