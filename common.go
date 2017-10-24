@@ -43,6 +43,7 @@ type dbTag struct {
 	Category string
 	Order    int
 	Notes    string
+	Score    int
 }
 
 type dbTagList []dbTag
@@ -50,7 +51,7 @@ type dbTagList []dbTag
 func (meta dbTagList) crush() dbRecordList {
 	var results dbRecordList
 	for _, m := range meta {
-		results = append(results, dbRecord{m.Name, m.Category, m.Order, m.Notes})
+		results = append(results, dbRecord{m.Name, m.Category, m.Order, m.Notes, m.Score})
 	}
 
 	return results
