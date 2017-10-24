@@ -59,7 +59,7 @@ func jmdictBuildScore(term *dbTerm) {
 			term.Score += 100
 		case "P":
 			term.Score += 500
-		case "iK":
+		case "iK", "ik", "ok", "oK", "io", "oik":
 			term.Score -= 100
 		}
 	}
@@ -83,7 +83,7 @@ func jmdictBuildTagMeta(entities map[string]string) dbTagList {
 		dbTag{Name: "ichi", Notes: "listed as common in Ichimango Goi Bunruishuu", Category: "frequent", Order: -2},
 		dbTag{Name: "spec", Notes: "common words not included in frequency lists", Category: "frequent", Order: -2},
 		dbTag{Name: "gai", Notes: "common loanword", Category: "frequent", Order: -2},
-		dbTag{Name: "P", Notes: "popular term", Category: "popular", Order: -10},
+		dbTag{Name: "P", Notes: "popular term", Category: "popular", Order: -10, Score: 10},
 	}
 
 	for name, value := range entities {
@@ -93,9 +93,11 @@ func jmdictBuildTagMeta(entities map[string]string) dbTagList {
 		case "exp", "id":
 			tag.Category = "expression"
 			tag.Order = -5
-		case "arch", "iK":
+		case "arch":
 			tag.Category = "archaism"
 			tag.Order = -4
+		case "iK", "ik", "ok", "oK", "io", "oik":
+			tag.Score = -5
 		case "adj-f", "adj-i", "adj-ix", "adj-ku", "adj-na", "adj-nari", "adj-no", "adj-pn", "adj-shiku", "adj-t", "adv", "adv-to", "aux-adj",
 			"aux", "aux-v", "conj", "cop-da", "ctr", "int", "n-adv", "n", "n-pref", "n-pr", "n-suf", "n-t", "num", "pn", "pref", "prt", "suf",
 			"unc", "v1", "v1-s", "v2a-s", "v2b-k", "v2d-s", "v2g-k", "v2g-s", "v2h-k", "v2h-s", "v2k-k", "v2k-s", "v2m-s", "v2n-s", "v2r-k",
