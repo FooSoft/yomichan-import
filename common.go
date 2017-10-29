@@ -33,7 +33,7 @@ import (
 	"strings"
 )
 
-const databaseFormat = 2
+const databaseFormat = 3
 
 type dbRecord []interface{}
 type dbRecordList []dbRecord
