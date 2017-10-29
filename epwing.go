@@ -213,6 +213,7 @@ func epwingExportDb(inputPath, outputPath, language, title string, stride int, p
 		outputPath,
 		title,
 		strings.Join(revisions, ";"),
+		true,
 		recordData,
 		stride,
 		pretty,

@@ -195,7 +195,7 @@ func jmdictExtractTerms(edictEntry jmdict.JmdictEntry, language string) []dbTerm
 			}
 		}
 		for _, reading := range edictEntry.Readings {
-			if reading.NoKanji != nil  {
+			if reading.NoKanji != nil {
 				convert(reading, nil)
 			}
 		}
@@ -260,6 +260,7 @@ func jmdictExportDb(inputPath, outputPath, language, title string, stride int, p
 		outputPath,
 		title,
 		jmdictRevision,
+		true,
 		recordData,
 		stride,
 		pretty,

@@ -180,6 +180,7 @@ func rikaiExportDb(inputPath, outputPath, language, title string, stride int, pr
 		outputPath,
 		title,
 		rikaiRevision,
+		true,
 		recordData,
 		stride,
 		pretty,

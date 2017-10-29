@@ -156,7 +156,7 @@ func (kanji dbKanjiList) crush() dbRecordList {
 	return results
 }
 
-func writeDb(outputPath, title, revision string, recordData map[string]dbRecordList, stride int, pretty bool) error {
+func writeDb(outputPath, title, revision string, sequenced bool, recordData map[string]dbRecordList, stride int, pretty bool) error {
 	var zbuff bytes.Buffer
 	zip := zip.NewWriter(&zbuff)
 
@@ -201,14 +201,16 @@ func writeDb(outputPath, title, revision string, recordData map[string]dbRecordL
 
 	var err error
 	var db struct {
-		Title    string `json:"title"`
-		Format   int    `json:"format"`
-		Revision string `json:"revision"`
+		Title     string `json:"title"`
+		Format    int    `json:"format"`
+		Revision  string `json:"revision"`
+		Sequenced bool   `json:"sequenced"`
 	}
 
 	db.Title = title
 	db.Format = databaseFormat
 	db.Revision = revision
+	db.Sequenced = sequenced
 
 	for recordType, recordEntries := range recordData {
 		if _, err := writeDbRecords(recordType, recordEntries); err != nil {
