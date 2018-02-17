@@ -144,12 +144,12 @@ func epwingExportDb(inputPath, outputPath, language, title string, stride int, p
 		"明鏡国語辞典":         makeMeikyouExtractor(),
 		"故事ことわざの辞典":      makeKotowazaExtractor(),
 		"研究社　新和英大辞典　第５版": makeWadaiExtractor(),
-		"広辞苑第六版": makeKoujienExtractor(),
-		"付属資料": makeKoujienExtractor(),
-		"学研国語大辞典": makeGakkenExtractor(),
-		"古語辞典": makeGakkenExtractor(),
-		"故事ことわざ辞典": makeGakkenExtractor(),
-		"学研漢和大字典": makeGakkenExtractor(),
+		"広辞苑第六版":         makeKoujienExtractor(),
+		"付属資料":           makeKoujienExtractor(),
+		"学研国語大辞典":        makeGakkenExtractor(),
+		"古語辞典":           makeGakkenExtractor(),
+		"故事ことわざ辞典":       makeGakkenExtractor(),
+		"学研漢和大字典":        makeGakkenExtractor(),
 	}
 
 	var (

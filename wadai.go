@@ -86,6 +86,11 @@ func (e *wadaiExtractor) extractTerms(entry epwingEntry, sequence int) []dbTerm 
 			reading = ""
 		}
 
+		expression = strings.TrimSpace(expression)
+		if len(expression) == 0 {
+			continue
+		}
+
 		term := dbTerm{
 			Expression: expression,
 			Reading:    reading,
