@@ -24,9 +24,9 @@ contributions are welcome.
 Builds of Yomichan Import are currently available for Linux, Mac OS X, and Windows. The necessary version of
 [Zero-EPWING](https://foosoft.net/projects/zero-epwing) is included for processing EPWING dictionaries.
 
-*   [yomichan-import_linux.tar.gz](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_linux.tar.gz): (GTK+ 3 required for GUI)
-*   [yomichan-import_darwin.tar.gz](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_darwin.tar.gz)
-*   [yomichan-import_windows.zip](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_windows.zip) (64 bit Vista or above, no console output)
+*   [yomichan-import\_linux.tar.gz](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_linux.tar.gz): (GTK+ 3 required for GUI)
+*   [yomichan-import\_darwin.tar.gz](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_darwin.tar.gz)
+*   [yomichan-import\_windows.zip](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_windows.zip) (64 bit Vista or above, no console output)
 
 ## Basic Usage ##
 
