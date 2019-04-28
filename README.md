@@ -19,6 +19,8 @@ Yomichan Import is being expanded to support other EPWING dictionaries based on 
 non-technical (although laborious) process that requires writing regular expressions and creating font tables; volunteer
 contributions are welcome.
 
+![](https://foosoft.net/projects/yomichan-import/img/import.png)
+
 ## Installation ##
 
 Builds of Yomichan Import are currently available for Linux, Mac OS X, and Windows. The necessary version of
@@ -43,5 +45,3 @@ Please follow the steps outlined below to import your custom dictionary into Yom
 not contain non-ASCII characters (including Japanese characters). This problem is due to the fact that the EPWING
 library used by Zero-EPWING, does not support such paths. Attempts to convert dictionaries stored in paths containing
 illegal characters will cause the conversion process to fail.
-
-[![](https://foosoft.net/projects/yomichan-import/img/import-thumb.png)](https://foosoft.net/projects/yomichan-import/img/import.png)
