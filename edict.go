@@ -34,7 +34,7 @@ const jmdictRevision = "jmdict4"
 func jmdictBuildRules(term *dbTerm) {
 	for _, tag := range term.DefinitionTags {
 		switch tag {
-		case "adj-i", "v1", "vk":
+		case "adj-i", "v1", "vk", "vz":
 			term.addRules(tag)
 		default:
 			if strings.HasPrefix(tag, "v5") {
