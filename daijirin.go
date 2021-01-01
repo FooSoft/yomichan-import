@@ -26,7 +26,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/FooSoft/zero-epwing-go/zig"
+	zig "github.com/FooSoft/zero-epwing-go"
 )
 
 type daijirinExtractor struct {

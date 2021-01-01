@@ -29,7 +29,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/FooSoft/zero-epwing-go/zig"
+	zig "github.com/FooSoft/zero-epwing-go"
 )
 
 type epwingExtractor interface {
