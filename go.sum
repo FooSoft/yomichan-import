@@ -1,6 +1,0 @@
-github.com/FooSoft/jmdict v0.0.0-20190926045629-808d66c7b050 h1:3VWk8B61jEgfcV+pEgzWO1j7TVXC9g5QaS0J06994Zc=
-github.com/FooSoft/jmdict v0.0.0-20190926045629-808d66c7b050/go.mod h1:zo92ezZlNld5cN1iuS0QRAmSsHcpvcqGZLVNKPM4Hlg=
-github.com/andlabs/ui v0.0.0-20180902183112-867a9e5a498d h1:4ianvxb8s3oyizgjuWWxGuTAUU+6JStcvj6BuHS4PVY=
-github.com/andlabs/ui v0.0.0-20180902183112-867a9e5a498d/go.mod h1:5G2EjwzgZUPnnReoKvPWVneT8APYbyKkihDVAHUi0II=
-github.com/mattn/go-sqlite3 v2.0.2+incompatible h1:qzw9c2GNT8UFrgWNDhCTqRqYUSmu/Dav/9Z58LGpk7U=
-github.com/mattn/go-sqlite3 v2.0.2+incompatible/go.mod h1:FPy6KqzDD04eiIsT53CuJW3U88zkxoIYsOqkbpncsNc=

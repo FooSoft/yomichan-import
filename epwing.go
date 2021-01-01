@@ -23,120 +23,26 @@
 package main
 
 import (
-	"bufio"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
-	"os"
-	"os/exec"
-	"path/filepath"
 	"regexp"
-	"runtime"
 	"strconv"
 	"strings"
+
+	"github.com/FooSoft/zero-epwing-go/zig"
 )
 
-type epwingEntry struct {
-	Heading string `json:"heading"`
-	Text    string `json:"text"`
-}
-
-type epwingSubbook struct {
-	Title     string        `json:"title"`
-	Copyright string        `json:"copyright"`
-	Entries   []epwingEntry `json:"entries"`
-}
-
-type epwingBook struct {
-	CharCode string          `json:"charCode"`
-	DiscCode string          `json:"discCode"`
-	Subbooks []epwingSubbook `json:"subbooks"`
-}
-
 type epwingExtractor interface {
-	extractTerms(entry epwingEntry, sequence int) []dbTerm
-	extractKanji(entry epwingEntry) []dbKanji
+	extractTerms(entry zig.BookEntry, sequence int) []dbTerm
+	extractKanji(entry zig.BookEntry) []dbKanji
 	getFontNarrow() map[int]string
 	getFontWide() map[int]string
 	getRevision() string
 }
 
 func epwingExportDb(inputPath, outputPath, language, title string, stride int, pretty bool) error {
-	stat, err := os.Stat(inputPath)
+	book, err := zig.Load(inputPath)
 	if err != nil {
-		return err
-	}
-
-	var toolExec bool
-	if stat.IsDir() {
-		toolExec = true
-	} else if filepath.Base(inputPath) == "CATALOGS" {
-		inputPath = filepath.Dir(inputPath)
-		toolExec = true
-	}
-
-	var data []byte
-	if toolExec {
-		exePath, err := os.Executable()
-		if err != nil {
-			return err
-		}
-
-		toolPath := filepath.Join("bin", runtime.GOOS, "zero-epwing")
-		if runtime.GOOS == "windows" {
-			toolPath += ".exe"
-		}
-
-		toolPath = filepath.Join(filepath.Dir(exePath), toolPath)
-
-		if _, err = os.Stat(toolPath); err != nil {
-			return fmt.Errorf("failed to find zero-epwing in '%s'", toolPath)
-		}
-
-		cmd := exec.Command(toolPath, "--entries", inputPath)
-
-		stdout, err := cmd.StdoutPipe()
-		if err != nil {
-			return err
-		}
-
-		stderr, err := cmd.StderrPipe()
-		if err != nil {
-			return err
-		}
-
-		log.Printf("invoking zero-epwing from '%s'...\n", toolPath)
-		if err := cmd.Start(); err != nil {
-			return err
-		}
-
-		go func() {
-			scanner := bufio.NewScanner(stderr)
-			for scanner.Scan() {
-				log.Printf("\t > %s\n", scanner.Text())
-			}
-		}()
-
-		if data, err = ioutil.ReadAll(stdout); err != nil {
-			return err
-		}
-
-		if err := cmd.Wait(); err != nil {
-			return err
-		}
-
-		log.Println("completed zero-epwing processing")
-	} else {
-		data, err = ioutil.ReadFile(inputPath)
-	}
-
-	if err != nil {
-		return err
-	}
-
-	var book epwingBook
-	if err := json.Unmarshal(data, &book); err != nil {
 		return err
 	}
 
@@ -160,11 +66,10 @@ func epwingExportDb(inputPath, outputPath, language, title string, stride int, p
 		kanji     dbKanjiList
 		revisions []string
 		titles    []string
+		sequence  int
 	)
 
 	log.Println("formatting dictionary data...")
-
-	var sequence int
 
 	for _, subbook := range book.Subbooks {
 		if extractor, ok := epwingExtractors[subbook.Title]; ok {

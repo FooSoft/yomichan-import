@@ -25,6 +25,8 @@ package main
 import (
 	"regexp"
 	"strings"
+
+	"github.com/FooSoft/zero-epwing-go/zig"
 )
 
 type daijirinExtractor struct {
@@ -47,7 +49,7 @@ func makeDaijirinExtractor() epwingExtractor {
 	}
 }
 
-func (e *daijirinExtractor) extractTerms(entry epwingEntry, sequence int) []dbTerm {
+func (e *daijirinExtractor) extractTerms(entry zig.BookEntry, sequence int) []dbTerm {
 	matches := e.partsExp.FindStringSubmatch(entry.Heading)
 	if matches == nil {
 		return nil
@@ -112,7 +114,7 @@ func (e *daijirinExtractor) extractTerms(entry epwingEntry, sequence int) []dbTe
 	return terms
 }
 
-func (*daijirinExtractor) extractKanji(entry epwingEntry) []dbKanji {
+func (*daijirinExtractor) extractKanji(entry zig.BookEntry) []dbKanji {
 	return nil
 }
 

@@ -107,7 +107,7 @@ func main() {
 
 	if *format == "" {
 		var err error
-		if *format, err = detectFormat(inputPath); err != nil {
+		if *format, err = detectFormat(&inputPath); err != nil {
 			log.Fatal(err)
 		}
 	}

@@ -25,6 +25,8 @@ package main
 import (
 	"regexp"
 	"strings"
+
+	"github.com/FooSoft/zero-epwing-go/zig"
 )
 
 type gakkenExtractor struct {
@@ -69,7 +71,7 @@ var cosmetics = strings.NewReplacer("(1)", "①", "(2)", "②", "(3)", "③", "(
 	"セ゛", "ゼ",
 	"ソ゛", "ゾ")
 
-func (e *gakkenExtractor) extractTerms(entry epwingEntry, sequence int) []dbTerm {
+func (e *gakkenExtractor) extractTerms(entry zig.BookEntry, sequence int) []dbTerm {
 	matches := e.partsExp.FindStringSubmatch(entry.Heading)
 	if matches == nil {
 		return nil
@@ -140,7 +142,7 @@ func (e *gakkenExtractor) extractTerms(entry epwingEntry, sequence int) []dbTerm
 	return terms
 }
 
-func (*gakkenExtractor) extractKanji(entry epwingEntry) []dbKanji {
+func (*gakkenExtractor) extractKanji(entry zig.BookEntry) []dbKanji {
 	return nil
 }
 

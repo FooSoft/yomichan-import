@@ -116,7 +116,7 @@ func gui() error {
 				return
 			}
 
-			format, err := detectFormat(inputPath)
+			format, err := detectFormat(&inputPath)
 			if err != nil {
 				ui.MsgBoxError(window, "Error", "Unable to detect dictionary format")
 				importButton.Enable()

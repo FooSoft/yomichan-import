@@ -25,6 +25,8 @@ package main
 import (
 	"regexp"
 	"strings"
+
+	"github.com/FooSoft/zero-epwing-go/zig"
 )
 
 type kotowazaExtractor struct {
@@ -43,7 +45,7 @@ func makeKotowazaExtractor() epwingExtractor {
 	}
 }
 
-func (e *kotowazaExtractor) extractTerms(entry epwingEntry, sequence int) []dbTerm {
+func (e *kotowazaExtractor) extractTerms(entry zig.BookEntry, sequence int) []dbTerm {
 	heading := entry.Heading
 
 	queue := []string{heading}
@@ -104,7 +106,7 @@ func (e *kotowazaExtractor) extractTerms(entry epwingEntry, sequence int) []dbTe
 	return terms
 }
 
-func (e *kotowazaExtractor) extractKanji(entry epwingEntry) []dbKanji {
+func (e *kotowazaExtractor) extractKanji(entry zig.BookEntry) []dbKanji {
 	return nil
 }
 
