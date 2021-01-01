@@ -29,6 +29,8 @@ import (
 
 	"github.com/andlabs/ui"
 	_ "github.com/andlabs/ui/winmanifest"
+
+	yomichan "github.com/FooSoft/yomichan-import"
 )
 
 type logger struct {
@@ -58,7 +60,11 @@ func gui() error {
 		pathTargetBox.Append(pathTargetButton, false)
 
 		titleEntry := ui.NewEntry()
+		titleEntry.SetText(yomichan.DefaultTitle)
+
 		languageEntry := ui.NewEntry()
+		languageEntry.SetText(yomichan.DefaultLanguage)
+
 		outputEntry := ui.NewEntry()
 		importButton := ui.NewButton("Import dictionary...")
 
@@ -116,28 +122,26 @@ func gui() error {
 				return
 			}
 
-			format, err := detectFormat(&inputPath)
-			if err != nil {
-				ui.MsgBoxError(window, "Error", "Unable to detect dictionary format")
-				importButton.Enable()
-				return
-			}
-
-			title := titleEntry.Text()
-			language := languageEntry.Text()
-
 			go func() {
-				var success bool
+				var err error
 				defer ui.QueueMain(func() {
 					importButton.Enable()
-					if success {
+					if err == nil {
 						ui.MsgBox(window, "Success", "Conversion process complete")
 					} else {
 						ui.MsgBox(window, "Error", "Conversion process failed")
 					}
 				})
 
-				success = exportDb(inputPath, outputPath, format, language, title, defaultStride, false) == nil
+				err = yomichan.ExportDb(
+					inputPath,
+					outputPath,
+					yomichan.DefaultFormat,
+					languageEntry.Text(),
+					titleEntry.Text(),
+					yomichan.DefaultStride,
+					yomichan.DefaultPretty,
+				)
 			}()
 		})
 
@@ -148,4 +152,10 @@ func gui() error {
 
 		window.Show()
 	})
+}
+
+func main() {
+	if err := gui(); err != nil {
+		log.Fatal(err)
+	}
 }

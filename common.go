@@ -20,7 +20,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package main
+package yomichan
 
 import (
 	"archive/zip"
@@ -31,6 +31,14 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+)
+
+const (
+	DefaultFormat   = ""
+	DefaultLanguage = ""
+	DefaultPretty   = false
+	DefaultStride   = 10000
+	DefaultTitle    = ""
 )
 
 const databaseFormat = 3
@@ -301,4 +309,30 @@ func detectFormat(path *string) (string, error) {
 	}
 
 	return "", errors.New("unrecognized dictionary format")
+}
+
+func ExportDb(inputPath, outputPath, format, language, title string, stride int, pretty bool) error {
+	handlers := map[string]func(string, string, string, string, int, bool) error{
+		"edict":     jmdictExportDb,
+		"enamdict":  jmnedictExportDb,
+		"epwing":    epwingExportDb,
+		"kanjidic":  kanjidicExportDb,
+		"rikai":     rikaiExportDb,
+		"kanjifreq": frequencyKanjiExportDb,
+		"termfreq":  frequencyTermsExportDb,
+	}
+
+	var err error
+	if format == DefaultFormat {
+		if format, err = detectFormat(&inputPath); err != nil {
+			return err
+		}
+	}
+
+	handler, ok := handlers[strings.ToLower(format)]
+	if !ok {
+		return errors.New("unrecognized dictionary format")
+	}
+
+	return handler(inputPath, outputPath, strings.ToLower(language), title, stride, pretty)
 }

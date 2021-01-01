@@ -20,11 +20,10 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package main
+package yomichan
 
 import (
 	"fmt"
-	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -68,8 +67,6 @@ func epwingExportDb(inputPath, outputPath, language, title string, stride int, p
 		titles    []string
 		sequence  int
 	)
-
-	log.Println("formatting dictionary data...")
 
 	for _, subbook := range book.Subbooks {
 		if extractor, ok := epwingExtractors[subbook.Title]; ok {
