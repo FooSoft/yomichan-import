@@ -6,6 +6,7 @@ supports the following formats:
 *   [JMdict](http://www.edrdg.org/jmdict/edict_doc.html)
 *   [JMnedict](http://www.edrdg.org/enamdict/enamdict_doc.html)
 *   [KANJIDIC2](http://www.edrdg.org/kanjidic/kanjd2index.html)
+*   [Rikai](https://www.polarcloud.com/getrcx/)
 *   [EPWING](https://ja.wikipedia.org/wiki/EPWING)
     *   [Daijirin](https://en.wikipedia.org/wiki/Daijirin) (三省堂　スーパー大辞林)
     *   [Daijisen](https://en.wikipedia.org/wiki/Daijisen) (大辞泉)
@@ -23,18 +24,19 @@ contributions are welcome.
 
 ## Installation ##
 
-Builds of Yomichan Import are currently available for Linux, Mac OS X, and Windows. The necessary version of
-[Zero-EPWING](https://foosoft.net/projects/zero-epwing) is included for processing EPWING dictionaries.
+Builds of Yomichan Import are available for Linux, Windows, and Mac OS X. As I do not have an easy way to compile for
+Mac OS X, the corresponding build is currently out of date. If you are able to, use the Linux or Windows versions as
+they will always be built from the latest version of the code.
 
 *   [yomichan-import\_linux.tar.gz](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_linux.tar.gz): (GTK+ 3 required for GUI)
-*   [yomichan-import\_darwin.tar.gz](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_darwin.tar.gz)
 *   [yomichan-import\_windows.zip](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_windows.zip) (64 bit Vista or above, no console output)
+*   [yomichan-import\_darwin.tar.gz](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_darwin.tar.gz) (outdated, consider using builds above)
 
 ## Basic Usage ##
 
-Please follow the steps outlined below to import your custom dictionary into Yomichan:
+Follow the steps outlined below to import your custom dictionary into Yomichan:
 
-1.  Launch the `yomichan-import` executable after extracting the entire archive.
+1.  Launch the `yomichan-gtk` executable after extracting the entire archive (or `yomichan` from the command line).
 2.  Specify the source path of the dictionary you wish to convert.
 3.  Specify the target path of the dictionary ZIP archive that you wish to create.
 4.  Press the button labeled *Import dictionary...* and wait for processing to complete.
@@ -43,5 +45,5 @@ Please follow the steps outlined below to import your custom dictionary into Yom
 
 **Notice**: When converting EPWING dictionaries on Windows, it is important that the dictionary path you provide does
 not contain non-ASCII characters (including Japanese characters). This problem is due to the fact that the EPWING
-library used by Zero-EPWING, does not support such paths. Attempts to convert dictionaries stored in paths containing
-illegal characters will cause the conversion process to fail.
+library used does not support such paths. Attempts to convert dictionaries stored in paths containing illegal characters
+may cause the conversion process to fail.
