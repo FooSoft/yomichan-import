@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2016 Alex Yatskov <alex@foosoft.net>
- * Author: Alex Yatskov <alex@foosoft.net>
+ * Copyright (c) 2016-2021 Alex Yatskov <alex@foosoft.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -274,8 +273,8 @@ func hasString(needle string, haystack []string) bool {
 	return false
 }
 
-func detectFormat(path *string) (string, error) {
-	switch filepath.Ext(*path) {
+func detectFormat(path string) (string, error) {
+	switch filepath.Ext(path) {
 	case ".sqlite":
 		return "rikai", nil
 	case ".kanjifreq":
@@ -284,25 +283,22 @@ func detectFormat(path *string) (string, error) {
 		return "termfreq", nil
 	}
 
-	switch filepath.Base(*path) {
+	switch filepath.Base(path) {
 	case "JMdict", "JMdict.xml", "JMdict_e", "JMdict_e.xml":
 		return "edict", nil
 	case "JMnedict", "JMnedict.xml":
 		return "enamdict", nil
 	case "kanjidic2", "kanjidic2.xml":
 		return "kanjidic", nil
-	case "CATALOGS":
-		*path = filepath.Dir(*path)
-		return "epwing", nil
 	}
 
-	info, err := os.Stat(*path)
+	info, err := os.Stat(path)
 	if err != nil {
 		return "", err
 	}
 
 	if info.IsDir() {
-		_, err := os.Stat(filepath.Join(*path, "CATALOGS"))
+		_, err := os.Stat(filepath.Join(path, "CATALOGS"))
 		if err == nil {
 			return "epwing", nil
 		}
@@ -324,7 +320,7 @@ func ExportDb(inputPath, outputPath, format, language, title string, stride int,
 
 	var err error
 	if format == DefaultFormat {
-		if format, err = detectFormat(&inputPath); err != nil {
+		if format, err = detectFormat(inputPath); err != nil {
 			return err
 		}
 	}

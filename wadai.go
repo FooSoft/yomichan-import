@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2017 Alex Yatskov <alex@foosoft.net>, ajyliew
- * Author: Alex Yatskov <alex@foosoft.net>, ajyliew
+ * Copyright (c) 2017-2021 Alex Yatskov <alex@foosoft.net>, ajyliew
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in

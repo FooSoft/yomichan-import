@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2017 Alex Yatskov <alex@foosoft.net>
- * Author: Alex Yatskov <alex@foosoft.net>
+ * Copyright (c) 2017-2019 Alex Yatskov <alex@foosoft.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -23,9 +22,8 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"path/filepath"
-	"strings"
 
 	"github.com/andlabs/ui"
 	_ "github.com/andlabs/ui/winmanifest"
@@ -33,20 +31,8 @@ import (
 	yomichan "github.com/FooSoft/yomichan-import"
 )
 
-type logger struct {
-	entry *ui.Entry
-}
-
-func (l *logger) Write(p []byte) (n int, err error) {
-	ui.QueueMain(func() {
-		l.entry.SetText(strings.Trim(string(p), "\n"))
-	})
-
-	return len(p), nil
-}
-
-func gui() error {
-	return ui.Main(func() {
+func main() {
+	ui.Main(func() {
 		pathSourceEntry := ui.NewEntry()
 		pathSourceButton := ui.NewButton("Browse...")
 		pathSourceBox := ui.NewHorizontalBox()
@@ -59,14 +45,13 @@ func gui() error {
 		pathTargetBox.Append(pathTargetEntry, true)
 		pathTargetBox.Append(pathTargetButton, false)
 
+		importButton := ui.NewButton("Import dictionary...")
+
 		titleEntry := ui.NewEntry()
 		titleEntry.SetText(yomichan.DefaultTitle)
 
 		languageEntry := ui.NewEntry()
 		languageEntry.SetText(yomichan.DefaultLanguage)
-
-		outputEntry := ui.NewEntry()
-		importButton := ui.NewButton("Import dictionary...")
 
 		mainBox := ui.NewVerticalBox()
 		mainBox.Append(ui.NewLabel("Path to dictionary source (CATALOGS file for EPWING)"), false)
@@ -77,12 +62,10 @@ func gui() error {
 		mainBox.Append(titleEntry, false)
 		mainBox.Append(ui.NewLabel("Dictionary glossary language (blank for English)"), false)
 		mainBox.Append(languageEntry, false)
-		mainBox.Append(ui.NewLabel("Application output"), false)
-		mainBox.Append(outputEntry, false)
 		mainBox.Append(ui.NewVerticalBox(), true)
 		mainBox.Append(importButton, false)
 
-		window := ui.NewWindow("Yomichan Import", 640, 320, false)
+		window := ui.NewWindow("Yomichan Import", 640, 280, false)
 		window.SetMargined(true)
 		window.SetChild(mainBox)
 
@@ -102,13 +85,14 @@ func gui() error {
 			}
 		})
 
-		log.SetOutput(&logger{outputEntry})
-
 		importButton.OnClicked(func(*ui.Button) {
 			importButton.Disable()
-			outputEntry.SetText("")
 
 			inputPath := pathSourceEntry.Text()
+			if filepath.Base(inputPath) == "CATALOGS" {
+				inputPath = filepath.Dir(inputPath)
+			}
+
 			if len(inputPath) == 0 {
 				ui.MsgBoxError(window, "Error", "You must specify a dictionary source path")
 				importButton.Enable()
@@ -123,17 +107,7 @@ func gui() error {
 			}
 
 			go func() {
-				var err error
-				defer ui.QueueMain(func() {
-					importButton.Enable()
-					if err == nil {
-						ui.MsgBox(window, "Success", "Conversion process complete")
-					} else {
-						ui.MsgBox(window, "Error", "Conversion process failed")
-					}
-				})
-
-				err = yomichan.ExportDb(
+				err := yomichan.ExportDb(
 					inputPath,
 					outputPath,
 					yomichan.DefaultFormat,
@@ -142,6 +116,15 @@ func gui() error {
 					yomichan.DefaultStride,
 					yomichan.DefaultPretty,
 				)
+
+				ui.QueueMain(func() {
+					importButton.Enable()
+					if err == nil {
+						ui.MsgBox(window, "Success", "Conversion process complete")
+					} else {
+						ui.MsgBox(window, "Error", fmt.Sprintf("Conversion process failed:\n%e", err))
+					}
+				})
 			}()
 		})
 
@@ -152,10 +135,4 @@ func gui() error {
 
 		window.Show()
 	})
-}
-
-func main() {
-	if err := gui(); err != nil {
-		log.Fatal(err)
-	}
 }
