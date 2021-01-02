@@ -302,6 +302,11 @@ func detectFormat(path string) (string, error) {
 		if err == nil {
 			return "epwing", nil
 		}
+
+		_, err = os.Stat(filepath.Join(path, "catalogs"))
+		if err == nil {
+			return "epwing", nil
+		}
 	}
 
 	return "", errors.New("unrecognized dictionary format")
