@@ -85,8 +85,19 @@ func main() {
 			}
 		})
 
+		setBusyState := func(busy bool) {
+			if busy {
+				importButton.Disable()
+				importButton.SetText("Importing, please wait...")
+
+			} else {
+				importButton.SetText("Start dictionary import")
+				importButton.Enable()
+			}
+		}
+
 		importButton.OnClicked(func(*ui.Button) {
-			importButton.Disable()
+			setBusyState(true)
 
 			inputPath := pathSourceEntry.Text()
 			if filepath.Base(inputPath) == "CATALOGS" {
@@ -95,14 +106,14 @@ func main() {
 
 			if len(inputPath) == 0 {
 				ui.MsgBoxError(window, "Error", "You must specify a dictionary source path")
-				importButton.Enable()
+				setBusyState(false)
 				return
 			}
 
 			outputPath := pathTargetEntry.Text()
 			if len(outputPath) == 0 {
 				ui.MsgBoxError(window, "Error", "You must specify a dictionary target path")
-				importButton.Enable()
+				setBusyState(false)
 				return
 			}
 
@@ -118,9 +129,9 @@ func main() {
 				)
 
 				ui.QueueMain(func() {
-					importButton.Enable()
+					setBusyState(false)
 					if err == nil {
-						ui.MsgBox(window, "Success", "Conversion process complete")
+						ui.MsgBox(window, "Success", "Conversion process complete!")
 					} else {
 						ui.MsgBox(window, "Error", fmt.Sprintf("Conversion process failed:\n%e", err))
 					}
