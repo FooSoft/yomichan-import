@@ -133,7 +133,7 @@ func main() {
 					if err == nil {
 						ui.MsgBox(window, "Success", "Conversion process complete!")
 					} else {
-						ui.MsgBox(window, "Error", fmt.Sprintf("Conversion process failed:\n%e", err))
+						ui.MsgBox(window, "Error", fmt.Sprintf("Conversion process failed: %s", err.Error()))
 					}
 				})
 			}()
