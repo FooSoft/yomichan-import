@@ -2,6 +2,8 @@ github.com/FooSoft/jmdict v0.0.0-20190926045629-808d66c7b050 h1:3VWk8B61jEgfcV+p
 github.com/FooSoft/jmdict v0.0.0-20190926045629-808d66c7b050/go.mod h1:zo92ezZlNld5cN1iuS0QRAmSsHcpvcqGZLVNKPM4Hlg=
 github.com/FooSoft/zero-epwing-go v0.0.0-20210110063657-4e432fa54539 h1:gQkr1jXwLOHMvYc7OHQOTN8/m5NyeFWCpfwKanNNtFs=
 github.com/FooSoft/zero-epwing-go v0.0.0-20210110063657-4e432fa54539/go.mod h1:HbHFbLqiZe/xWwz7j0zPrHQ6CvJA3IM71yeB7ncL5ss=
+github.com/andlabs/ui v0.0.0-20200610043537-70a69d6ae31e h1:wSQCJiig/QkoUnpvelSPbLiZNWvh2yMqQTQvIQqSUkU=
+github.com/andlabs/ui v0.0.0-20200610043537-70a69d6ae31e/go.mod h1:5G2EjwzgZUPnnReoKvPWVneT8APYbyKkihDVAHUi0II=
 github.com/mattn/go-sqlite3 v1.14.6 h1:dNPt6NO46WmLVt2DLNpwczCmdV5boIZ6g/tlDrlRUbg=
 github.com/mattn/go-sqlite3 v1.14.6/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
 golang.org/x/text v0.3.4 h1:0YWbFKbhXG/wIiuHDSKpS0Iy7FSA+u45VtBMfQcFTTc=
