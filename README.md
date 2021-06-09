@@ -1,4 +1,4 @@
-# Yomichan Import #
+# Yomichan Import
 
 Yomichan Import allows users of the [Yomichan](https://foosoft.net/projects/yomichan) extension to import custom dictionary files. It currently
 supports the following formats:
@@ -22,7 +22,7 @@ contributions are welcome.
 
 ![](https://foosoft.net/projects/yomichan-import/img/import.png)
 
-## Installation ##
+## Installation
 
 Builds of Yomichan Import are available for Linux, Windows, and Mac OS X. As I do not have an easy way to compile for
 Mac OS X, the corresponding build is currently out of date. If you are able to, use the Linux or Windows versions as
@@ -32,7 +32,7 @@ they will always be built from the latest version of the code.
 *   [yomichan-import\_windows.zip](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_windows.zip) (64 bit Vista or above, no console output)
 *   [yomichan-import\_darwin.tar.gz](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_darwin.tar.gz) (outdated, consider using builds above)
 
-## Basic Usage ##
+## Basic Usage
 
 Follow the steps outlined below to import your custom dictionary into Yomichan:
 
