@@ -33,13 +33,8 @@ contributions are welcome.
 
 ## Installation
 
-Builds of Yomichan Import are available for Linux, Windows, and Mac OS X. As I do not have an easy way to compile for
-Mac OS X, the corresponding build is currently out of date. If you are able to, use the Linux or Windows versions as
-they will always be built from the latest version of the code.
-
-*   [yomichan-import\_linux.tar.gz](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_linux.tar.gz): (GTK+ 3 required for GUI)
-*   [yomichan-import\_windows.zip](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_windows.zip) (64 bit Vista or above, no console output)
-*   [yomichan-import\_darwin.tar.gz](https://foosoft.net/projects/yomichan-import/dl/yomichan-import_darwin.tar.gz) (outdated, consider using builds above)
+Pre-built binaries are available for Linux, Mac OS X, and Windows on the [project
+page](https://github.com/FooSoft/yomichan-import/releases).
 
 ## Basic Usage
 
