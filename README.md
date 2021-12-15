@@ -1,3 +1,12 @@
+<!-- +++
+Area = "projects"
+GitHub = "yomichan-import"
+Layout = "page"
+Tags = ["epwing", "golang", "japanese", "mit license", "yomichan", "zero-epwing"]
+Description = "External dictionary importer for the Yomichan browser extension."
+Collection = "ProjectsActive"
++++ -->
+
 # Yomichan Import
 
 Yomichan Import allows users of the [Yomichan](https://foosoft.net/projects/yomichan) extension to import custom dictionary files. It currently
@@ -20,7 +29,7 @@ Yomichan Import is being expanded to support other EPWING dictionaries based on 
 non-technical (although laborious) process that requires writing regular expressions and creating font tables; volunteer
 contributions are welcome.
 
-![](https://foosoft.net/projects/yomichan-import/img/import.png)
+![](img/import.png)
 
 ## Installation
 
