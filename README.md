@@ -43,7 +43,7 @@ Follow the steps outlined below to import your custom dictionary into Yomichan:
 1.  Launch the `yomichan-gtk` executable after extracting the entire archive (or `yomichan` from the command line).
 2.  Specify the source path of the dictionary you wish to convert.
 3.  Specify the target path of the dictionary ZIP archive that you wish to create.
-4.  Press the button labeled *Import dictionary...* and wait for processing to complete.
+4.  Press the button labeled `Import dictionary...` and wait for processing to complete.
 5.  On the Yomichan options page, browse to the dictionary ZIP archive file you created.
 6.  Wait for the import progress to complete before closing the options page.
 
