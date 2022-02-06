@@ -9,14 +9,14 @@ Collection = "ProjectsActive"
 
 # Yomichan Import
 
-Yomichan Import allows users of the [Yomichan](https://foosoft.net/projects/yomichan) extension to import custom dictionary files. It currently
-supports the following formats:
+Yomichan Import allows users of the [Yomichan](https://foosoft.net/projects/yomichan) extension to import custom
+dictionary files. It currently supports the following formats:
 
-*   [JMdict](http://www.edrdg.org/jmdict/edict_doc.html)
-*   [JMnedict](http://www.edrdg.org/enamdict/enamdict_doc.html)
-*   [KANJIDIC2](http://www.edrdg.org/kanjidic/kanjd2index.html)
-*   [Rikai](https://www.polarcloud.com/getrcx/)
-*   [EPWING](https://ja.wikipedia.org/wiki/EPWING)
+*   [JMdict XML](http://www.edrdg.org/jmdict/edict_doc.html)
+*   [JMnedict XML](http://www.edrdg.org/enamdict/enamdict_doc.html)
+*   [KANJIDIC2 XML](http://www.edrdg.org/kanjidic/kanjd2index.html)
+*   [Rikai SQLite DB](https://www.polarcloud.com/getrcx/)
+*   [EPWING](https://ja.wikipedia.org/wiki/EPWING):
     *   [Daijirin](https://en.wikipedia.org/wiki/Daijirin) (三省堂　スーパー大辞林)
     *   [Daijisen](https://en.wikipedia.org/wiki/Daijisen) (大辞泉)
     *   [Kenkyusha](https://en.wikipedia.org/wiki/Kenky%C5%ABsha%27s_New_Japanese-English_Dictionary) (研究社　新和英大辞典　第５版)
@@ -31,21 +31,18 @@ contributions are welcome.
 
 ![](img/import.png)
 
-## Installation
-
-Pre-built binaries are available for Linux, Mac OS X, and Windows on the [project
-page](https://github.com/FooSoft/yomichan-import/releases).
-
-## Basic Usage
+## Installation and Usage
 
 Follow the steps outlined below to import your custom dictionary into Yomichan:
 
-1.  Launch the `yomichan-gtk` executable after extracting the entire archive (or `yomichan` from the command line).
-2.  Specify the source path of the dictionary you wish to convert.
-3.  Specify the target path of the dictionary ZIP archive that you wish to create.
-4.  Press the button labeled `Import dictionary...` and wait for processing to complete.
-5.  On the Yomichan options page, browse to the dictionary ZIP archive file you created.
-6.  Wait for the import progress to complete before closing the options page.
+1.  Download a pre-built binary for Linux, Mac OS X or Windows from the [project
+    page](https://github.com/FooSoft/yomichan-import/releases).
+2.  Launch the `yomichan-gtk` executable after extracting the entire archive (or `yomichan` from the command line).
+3.  Specify the source path of the dictionary you wish to convert.
+4.  Specify the target path of the dictionary ZIP archive that you wish to create.
+5.  Press the button labeled `Import dictionary...` and wait for processing to complete.
+6.  On the Yomichan options page, browse to the dictionary ZIP archive file you created.
+7.  Wait for the import progress to complete before closing the options page.
 
 **Notice**: When converting EPWING dictionaries on Windows, it is important that the dictionary path you provide does
 not contain non-ASCII characters (including Japanese characters). This problem is due to the fact that the EPWING
