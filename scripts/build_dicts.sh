@@ -1,6 +1,6 @@
 #!/bin/bash
 
-go get github.com/FooSoft/yomichan-import/yomichan
+go get foosoft.net/projects/yomichan-import/yomichan
 
 mkdir -p src
 mkdir -p dst

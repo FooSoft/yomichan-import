@@ -1,9 +1,10 @@
 #!/bin/bash
+
 mkdir -p dst
 mkdir -p yomichan-import
 
-go build github.com/FooSoft/yomichan-import/yomichan
-go build github.com/FooSoft/yomichan-import/yomichan-gtk
+go build foosoft.net/projects/yomichan-import/yomichan
+go build foosoft.net/projects/yomichan-import/yomichan-gtk
 
 mv yomichan yomichan-import
 mv yomichan-gtk yomichan-import

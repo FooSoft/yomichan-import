@@ -1,31 +1,10 @@
-/*
- * Copyright (c) 2016-2021 Alex Yatskov <alex@foosoft.net>
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- * the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
-
 package yomichan
 
 import (
 	"regexp"
 	"strings"
 
-	zig "github.com/FooSoft/zero-epwing-go"
+	zig "foosoft.net/projects/zero-epwing-go"
 )
 
 type daijirinExtractor struct {
@@ -379,13 +358,13 @@ func (*daijirinExtractor) getFontNarrow() map[int]string {
 		50006: "₋",
 		50010: "g̀",
 		50012: "$",
-		50016: "ㇾ", /* FIXME: 漢文訓読 */
-		50020: "₋", /* FIXME: 漢文訓読 */
+		50016: "ㇾ",   /* FIXME: 漢文訓読 */
+		50020: "₋",   /* FIXME: 漢文訓読 */
 		50021: "{㆘}", /* FIXME: 漢文訓読 */
 		50022: "{㆔}", /* FIXME: 漢文訓読 */
 		50023: "{㆖}", /* FIXME: 漢文訓読 */
 		50025: "{㆗}", /* FIXME: 漢文訓読 */
-		50026: "₌", /* FIXME: 漢文訓読 */
+		50026: "₌",   /* FIXME: 漢文訓読 */
 		50027: "ĕ",
 		50028: "Č",
 		50029: "Š",
@@ -1664,7 +1643,7 @@ func (*daijirinExtractor) getFontWide() map[int]string {
 		44613: "𩙿",
 		44619: "𤣥", /* FIXME: 欠画 */
 		44621: "⺩",
-		44622: "⺏", /* FIXME: 尢, this but with with leg stretched as in 尩 */
+		44622: "⺏",  /* FIXME: 尢, this but with with leg stretched as in 尩 */
 		44623: "भर", /* FIXME: 勃嚕唵/bhrūṃ  in sanskrit */
 		44624: "㐂",
 		44625: "𛀸", /* FIXME: 変体仮名 (こ) */
@@ -1717,9 +1696,9 @@ func (*daijirinExtractor) getFontWide() map[int]string {
 		45112: "☴",
 		45113: "☵",
 		45114: "☶",
-		45115: "＼", /* FIXME: くの字点 */
+		45115: "＼",  /* FIXME: くの字点 */
 		45116: "＼ﾞ", /* FIXME: くの字点 */
-		45117: "／", /* FIXME: くの字点 */
+		45117: "／",  /* FIXME: くの字点 */
 		45118: "〻",
 		45119: "ǂ", /* FIXME: 複十字, probably not the char they wanted */
 		45120: "℉",
