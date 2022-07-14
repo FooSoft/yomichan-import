@@ -1,12 +1,3 @@
-<!-- +++
-Area = "projects"
-GitHub = "yomichan-import"
-Layout = "page"
-Tags = ["epwing", "golang", "japanese", "mit license", "yomichan", "zero-epwing"]
-Description = "External dictionary importer for the Yomichan browser extension."
-Collection = "ProjectsActive"
-+++ -->
-
 # Yomichan Import
 
 Yomichan Import allows users of the [Yomichan](https://foosoft.net/projects/yomichan) extension to import custom
