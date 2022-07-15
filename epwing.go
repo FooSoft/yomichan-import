@@ -36,6 +36,7 @@ func epwingExportDb(inputPath, outputPath, language, title string, stride int, p
 		"古語辞典":           makeGakkenExtractor(),
 		"故事ことわざ辞典":       makeGakkenExtractor(),
 		"学研漢和大字典":        makeGakkenExtractor(),
+		"小学館２":           makeShougakukan2Extractor(),
 	}
 
 	var (
