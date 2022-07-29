@@ -10,6 +10,7 @@ import (
 type daijisenExtractor struct {
 	partsExp     *regexp.Regexp
 	expShapesExp *regexp.Regexp
+	expMultiExp  *regexp.Regexp
 	expVarExp    *regexp.Regexp
 	readGroupExp *regexp.Regexp
 	metaExp      *regexp.Regexp
@@ -20,7 +21,8 @@ type daijisenExtractor struct {
 func makeDaijisenExtractor() epwingExtractor {
 	return &daijisenExtractor{
 		partsExp:     regexp.MustCompile(`([^【]+)(?:【(.*)】)?`),
-		expShapesExp: regexp.MustCompile(`[×△]+`),
+		expShapesExp: regexp.MustCompile(`[×△＝‐]+`),
+		expMultiExp:  regexp.MustCompile(`】[^【】]*【`),
 		expVarExp:    regexp.MustCompile(`（([^）]*)）`),
 		readGroupExp: regexp.MustCompile(`[‐・]+`),
 		metaExp:      regexp.MustCompile(`［([^］]*)］`),
@@ -37,6 +39,7 @@ func (e *daijisenExtractor) extractTerms(entry zig.BookEntry, sequence int) []db
 
 	var expressions []string
 	if expression := matches[2]; len(expression) > 0 {
+		expression = e.expMultiExp.ReplaceAllString(expression, "・")
 		expression = e.expShapesExp.ReplaceAllString(expression, "")
 		for _, split := range strings.Split(expression, "・") {
 			splitInc := e.expVarExp.ReplaceAllString(split, "$1")
@@ -112,7 +115,7 @@ func (e *daijisenExtractor) exportRules(term *dbTerm, tags []string) {
 }
 
 func (*daijisenExtractor) getRevision() string {
-	return "daijisen1"
+	return "daijisen2"
 }
 
 func (*daijisenExtractor) getFontNarrow() map[int]string {
