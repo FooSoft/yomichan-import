@@ -69,6 +69,8 @@ func epwingExportDb(inputPath, outputPath, language, title string, stride int, p
 
 					str = strings.Replace(str, matches[0], replacement, -1)
 				}
+				pattern := regexp.MustCompile("\n+")
+				str = pattern.ReplaceAllLiteralString(str, "\n")
 
 				return str
 			}
