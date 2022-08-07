@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"strings"
 
-	zig "github.com/FooSoft/zero-epwing-go"
+	zig "foosoft.net/projects/zero-epwing-go"
 )
 
 type shougakukan2Extractor struct {
