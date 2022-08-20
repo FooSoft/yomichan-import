@@ -17,7 +17,7 @@ func jmdictBuildRules(term *dbTerm) {
 		default:
 			if strings.HasPrefix(tag, "v5") {
 				term.addRules("v5")
-			} else if strings.HasPrefix(tag, "vs") {
+			} else if strings.HasPrefix(tag, "vs-") {
 				term.addRules("vs")
 			}
 		}
