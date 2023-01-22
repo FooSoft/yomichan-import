@@ -93,7 +93,7 @@ func (e *shougakukan2Extractor) extractTerms(entry zig.BookEntry, sequence int) 
 			terms = append(terms, dbTerm{
 				Expression: expression,
 				Reading:    reading,
-				Glossary:   []string{entry.Text},
+				Glossary:   []any{entry.Text},
 				Sequence:   sequence,
 			})
 		}

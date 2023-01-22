@@ -106,7 +106,7 @@ func (e *meikyouExtractor) extractTerms(entry zig.BookEntry, sequence int) []dbT
 		for _, reading := range readings {
 			term := dbTerm{
 				Expression: reading,
-				Glossary:   []string{entry.Text},
+				Glossary:   []any{entry.Text},
 				Sequence:   sequence,
 			}
 
@@ -120,7 +120,7 @@ func (e *meikyouExtractor) extractTerms(entry zig.BookEntry, sequence int) []dbT
 				term := dbTerm{
 					Expression: expression,
 					Reading:    reading,
-					Glossary:   []string{entry.Text},
+					Glossary:   []any{entry.Text},
 					Sequence:   sequence,
 				}
 

@@ -21,7 +21,7 @@ const (
 
 const databaseFormat = 3
 
-type dbRecord []interface{}
+type dbRecord []any
 type dbRecordList []dbRecord
 
 type dbTag struct {
@@ -46,7 +46,7 @@ func (meta dbTagList) crush() dbRecordList {
 type dbMeta struct {
 	Expression string
 	Mode       string
-	Data       interface{}
+	Data       any
 }
 
 type dbMetaList []dbMeta
@@ -66,7 +66,7 @@ type dbTerm struct {
 	DefinitionTags []string
 	Rules          []string
 	Score          int
-	Glossary       []string
+	Glossary       []any
 	Sequence       int
 	TermTags       []string
 }

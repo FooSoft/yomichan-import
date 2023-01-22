@@ -53,7 +53,9 @@ func jmnedictExtractTerms(enamdictEntry jmdict.JmnedictEntry) []dbTerm {
 		}
 
 		for _, trans := range enamdictEntry.Translations {
-			term.Glossary = append(term.Glossary, trans.Translations...)
+			for _, translation := range trans.Translations {
+				term.Glossary = append(term.Glossary, translation)
+			}
 			term.addDefinitionTags(trans.NameTypes...)
 		}
 
