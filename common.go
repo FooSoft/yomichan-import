@@ -306,7 +306,7 @@ func detectFormat(path string) (string, error) {
 	}
 
 	switch filepath.Base(path) {
-	case "JMdict", "JMdict.xml", "JMdict_e", "JMdict_e.xml":
+	case "JMdict", "JMdict.xml", "JMdict_e", "JMdict_e.xml", "JMdict_e_examp":
 		return "edict", nil
 	case "JMnedict", "JMnedict.xml":
 		return "enamdict", nil
@@ -336,7 +336,8 @@ func detectFormat(path string) (string, error) {
 
 func ExportDb(inputPath, outputPath, format, language, title string, stride int, pretty bool) error {
 	handlers := map[string]func(string, string, string, string, int, bool) error{
-		"edict":     jmdictExportDb,
+		"edict":     jmdExportDb,
+		"forms":     formsExportDb,
 		"enamdict":  jmnedictExportDb,
 		"epwing":    epwingExportDb,
 		"kanjidic":  kanjidicExportDb,
