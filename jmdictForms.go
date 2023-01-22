@@ -210,17 +210,21 @@ func formsExportDb(inputPath, outputPath, languageName, title string, stride int
 		return err
 	}
 
+	meta := newJmdictMetadata(dictionary, languageName)
+
 	terms := dbTermList{}
 	for _, entry := range dictionary.Entries {
 		baseTerm := baseFormsTerm(entry)
 		headwords := extractHeadwords(entry)
 		for _, h := range headwords {
-			term := baseTerm
+			var term dbTerm
 			if h.IsSearchOnly {
-				term.Sequence = -term.Sequence
+				term = createSearchTerm(h, entry, meta)
+			} else {
+				term = baseTerm
+				term.Expression = h.Expression
+				term.Reading = h.Reading
 			}
-			term.Expression = h.Expression
-			term.Reading = h.Reading
 			terms = append(terms, term)
 		}
 	}

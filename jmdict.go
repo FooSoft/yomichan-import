@@ -134,8 +134,12 @@ func extractTerms(headword headword, entry jmdict.JmdictEntry, meta jmdictMetada
 		return nil, false
 	}
 	if headword.IsSearchOnly {
-		searchTerm := createSearchTerm(headword, entry, meta)
-		return []dbTerm{searchTerm}, true
+		if meta.language == "eng" {
+			searchTerm := createSearchTerm(headword, entry, meta)
+			return []dbTerm{searchTerm}, true
+		} else {
+			return nil, false
+		}
 	}
 	terms := []dbTerm{}
 	senseNumber := 1
@@ -156,7 +160,7 @@ func extractTerms(headword headword, entry jmdict.JmdictEntry, meta jmdictMetada
 		terms = append(terms, senseTerm)
 	}
 
-	if meta.hasMultipleForms[entry.Sequence] {
+	if meta.hasMultipleForms[entry.Sequence] && meta.language == "eng" {
 		formsTerm := createFormsTerm(headword, entry, meta)
 		terms = append(terms, formsTerm)
 	}
