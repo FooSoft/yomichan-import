@@ -7,7 +7,7 @@ import (
 	"foosoft.net/projects/jmdict"
 )
 
-const jmdictRevision = "jmdict4"
+const edrdgAttribution = "This publication has included material from the JMdict (EDICT, etc.) dictionary files in accordance with the licence provisions of the Electronic Dictionaries Research Group. See http://www.edrdg.org/"
 
 func jmdictBuildRules(term *dbTerm) {
 	for _, tag := range term.DefinitionTags {
@@ -234,11 +234,17 @@ func jmdictExportDb(inputPath, outputPath, language, title string, stride int, p
 		"tag":  jmdictBuildTagMeta(entities).crush(),
 	}
 
+	index := dbIndex{
+		Title:       title,
+		Revision:    "jmdict4",
+		Sequenced:   true,
+		Attribution: edrdgAttribution,
+	}
+	index.setDefaults()
+
 	return writeDb(
 		outputPath,
-		title,
-		jmdictRevision,
-		true,
+		index,
 		recordData,
 		stride,
 		pretty,

@@ -19,8 +19,6 @@ const (
 	DefaultTitle    = ""
 )
 
-const databaseFormat = 3
-
 type dbRecord []any
 type dbRecordList []dbRecord
 
@@ -142,11 +140,34 @@ func (kanji dbKanjiList) crush() dbRecordList {
 	return results
 }
 
-func writeDb(outputPath, title, revision string, sequenced bool, recordData map[string]dbRecordList, stride int, pretty bool) error {
+type dbIndex struct {
+	Title       string `json:"title"`
+	Format      int    `json:"format"`
+	Revision    string `json:"revision"`
+	Sequenced   bool   `json:"sequenced"`
+	Author      string `json:"author"`
+	Url         string `json:"url"`
+	Description string `json:"description"`
+	Attribution string `json:"attribution"`
+}
+
+func (index *dbIndex) setDefaults() {
+	if index.Format == 0 {
+		index.Format = 3
+	}
+	if index.Author == "" {
+		index.Author = "yomichan-import"
+	}
+	if index.Url == "" {
+		index.Url = "https://github.com/FooSoft/yomichan-import"
+	}
+}
+
+func writeDb(outputPath string, index dbIndex, recordData map[string]dbRecordList, stride int, pretty bool) error {
 	var zbuff bytes.Buffer
 	zip := zip.NewWriter(&zbuff)
 
-	marshalJSON := func(obj interface{}, pretty bool) ([]byte, error) {
+	marshalJSON := func(obj any, pretty bool) ([]byte, error) {
 		if pretty {
 			return json.MarshalIndent(obj, "", "    ")
 		}
@@ -186,17 +207,6 @@ func writeDb(outputPath, title, revision string, sequenced bool, recordData map[
 	}
 
 	var err error
-	var db struct {
-		Title     string `json:"title"`
-		Format    int    `json:"format"`
-		Revision  string `json:"revision"`
-		Sequenced bool   `json:"sequenced"`
-	}
-
-	db.Title = title
-	db.Format = databaseFormat
-	db.Revision = revision
-	db.Sequenced = sequenced
 
 	for recordType, recordEntries := range recordData {
 		if _, err := writeDbRecords(recordType, recordEntries); err != nil {
@@ -204,7 +214,7 @@ func writeDb(outputPath, title, revision string, sequenced bool, recordData map[
 		}
 	}
 
-	bytes, err := marshalJSON(db, pretty)
+	bytes, err := marshalJSON(index, pretty)
 	if err != nil {
 		return err
 	}

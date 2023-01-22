@@ -7,8 +7,6 @@ import (
 	"strings"
 )
 
-const frequencyRevision = "frequency1"
-
 func frequencyTermsExportDb(inputPath, outputPath, language, title string, stride int, pretty bool) error {
 	return frequncyExportDb(inputPath, outputPath, language, title, stride, pretty, "term_meta")
 }
@@ -57,11 +55,18 @@ func frequncyExportDb(inputPath, outputPath, language, title string, stride int,
 		key: frequencies.crush(),
 	}
 
+	index := dbIndex{
+		Title:       title,
+		Revision:    "frequency1",
+		Sequenced:   false,
+		Description: "",
+		Attribution: "",
+	}
+	index.setDefaults()
+
 	return writeDb(
 		outputPath,
-		title,
-		frequencyRevision,
-		false,
+		index,
 		recordData,
 		stride,
 		pretty,
