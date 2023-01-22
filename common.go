@@ -262,6 +262,39 @@ func hasString(needle string, haystack []string) bool {
 	return false
 }
 
+func intersection(s1, s2 []string) []string {
+	s := []string{}
+	m := make(map[string]bool)
+	for _, e := range s1 {
+		m[e] = true
+	}
+	for _, e := range s2 {
+		if m[e] {
+			s = append(s, e)
+			m[e] = false
+		}
+	}
+	return s
+}
+
+func union(s1, s2 []string) []string {
+	s := []string{}
+	m := make(map[string]bool)
+	for _, e := range s1 {
+		if !m[e] {
+			s = append(s, e)
+			m[e] = true
+		}
+	}
+	for _, e := range s2 {
+		if !m[e] {
+			s = append(s, e)
+			m[e] = true
+		}
+	}
+	return s
+}
+
 func detectFormat(path string) (string, error) {
 	switch filepath.Ext(path) {
 	case ".sqlite":
