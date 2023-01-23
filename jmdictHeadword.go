@@ -16,6 +16,7 @@ type headword struct {
 	TermTags     []string
 	Index        int
 	IsPriority   bool
+	IsFrequent   bool
 	IsIrregular  bool
 	IsOutdated   bool
 	IsRareKanji  bool
@@ -69,6 +70,9 @@ func (h *headword) Score() int {
 	if h.IsPriority {
 		score += 1
 	}
+	if h.IsFrequent {
+		score += 1
+	}
 	if h.IsIrregular {
 		score -= 5
 	}
@@ -108,6 +112,9 @@ func (h *headword) SetFlags(infoTags, freqTags []string) {
 			h.IsPriority = true
 			break
 		}
+	}
+	if len(freqTags) > 1 {
+		h.IsFrequent = true
 	}
 	for _, infoTag := range infoTags {
 		switch infoTag {
