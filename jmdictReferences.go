@@ -87,10 +87,10 @@ func (meta *jmdictMetadata) MakeReferenceToSeqMap() {
 func (meta *jmdictMetadata) MakeHashToSearchValuesMap() {
 	meta.hashToSearchValues = make(map[hash][]searchValue)
 	for seq, searchHashes := range meta.seqToSearchHashes {
-		for score, searchHash := range searchHashes {
+		for idx, searchHash := range searchHashes {
 			searchValue := searchValue{
 				sequence:   seq,
-				index:      score,
+				index:      idx,
 				isPriority: searchHash.isPriority,
 			}
 			meta.hashToSearchValues[searchHash.hash] =
@@ -100,6 +100,10 @@ func (meta *jmdictMetadata) MakeHashToSearchValuesMap() {
 }
 
 /*
+ * This function attemps to convert a JMdict reference string into a
+ * single definite sequence number. These reference strings are often
+ * ambiguous, so we have to resort to using heuristics.
+ *
  * Generally, correspondence is determined by the order in which term
  * pairs are extracted from each JMdict entry. Take for example the
  * JMdict entry for ご本, which contains a reference to 本 (without a
@@ -115,7 +119,7 @@ func (meta *jmdictMetadata) MakeHashToSearchValuesMap() {
  * returned.
  *
  * In situations in which multiple sequences are found with the same
- * score, the entry with a priority tag ("news1", "ichi1", "spec1",
+ * index, the entry with a priority tag ("news1", "ichi1", "spec1",
  * "spec2", "gai1") is given preference. This mostly affects
  * katakana-only loanwords like ラグ.
  *
@@ -129,8 +133,8 @@ func (meta *jmdictMetadata) MakeHashToSearchValuesMap() {
  *
  * All else being equal, the entry with the smallest sequence number
  * is chosen. References in the JMdict file are currently ambiguous,
- * and getting this perfect won't be possible until sequence numbers
- * are explictly identified in these references.  See:
+ * and getting this perfect won't be possible until reference sequence
+ * numbers are included in the file.  See:
  * https://github.com/JMdictProject/JMdictIssues/issues/61
  */
 func (meta *jmdictMetadata) FindBestSequence(reference string) sequence {
@@ -142,24 +146,24 @@ func (meta *jmdictMetadata) FindBestSequence(reference string) sequence {
 		return bestSeq
 	}
 	hash := headword.Hash()
-	for _, seqScore := range meta.hashToSearchValues[hash] {
-		if meta.seqToSenseCount[seqScore.sequence] < senseNumber {
+	for _, v := range meta.hashToSearchValues[hash] {
+		if meta.seqToSenseCount[v.sequence] < senseNumber {
 			// entry must contain the specified sense
 			continue
-		} else if lowestIndex < seqScore.index {
+		} else if lowestIndex < v.index {
 			// lower indices are better
 			continue
-		} else if (lowestIndex == seqScore.index) && (bestIsPriority && !seqScore.isPriority) {
-			// if scores match, check priority
+		} else if (lowestIndex == v.index) && (bestIsPriority && !v.isPriority) {
+			// if indices match, check priority
 			continue
-		} else if (lowestIndex == seqScore.index) && (bestIsPriority == seqScore.isPriority) && (bestSeq < seqScore.sequence) {
-			// if scores and priority match, check sequence number.
+		} else if (lowestIndex == v.index) && (bestIsPriority == v.isPriority) && (bestSeq < v.sequence) {
+			// if indices and priority match, check sequence number.
 			// lower sequence numbers are better
 			continue
 		} else {
-			lowestIndex = seqScore.index
-			bestSeq = seqScore.sequence
-			bestIsPriority = seqScore.isPriority
+			lowestIndex = v.index
+			bestSeq = v.sequence
+			bestIsPriority = v.isPriority
 		}
 	}
 	return bestSeq
