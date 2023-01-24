@@ -81,7 +81,7 @@ func (h *headword) KanjiForm() string {
 	}
 }
 
-func jmdNeedsFormTable(headwords []headword) bool {
+func needsFormTable(headwords []headword) bool {
 	// Does the entry contain more than 1 distinct reading?
 	// E.g. バカがい and ばかがい are not distinct.
 	uniqueReading := ""
@@ -186,7 +186,7 @@ func formsGlossary(headwords []headword) []any {
 func baseFormsTerm(entry jmdict.JmdictEntry) dbTerm {
 	term := dbTerm{Sequence: entry.Sequence}
 	headwords := extractHeadwords(entry)
-	if jmdNeedsFormTable(headwords) {
+	if needsFormTable(headwords) {
 		term.Glossary = formsTableGlossary(headwords)
 	} else {
 		term.Glossary = formsGlossary(headwords)
@@ -224,6 +224,8 @@ func formsExportDb(inputPath, outputPath, languageName, title string, stride int
 				term = baseTerm
 				term.Expression = h.Expression
 				term.Reading = h.Reading
+				term.addTermTags(h.TermTags...)
+				term.Score = calculateTermScore(0, h)
 			}
 			terms = append(terms, term)
 		}
