@@ -225,7 +225,7 @@ func formsExportDb(inputPath, outputPath, languageName, title string, stride int
 				term.Expression = h.Expression
 				term.Reading = h.Reading
 				term.addTermTags(h.TermTags...)
-				term.Score = calculateTermScore(0, h)
+				term.Score = calculateTermScore(1, h)
 			}
 			terms = append(terms, term)
 		}

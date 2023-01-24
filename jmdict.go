@@ -85,7 +85,7 @@ func createSearchTerm(headword headword, entry jmdict.JmdictEntry, meta jmdictMe
 		term.addRules(rules...)
 	}
 	term.addTermTags(headword.TermTags...)
-	term.Score = calculateTermScore(0, headword)
+	term.Score = calculateTermScore(1, headword)
 
 	redirectHeadword := meta.seqToMainHeadword[entry.Sequence]
 	expHash := redirectHeadword.ExpHash()
