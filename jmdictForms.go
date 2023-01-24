@@ -205,7 +205,7 @@ func formsExportDb(inputPath, outputPath, languageName, title string, stride int
 	}
 	defer reader.Close()
 
-	dictionary, _, err := jmdict.LoadJmdictNoTransform(reader)
+	dictionary, entities, err := jmdict.LoadJmdictNoTransform(reader)
 	if err != nil {
 		return err
 	}
@@ -231,13 +231,18 @@ func formsExportDb(inputPath, outputPath, languageName, title string, stride int
 		}
 	}
 
+	tags := dbTagList{}
+	tags = append(tags, entityTags(entities)...)
+	tags = append(tags, newsFrequencyTags()...)
+	tags = append(tags, customDbTags()...)
+
 	if title == "" {
 		title = "JMdict Forms"
 	}
 
 	recordData := map[string]dbRecordList{
 		"term": terms.crush(),
-		"tag":  dbRecordList{},
+		"tag":  tags.crush(),
 	}
 
 	jmdictDate := jmdictPublicationDate(dictionary)
