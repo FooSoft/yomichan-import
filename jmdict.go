@@ -62,7 +62,21 @@ func jmdictPublicationDate(dictionary jmdict.Jmdict) string {
 	return jmdictDate
 }
 
-func createFormsTerm(headword headword, entry jmdict.JmdictEntry, meta jmdictMetadata) dbTerm {
+func createFormsTerm(headword headword, entry jmdict.JmdictEntry, meta jmdictMetadata) (dbTerm, bool) {
+	// Don't add "forms" terms to non-English dictionaries.
+	// Information would be duplicated if users installed more
+	// than one version.
+	if meta.language != "eng" {
+		return dbTerm{}, false
+	}
+	// Don't need a "forms" term for entries with one unique
+	// headword which does not appear in any other entries.
+	if !meta.hasMultipleForms[entry.Sequence] {
+		if len(meta.headwordHashToSeqs[headword.Hash()]) == 1 {
+			return dbTerm{}, false
+		}
+	}
+
 	term := baseFormsTerm(entry)
 	term.Expression = headword.Expression
 	term.Reading = headword.Reading
@@ -72,10 +86,17 @@ func createFormsTerm(headword headword, entry jmdict.JmdictEntry, meta jmdictMet
 	term.addDefinitionTags("forms")
 	senseNumber := meta.seqToSenseCount[entry.Sequence] + 1
 	term.Score = calculateTermScore(senseNumber, headword)
-	return term
+	return term, true
 }
 
-func createSearchTerm(headword headword, entry jmdict.JmdictEntry, meta jmdictMetadata) dbTerm {
+func createSearchTerm(headword headword, entry jmdict.JmdictEntry, meta jmdictMetadata) (dbTerm, bool) {
+	// Don't add "search" terms to non-English dictionaries.
+	// Information would be duplicated if users installed more
+	// than one version.
+	if meta.language != "eng" {
+		return dbTerm{}, false
+	}
+
 	term := dbTerm{
 		Expression: headword.Expression,
 		Sequence:   -entry.Sequence,
@@ -98,10 +119,17 @@ func createSearchTerm(headword headword, entry jmdict.JmdictEntry, meta jmdictMe
 	)
 
 	term.Glossary = []any{contentStructure(content)}
-	return term
+	return term, true
 }
 
-func createSenseTerm(sense jmdict.JmdictSense, senseNumber int, headword headword, entry jmdict.JmdictEntry, meta jmdictMetadata) dbTerm {
+func createSenseTerm(sense jmdict.JmdictSense, senseNumber int, headword headword, entry jmdict.JmdictEntry, meta jmdictMetadata) (dbTerm, bool) {
+	if sense.RestrictedReadings != nil && !slices.Contains(sense.RestrictedReadings, headword.Reading) {
+		return dbTerm{}, false
+	}
+	if sense.RestrictedKanji != nil && !slices.Contains(sense.RestrictedKanji, headword.Expression) {
+		return dbTerm{}, false
+	}
+
 	term := dbTerm{
 		Expression: headword.Expression,
 		Reading:    headword.Reading,
@@ -126,7 +154,7 @@ func createSenseTerm(sense jmdict.JmdictSense, senseNumber int, headword headwor
 
 	term.Score = calculateTermScore(senseNumber, headword)
 
-	return term
+	return term, true
 }
 
 func extractTerms(headword headword, entry jmdict.JmdictEntry, meta jmdictMetadata) ([]dbTerm, bool) {
@@ -134,8 +162,7 @@ func extractTerms(headword headword, entry jmdict.JmdictEntry, meta jmdictMetada
 		return nil, false
 	}
 	if headword.IsSearchOnly {
-		if meta.language == "eng" {
-			searchTerm := createSearchTerm(headword, entry, meta)
+		if searchTerm, ok := createSearchTerm(headword, entry, meta); ok {
 			return []dbTerm{searchTerm}, true
 		} else {
 			return nil, false
@@ -145,25 +172,19 @@ func extractTerms(headword headword, entry jmdict.JmdictEntry, meta jmdictMetada
 	senseNumber := 1
 	for _, sense := range entry.Sense {
 		if !glossaryContainsLanguage(sense.Glossary, meta.language) {
+			// Do not increment sense number
 			continue
 		}
-		if sense.RestrictedReadings != nil && !slices.Contains(sense.RestrictedReadings, headword.Reading) {
-			senseNumber += 1
-			continue
+		if senseTerm, ok := createSenseTerm(sense, senseNumber, headword, entry, meta); ok {
+			terms = append(terms, senseTerm)
 		}
-		if sense.RestrictedKanji != nil && !slices.Contains(sense.RestrictedKanji, headword.Expression) {
-			senseNumber += 1
-			continue
-		}
-		senseTerm := createSenseTerm(sense, senseNumber, headword, entry, meta)
 		senseNumber += 1
-		terms = append(terms, senseTerm)
 	}
 
-	if meta.hasMultipleForms[entry.Sequence] && meta.language == "eng" {
-		formsTerm := createFormsTerm(headword, entry, meta)
+	if formsTerm, ok := createFormsTerm(headword, entry, meta); ok {
 		terms = append(terms, formsTerm)
 	}
+
 	return terms, true
 }
 
