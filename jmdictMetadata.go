@@ -20,6 +20,7 @@ type jmdictMetadata struct {
 	referenceToSeq     map[string]sequence
 	hashToSearchValues map[hash][]searchValue
 	seqToSearchHashes  map[sequence][]searchHash
+	entryDepth         map[sequence]int
 	hasMultipleForms   map[sequence]bool
 	maxSenseCount      int
 }
@@ -27,6 +28,26 @@ type jmdictMetadata struct {
 type senseID struct {
 	sequence sequence
 	number   int
+}
+
+func (meta *jmdictMetadata) CalculateEntryDepth(headwords []headword, entrySequence sequence) {
+	// This is to ensure that terms are grouped among their
+	// entries of origin and displayed in correct sequential order
+	maxDepth := 0
+	for _, headword := range headwords {
+		hash := headword.Hash()
+		for _, seq := range meta.headwordHashToSeqs[hash] {
+			seqDepth := meta.entryDepth[seq]
+			if seqDepth == 0 {
+				meta.entryDepth[seq] = 1
+				seqDepth = 1
+			}
+			if maxDepth < seqDepth+1 {
+				maxDepth = seqDepth + 1
+			}
+		}
+	}
+	meta.entryDepth[entrySequence] = maxDepth
 }
 
 func (meta *jmdictMetadata) AddHeadword(headword headword, entry jmdict.JmdictEntry) {
@@ -128,6 +149,7 @@ func newJmdictMetadata(dictionary jmdict.Jmdict, languageName string) jmdictMeta
 		references:         []string{},
 		hashToSearchValues: nil,
 		referenceToSeq:     nil,
+		entryDepth:         make(map[sequence]int),
 		hasMultipleForms:   make(map[sequence]bool),
 		maxSenseCount:      0,
 	}
@@ -141,6 +163,7 @@ func newJmdictMetadata(dictionary jmdict.Jmdict, languageName string) jmdictMeta
 				formCount += 1
 			}
 		}
+		meta.CalculateEntryDepth(headwords, entry.Sequence)
 		meta.hasMultipleForms[entry.Sequence] = (formCount > 1)
 	}
 

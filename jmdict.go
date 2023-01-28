@@ -29,13 +29,15 @@ func grammarRules(partsOfSpeech []string) []string {
 	return rules
 }
 
-func calculateTermScore(senseNumber int, headword headword) int {
+func calculateTermScore(senseNumber int, depth int, headword headword) int {
 	const senseWeight int = 1
-	const entryPositionWeight int = 100
-	const priorityWeight int = 10000
+	const depthWeight int = 100
+	const entryPositionWeight int = 10000
+	const priorityWeight int = 1000000
 
 	score := 0
 	score -= (senseNumber - 1) * senseWeight
+	score -= depth * depthWeight
 	score -= headword.Index * entryPositionWeight
 	score += headword.Score() * priorityWeight
 
@@ -85,7 +87,8 @@ func createFormsTerm(headword headword, entry jmdict.JmdictEntry, meta jmdictMet
 
 	term.addDefinitionTags("forms")
 	senseNumber := meta.seqToSenseCount[entry.Sequence] + 1
-	term.Score = calculateTermScore(senseNumber, headword)
+	entryDepth := meta.entryDepth[entry.Sequence]
+	term.Score = calculateTermScore(senseNumber, entryDepth, headword)
 	return term, true
 }
 
@@ -106,7 +109,7 @@ func createSearchTerm(headword headword, entry jmdict.JmdictEntry, meta jmdictMe
 		term.addRules(rules...)
 	}
 	term.addTermTags(headword.TermTags...)
-	term.Score = calculateTermScore(1, headword)
+	term.Score = calculateTermScore(1, 0, headword)
 
 	redirectHeadword := meta.seqToMainHeadword[entry.Sequence]
 	expHash := redirectHeadword.ExpHash()
@@ -152,7 +155,8 @@ func createSenseTerm(sense jmdict.JmdictSense, senseNumber int, headword headwor
 	rules := grammarRules(sense.PartsOfSpeech)
 	term.addRules(rules...)
 
-	term.Score = calculateTermScore(senseNumber, headword)
+	entryDepth := meta.entryDepth[entry.Sequence]
+	term.Score = calculateTermScore(senseNumber, entryDepth, headword)
 
 	return term, true
 }
