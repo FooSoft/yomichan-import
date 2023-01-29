@@ -163,10 +163,8 @@ func kanjidicExportDb(inputPath, outputPath, language, title string, stride int,
 		Title:       title,
 		Revision:    "kanjidic2",
 		Sequenced:   false,
-		Description: "",
 		Attribution: edrdgAttribution,
 	}
-	index.setDefaults()
 
 	return writeDb(
 		outputPath,

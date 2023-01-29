@@ -105,10 +105,8 @@ func jmnedictExportDb(inputPath, outputPath, language, title string, stride int,
 		Title:       title,
 		Revision:    "jmnedict1",
 		Sequenced:   true,
-		Description: "",
 		Attribution: edrdgAttribution,
 	}
-	index.setDefaults()
 
 	return writeDb(
 		outputPath,

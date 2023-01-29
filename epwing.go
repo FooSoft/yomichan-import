@@ -102,13 +102,10 @@ func epwingExportDb(inputPath, outputPath, language, title string, stride int, p
 	}
 
 	index := dbIndex{
-		Title:       title,
-		Revision:    strings.Join(revisions, ";"),
-		Sequenced:   true,
-		Description: "",
-		Attribution: "",
+		Title:     title,
+		Revision:  strings.Join(revisions, ";"),
+		Sequenced: true,
 	}
-	index.setDefaults()
 
 	return writeDb(
 		outputPath,

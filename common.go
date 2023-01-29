@@ -214,6 +214,7 @@ func writeDb(outputPath string, index dbIndex, recordData map[string]dbRecordLis
 		}
 	}
 
+	index.setDefaults()
 	bytes, err := marshalJSON(index, pretty)
 	if err != nil {
 		return err

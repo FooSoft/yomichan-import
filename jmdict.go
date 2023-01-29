@@ -238,7 +238,6 @@ func jmdExportDb(inputPath string, outputPath string, languageName string, title
 		Sequenced:   true,
 		Attribution: edrdgAttribution,
 	}
-	index.setDefaults()
 
 	return writeDb(
 		outputPath,

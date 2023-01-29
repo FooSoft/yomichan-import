@@ -254,7 +254,6 @@ func formsExportDb(inputPath, outputPath, languageName, title string, stride int
 		Sequenced:   true,
 		Attribution: edrdgAttribution,
 	}
-	index.setDefaults()
 
 	return writeDb(
 		outputPath,

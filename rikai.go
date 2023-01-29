@@ -153,13 +153,10 @@ func rikaiExportDb(inputPath, outputPath, language, title string, stride int, pr
 	}
 
 	index := dbIndex{
-		Title:       title,
-		Revision:    "rikai2",
-		Sequenced:   true,
-		Description: "",
-		Attribution: "",
+		Title:     title,
+		Revision:  "rikai2",
+		Sequenced: true,
 	}
-	index.setDefaults()
 
 	return writeDb(
 		outputPath,

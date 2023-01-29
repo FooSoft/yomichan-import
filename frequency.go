@@ -56,13 +56,10 @@ func frequncyExportDb(inputPath, outputPath, language, title string, stride int,
 	}
 
 	index := dbIndex{
-		Title:       title,
-		Revision:    "frequency1",
-		Sequenced:   false,
-		Description: "",
-		Attribution: "",
+		Title:     title,
+		Revision:  "frequency1",
+		Sequenced: false,
 	}
-	index.setDefaults()
 
 	return writeDb(
 		outputPath,
