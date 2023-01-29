@@ -42,17 +42,18 @@ var ISOtoFlag = map[string]string{
 }
 
 var langNameToCode = map[string]string{
-	"":          "eng",
-	"english":   "eng",
-	"dutch":     "dut",
-	"french":    "fre",
-	"german":    "ger",
-	"hungarian": "hun",
-	"italian":   "ita",
-	"russian":   "rus",
-	"slovenian": "slv",
-	"spanish":   "spa",
-	"swedish":   "swe",
+	"":              "eng",
+	"english":       "eng",
+	"english_extra": "eng",
+	"dutch":         "dut",
+	"french":        "fre",
+	"german":        "ger",
+	"hungarian":     "hun",
+	"italian":       "ita",
+	"russian":       "rus",
+	"slovenian":     "slv",
+	"spanish":       "spa",
+	"swedish":       "swe",
 }
 
 var glossTypeCodeToName = map[LangCode]string{

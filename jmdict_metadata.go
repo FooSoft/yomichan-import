@@ -23,6 +23,7 @@ type jmdictMetadata struct {
 	entryDepth         map[sequence]int
 	hasMultipleForms   map[sequence]bool
 	maxSenseCount      int
+	extraMode          bool
 }
 
 type senseID struct {
@@ -152,6 +153,7 @@ func newJmdictMetadata(dictionary jmdict.Jmdict, languageName string) jmdictMeta
 		entryDepth:         make(map[sequence]int),
 		hasMultipleForms:   make(map[sequence]bool),
 		maxSenseCount:      0,
+		extraMode:          languageName == "english_extra",
 	}
 
 	for _, entry := range dictionary.Entries {

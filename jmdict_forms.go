@@ -210,7 +210,7 @@ func formsExportDb(inputPath, outputPath, languageName, title string, stride int
 		return err
 	}
 
-	meta := newJmdictMetadata(dictionary, "english")
+	meta := newJmdictMetadata(dictionary, "")
 
 	terms := dbTermList{}
 	for _, entry := range dictionary.Entries {

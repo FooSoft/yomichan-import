@@ -17,10 +17,11 @@ function refresh_source () {
 }
 
 refresh_source "JMdict_e_examp"
-yomichan -language="english" -title="JMdict" src/JMdict_e_examp dst/jmdict_english_with_examples.zip
+yomichan -language="english_extra" -title="JMdict" src/JMdict_e_examp dst/jmdict_english_extra_with_examples.zip
 
 refresh_source "JMdict"
-yomichan -language="english"   -title="JMdict"             src/JMdict dst/jmdict_english.zip
+yomichan -language="english_extra" -title="JMdict"         src/JMdict dst/jmdict_english_extra.zip
+yomichan -language="english"   -title="JMdict (English)"   src/JMdict dst/jmdict_english.zip
 yomichan -language="dutch"     -title="JMdict (Dutch)"     src/JMdict dst/jmdict_dutch.zip
 yomichan -language="french"    -title="JMdict (French)"    src/JMdict dst/jmdict_french.zip
 yomichan -language="german"    -title="JMdict (German)"    src/JMdict dst/jmdict_german.zip

@@ -287,7 +287,7 @@ func createGlossaryContent(sense jmdict.JmdictSense, meta jmdictMetadata) any {
 
 func createGlossary(sense jmdict.JmdictSense, meta jmdictMetadata) []any {
 	glossary := []any{}
-	if needsStructuredContent(sense, meta.language) {
+	if meta.extraMode && needsStructuredContent(sense, meta.language) {
 		glossary = append(glossary, createGlossaryContent(sense, meta))
 	} else {
 		for _, gloss := range sense.Glossary {

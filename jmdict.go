@@ -1,6 +1,7 @@
 package yomichan
 
 import (
+	"errors"
 	"os"
 	"regexp"
 	"strconv"
@@ -48,7 +49,11 @@ func doDisplaySenseNumberTag(headword headword, entry jmdict.JmdictEntry, meta j
 	// Display sense numbers if the entry has more than one sense
 	// or if the headword is found in multiple entries.
 	hash := headword.Hash()
-	if meta.seqToSenseCount[entry.Sequence] > 1 {
+	if !meta.extraMode {
+		return false
+	} else if meta.language != "eng" {
+		return false
+	} else if meta.seqToSenseCount[entry.Sequence] > 1 {
 		return true
 	} else if len(meta.headwordHashToSeqs[hash]) > 1 {
 		return true
@@ -68,7 +73,7 @@ func createFormsTerm(headword headword, entry jmdict.JmdictEntry, meta jmdictMet
 	// Don't add "forms" terms to non-English dictionaries.
 	// Information would be duplicated if users installed more
 	// than one version.
-	if meta.language != "eng" {
+	if meta.language != "eng" || !meta.extraMode {
 		return dbTerm{}, false
 	}
 	// Don't need a "forms" term for entries with one unique
@@ -193,6 +198,10 @@ func extractTerms(headword headword, entry jmdict.JmdictEntry, meta jmdictMetada
 }
 
 func jmdExportDb(inputPath string, outputPath string, languageName string, title string, stride int, pretty bool) error {
+	if _, ok := langNameToCode[languageName]; !ok {
+		return errors.New("Unrecognized language parameter: " + languageName)
+	}
+
 	reader, err := os.Open(inputPath)
 	if err != nil {
 		return err
