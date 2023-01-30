@@ -130,6 +130,9 @@ func (h *headword) SetFlags(infoTags, freqTags []string) {
 			h.IsAteji = true
 		case "gikun":
 			h.IsGikun = true
+		default:
+			fmt.Println("Unknown information tag type: " + infoTag)
+			h.TermTags = append(h.TermTags, infoTag)
 		}
 	}
 	if h.IsOutdated && h.IsRareKanji {
@@ -138,16 +141,16 @@ func (h *headword) SetFlags(infoTags, freqTags []string) {
 }
 
 func (h *headword) SetTermTags(freqTags []string) {
-	h.TermTags = []string{}
 	if h.IsPriority {
 		h.TermTags = append(h.TermTags, priorityTagName)
 	}
+	knownFreqTags := []string{"ichi1", "ichi2", "gai1", "gai2", "spec1", "spec2"}
 	for _, tag := range freqTags {
 		isNewsFreqTag, _ := regexp.MatchString(`nf\d\d`, tag)
 		if isNewsFreqTag {
 			// nf tags are divided into ranks of 500
-			// (nf01 to nf48), but it will be easier
-			// for the user to read 1k, 2k, etc.
+			// (nf01 to nf48). Let's combine them into
+			// ranks of 1k (news1k, news2k, ..., news24k).
 			var i int
 			if _, err := fmt.Sscanf(tag, "nf%2d", &i); err == nil {
 				i = (i + (i % 2)) / 2
@@ -155,10 +158,15 @@ func (h *headword) SetTermTags(freqTags []string) {
 				h.TermTags = append(h.TermTags, newsTag)
 			}
 		} else if tag == "news1" || tag == "news2" {
+			// News tags are derived from the nf
+			// rankings, so these are not needed.
 			continue
-		} else {
-			tagWithoutTheNumber := tag[:len(tag)-1] // "ichi", "gai", or "spec"
+		} else if slices.Contains(knownFreqTags, tag) {
+			tagWithoutTheNumber := tag[:len(tag)-1]
 			h.TermTags = append(h.TermTags, tagWithoutTheNumber)
+		} else {
+			fmt.Println("Unknown frequency tag type: " + tag)
+			h.TermTags = append(h.TermTags, tag)
 		}
 	}
 	if h.IsIrregular {
