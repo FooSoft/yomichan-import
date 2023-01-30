@@ -74,7 +74,7 @@ func (e *wadaiExtractor) extractTerms(entry zig.BookEntry, sequence int) []dbTer
 		term := dbTerm{
 			Expression: expression,
 			Reading:    reading,
-			Glossary:   []string{entry.Text},
+			Glossary:   []any{entry.Text},
 			Sequence:   sequence,
 		}
 

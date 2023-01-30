@@ -65,7 +65,7 @@ func (e *daijirinExtractor) extractTerms(entry zig.BookEntry, sequence int) []db
 		for _, reading := range readings {
 			term := dbTerm{
 				Expression: reading,
-				Glossary:   []string{entry.Text},
+				Glossary:   []any{entry.Text},
 				Sequence:   sequence,
 			}
 
@@ -79,7 +79,7 @@ func (e *daijirinExtractor) extractTerms(entry zig.BookEntry, sequence int) []db
 				term := dbTerm{
 					Expression: expression,
 					Reading:    reading,
-					Glossary:   []string{entry.Text},
+					Glossary:   []any{entry.Text},
 					Sequence:   sequence,
 				}
 

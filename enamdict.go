@@ -6,8 +6,6 @@ import (
 	"foosoft.net/projects/jmdict"
 )
 
-const jmnedictRevision = "jmnedict1"
-
 func jmnedictBuildTagMeta(entities map[string]string) dbTagList {
 	var tags dbTagList
 
@@ -53,7 +51,9 @@ func jmnedictExtractTerms(enamdictEntry jmdict.JmnedictEntry) []dbTerm {
 		}
 
 		for _, trans := range enamdictEntry.Translations {
-			term.Glossary = append(term.Glossary, trans.Translations...)
+			for _, translation := range trans.Translations {
+				term.Glossary = append(term.Glossary, translation)
+			}
 			term.addDefinitionTags(trans.NameTypes...)
 		}
 
@@ -101,11 +101,16 @@ func jmnedictExportDb(inputPath, outputPath, language, title string, stride int,
 		"tag":  jmnedictBuildTagMeta(entities).crush(),
 	}
 
+	index := dbIndex{
+		Title:       title,
+		Revision:    "jmnedict1",
+		Sequenced:   true,
+		Attribution: edrdgAttribution,
+	}
+
 	return writeDb(
 		outputPath,
-		title,
-		jmnedictRevision,
-		true,
+		index,
 		recordData,
 		stride,
 		pretty,

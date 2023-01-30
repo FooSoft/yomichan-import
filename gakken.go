@@ -90,7 +90,7 @@ func (e *gakkenExtractor) extractTerms(entry zig.BookEntry, sequence int) []dbTe
 		for _, reading := range readings {
 			term := dbTerm{
 				Expression: reading,
-				Glossary:   []string{entryText},
+				Glossary:   []any{entryText},
 				Sequence:   sequence,
 			}
 
@@ -107,7 +107,7 @@ func (e *gakkenExtractor) extractTerms(entry zig.BookEntry, sequence int) []dbTe
 				term := dbTerm{
 					Expression: expression,
 					Reading:    reading,
-					Glossary:   []string{entryText},
+					Glossary:   []any{entryText},
 					Sequence:   sequence,
 				}
 

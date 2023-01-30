@@ -72,7 +72,7 @@ func (e *kotowazaExtractor) extractTerms(entry zig.BookEntry, sequence int) []db
 			term := dbTerm{
 				Expression: expression,
 				Reading:    reading,
-				Glossary:   []string{entry.Text},
+				Glossary:   []any{entry.Text},
 				Sequence:   sequence,
 			}
 

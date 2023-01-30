@@ -7,8 +7,6 @@ import (
 	"foosoft.net/projects/jmdict"
 )
 
-const kanjidicRevision = "kanjidic2"
-
 func kanjidicExtractKanji(entry jmdict.KanjidicCharacter, language string) *dbKanji {
 	if entry.ReadingMeaning == nil {
 		return nil
@@ -161,11 +159,16 @@ func kanjidicExportDb(inputPath, outputPath, language, title string, stride int,
 		"tag":   tags.crush(),
 	}
 
+	index := dbIndex{
+		Title:       title,
+		Revision:    "kanjidic2",
+		Sequenced:   false,
+		Attribution: edrdgAttribution,
+	}
+
 	return writeDb(
 		outputPath,
-		title,
-		kanjidicRevision,
-		false,
+		index,
 		recordData,
 		stride,
 		pretty,

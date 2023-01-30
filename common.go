@@ -19,9 +19,7 @@ const (
 	DefaultTitle    = ""
 )
 
-const databaseFormat = 3
-
-type dbRecord []interface{}
+type dbRecord []any
 type dbRecordList []dbRecord
 
 type dbTag struct {
@@ -46,7 +44,7 @@ func (meta dbTagList) crush() dbRecordList {
 type dbMeta struct {
 	Expression string
 	Mode       string
-	Data       interface{}
+	Data       any
 }
 
 type dbMetaList []dbMeta
@@ -66,7 +64,7 @@ type dbTerm struct {
 	DefinitionTags []string
 	Rules          []string
 	Score          int
-	Glossary       []string
+	Glossary       []any
 	Sequence       int
 	TermTags       []string
 }
@@ -142,11 +140,34 @@ func (kanji dbKanjiList) crush() dbRecordList {
 	return results
 }
 
-func writeDb(outputPath, title, revision string, sequenced bool, recordData map[string]dbRecordList, stride int, pretty bool) error {
+type dbIndex struct {
+	Title       string `json:"title"`
+	Format      int    `json:"format"`
+	Revision    string `json:"revision"`
+	Sequenced   bool   `json:"sequenced"`
+	Author      string `json:"author"`
+	Url         string `json:"url"`
+	Description string `json:"description"`
+	Attribution string `json:"attribution"`
+}
+
+func (index *dbIndex) setDefaults() {
+	if index.Format == 0 {
+		index.Format = 3
+	}
+	if index.Author == "" {
+		index.Author = "yomichan-import"
+	}
+	if index.Url == "" {
+		index.Url = "https://github.com/FooSoft/yomichan-import"
+	}
+}
+
+func writeDb(outputPath string, index dbIndex, recordData map[string]dbRecordList, stride int, pretty bool) error {
 	var zbuff bytes.Buffer
 	zip := zip.NewWriter(&zbuff)
 
-	marshalJSON := func(obj interface{}, pretty bool) ([]byte, error) {
+	marshalJSON := func(obj any, pretty bool) ([]byte, error) {
 		if pretty {
 			return json.MarshalIndent(obj, "", "    ")
 		}
@@ -186,17 +207,6 @@ func writeDb(outputPath, title, revision string, sequenced bool, recordData map[
 	}
 
 	var err error
-	var db struct {
-		Title     string `json:"title"`
-		Format    int    `json:"format"`
-		Revision  string `json:"revision"`
-		Sequenced bool   `json:"sequenced"`
-	}
-
-	db.Title = title
-	db.Format = databaseFormat
-	db.Revision = revision
-	db.Sequenced = sequenced
 
 	for recordType, recordEntries := range recordData {
 		if _, err := writeDbRecords(recordType, recordEntries); err != nil {
@@ -204,7 +214,8 @@ func writeDb(outputPath, title, revision string, sequenced bool, recordData map[
 		}
 	}
 
-	bytes, err := marshalJSON(db, pretty)
+	index.setDefaults()
+	bytes, err := marshalJSON(index, pretty)
 	if err != nil {
 		return err
 	}
@@ -252,6 +263,39 @@ func hasString(needle string, haystack []string) bool {
 	return false
 }
 
+func intersection(s1, s2 []string) []string {
+	s := []string{}
+	m := make(map[string]bool)
+	for _, e := range s1 {
+		m[e] = true
+	}
+	for _, e := range s2 {
+		if m[e] {
+			s = append(s, e)
+			m[e] = false
+		}
+	}
+	return s
+}
+
+func union(s1, s2 []string) []string {
+	s := []string{}
+	m := make(map[string]bool)
+	for _, e := range s1 {
+		if !m[e] {
+			s = append(s, e)
+			m[e] = true
+		}
+	}
+	for _, e := range s2 {
+		if !m[e] {
+			s = append(s, e)
+			m[e] = true
+		}
+	}
+	return s
+}
+
 func detectFormat(path string) (string, error) {
 	switch filepath.Ext(path) {
 	case ".sqlite":
@@ -263,7 +307,7 @@ func detectFormat(path string) (string, error) {
 	}
 
 	switch filepath.Base(path) {
-	case "JMdict", "JMdict.xml", "JMdict_e", "JMdict_e.xml":
+	case "JMdict", "JMdict.xml", "JMdict_e", "JMdict_e.xml", "JMdict_e_examp":
 		return "edict", nil
 	case "JMnedict", "JMnedict.xml":
 		return "enamdict", nil
@@ -293,7 +337,8 @@ func detectFormat(path string) (string, error) {
 
 func ExportDb(inputPath, outputPath, format, language, title string, stride int, pretty bool) error {
 	handlers := map[string]func(string, string, string, string, int, bool) error{
-		"edict":     jmdictExportDb,
+		"edict":     jmdExportDb,
+		"forms":     formsExportDb,
 		"enamdict":  jmnedictExportDb,
 		"epwing":    epwingExportDb,
 		"kanjidic":  kanjidicExportDb,

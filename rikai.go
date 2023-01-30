@@ -8,8 +8,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const rikaiRevision = "rikai2"
-
 type rikaiEntry struct {
 	kanji string
 	kana  string
@@ -154,11 +152,15 @@ func rikaiExportDb(inputPath, outputPath, language, title string, stride int, pr
 		"tag":  tags.crush(),
 	}
 
+	index := dbIndex{
+		Title:     title,
+		Revision:  "rikai2",
+		Sequenced: true,
+	}
+
 	return writeDb(
 		outputPath,
-		title,
-		rikaiRevision,
-		true,
+		index,
 		recordData,
 		stride,
 		pretty,

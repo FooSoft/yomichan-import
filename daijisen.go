@@ -70,7 +70,7 @@ func (e *daijisenExtractor) extractTerms(entry zig.BookEntry, sequence int) []db
 	if len(expressions) == 0 {
 		term := dbTerm{
 			Expression: reading,
-			Glossary:   []string{entry.Text},
+			Glossary:   []any{entry.Text},
 			Sequence:   sequence,
 		}
 
@@ -82,7 +82,7 @@ func (e *daijisenExtractor) extractTerms(entry zig.BookEntry, sequence int) []db
 			term := dbTerm{
 				Expression: expression,
 				Reading:    reading,
-				Glossary:   []string{entry.Text},
+				Glossary:   []any{entry.Text},
 				Sequence:   sequence,
 			}
 
