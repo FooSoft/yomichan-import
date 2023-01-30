@@ -63,10 +63,20 @@ func doDisplaySenseNumberTag(headword headword, entry jmdict.JmdictEntry, meta j
 }
 
 func jmdictPublicationDate(dictionary jmdict.Jmdict) string {
+	if len(dictionary.Entries) == 0 {
+		return "unknown"
+	}
 	dateEntry := dictionary.Entries[len(dictionary.Entries)-1]
+	if len(dateEntry.Sense) == 0 || len(dateEntry.Sense[0].Glossary) == 0 {
+		return "unknown"
+	}
 	r := regexp.MustCompile(`\d{4}-\d{2}-\d{2}`)
 	jmdictDate := r.FindString(dateEntry.Sense[0].Glossary[0].Content)
-	return jmdictDate
+	if jmdictDate != "" {
+		return jmdictDate
+	} else {
+		return "unknown"
+	}
 }
 
 func createFormsTerm(headword headword, entry jmdict.JmdictEntry, meta jmdictMetadata) (dbTerm, bool) {
