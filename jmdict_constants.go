@@ -5,26 +5,28 @@ type LangCode struct {
 	code     string
 }
 
-const edrdgAttribution = "This publication has included material from the JMdict (EDICT, etc.) dictionary files in accordance with the licence provisions of the Electronic Dictionaries Research Group. See http://www.edrdg.org/"
+const (
+	edrdgAttribution = "This publication has included material from the JMdict (EDICT, etc.) dictionary files in accordance with the licence provisions of the Electronic Dictionaries Research Group. See http://www.edrdg.org/"
 
-const prioritySymbol = "★"
-const rareKanjiSymbol = "🅁"
-const irregularSymbol = "⚠"
-const outdatedSymbol = "⛬"
-const defaultSymbol = "㊒"
+	prioritySymbol  = "★"
+	rareKanjiSymbol = "🅁"
+	irregularSymbol = "⚠"
+	outdatedSymbol  = "⛬"
+	defaultSymbol   = "㊒"
 
-const priorityTagName = "⭐"
-const rareKanjiTagName = "R"
-const irregularTagName = "⚠️"
-const outdatedTagName = "⛬"
-const atejiTagName = "ateji"
-const gikunTagName = "gikun"
+	priorityTagName  = "⭐"
+	rareKanjiTagName = "R"
+	irregularTagName = "⚠️"
+	outdatedTagName  = "⛬"
+	atejiTagName     = "ateji"
+	gikunTagName     = "gikun"
 
-const langMarker = "'🌐 '"
-const noteMarker = "'📝 '"
-const infoMarker = "'ℹ️ '"
-const refMarker = "'➡️ '"
-const antonymMarker = "'🔄 '"
+	langMarker    = "'🌐 '"
+	noteMarker    = "'📝 '"
+	infoMarker    = "'ℹ️ '"
+	refMarker     = "'➡️ '"
+	antonymMarker = "'🔄 '"
+)
 
 var ISOtoFlag = map[string]string{
 	"":    "'🇬🇧 '",
