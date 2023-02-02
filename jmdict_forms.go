@@ -172,18 +172,20 @@ func formsGlossary(headwords []headword) []any {
 	return glossary
 }
 
-func baseFormsTerm(entry jmdict.JmdictEntry) dbTerm {
+func baseFormsTerm(entry jmdict.JmdictEntry, meta jmdictMetadata) dbTerm {
 	term := dbTerm{Sequence: entry.Sequence}
 	headwords := extractHeadwords(entry)
+
 	if needsFormTable(headwords) {
 		term.Glossary = formsTableGlossary(headwords)
 	} else {
 		term.Glossary = formsGlossary(headwords)
 	}
-	for _, sense := range entry.Sense {
-		rules := grammarRules(sense.PartsOfSpeech)
-		term.addRules(rules...)
-	}
+
+	partsOfSpeech := meta.seqToPartsOfSpeech[entry.Sequence]
+	rules := grammarRules(partsOfSpeech)
+	term.addRules(rules...)
+
 	return term
 }
 
@@ -203,7 +205,7 @@ func formsExportDb(inputPath, outputPath, languageName, title string, stride int
 
 	terms := dbTermList{}
 	for _, entry := range dictionary.Entries {
-		baseTerm := baseFormsTerm(entry)
+		baseTerm := baseFormsTerm(entry, meta)
 		headwords := extractHeadwords(entry)
 		for _, h := range headwords {
 			if h.IsSearchOnly {

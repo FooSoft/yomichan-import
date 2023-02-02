@@ -94,16 +94,17 @@ func jmdictFormsTerm(headword headword, entry jmdict.JmdictEntry, meta jmdictMet
 		}
 	}
 
-	term := baseFormsTerm(entry)
+	term := baseFormsTerm(entry, meta)
 	term.Expression = headword.Expression
 	term.Reading = headword.Reading
 
 	term.addTermTags(headword.TermTags...)
-
 	term.addDefinitionTags("forms")
+
 	senseNumber := meta.seqToSenseCount[entry.Sequence] + 1
 	entryDepth := meta.entryDepth[entry.Sequence]
 	term.Score = calculateTermScore(senseNumber, entryDepth, headword)
+
 	return term, true
 }
 
@@ -119,10 +120,11 @@ func jmdictSearchTerm(headword headword, entry jmdict.JmdictEntry, meta jmdictMe
 		Expression: headword.Expression,
 		Sequence:   -entry.Sequence,
 	}
-	for _, sense := range entry.Sense {
-		rules := grammarRules(sense.PartsOfSpeech)
-		term.addRules(rules...)
-	}
+
+	partsOfSpeech := meta.seqToPartsOfSpeech[entry.Sequence]
+	rules := grammarRules(partsOfSpeech)
+	term.addRules(rules...)
+
 	term.addTermTags(headword.TermTags...)
 	term.Score = calculateTermScore(1, 0, headword)
 
