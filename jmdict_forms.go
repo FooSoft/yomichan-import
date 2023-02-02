@@ -8,17 +8,6 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-func kata2hira(word string) string {
-	charMap := func(character rune) rune {
-		if (character >= 'ァ' && character <= 'ヶ') || (character >= 'ヽ' && character <= 'ヾ') {
-			return character - 0x60
-		} else {
-			return character
-		}
-	}
-	return strings.Map(charMap, word)
-}
-
 func (h *headword) InfoSymbols() string {
 	infoSymbols := []string{}
 	if h.IsPriority {
@@ -93,8 +82,8 @@ func needsFormTable(headwords []headword) bool {
 		} else if h.IsKanaOnly() {
 			continue
 		} else if uniqueReading == "" {
-			uniqueReading = kata2hira(h.Reading)
-		} else if uniqueReading != kata2hira(h.Reading) {
+			uniqueReading = katakanaToHiragana(h.Reading)
+		} else if uniqueReading != katakanaToHiragana(h.Reading) {
 			return true
 		}
 	}
