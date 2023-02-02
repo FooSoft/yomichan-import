@@ -79,7 +79,7 @@ func jmdictPublicationDate(dictionary jmdict.Jmdict) string {
 	}
 }
 
-func createFormsTerm(headword headword, entry jmdict.JmdictEntry, meta jmdictMetadata) (dbTerm, bool) {
+func jmdictFormsTerm(headword headword, entry jmdict.JmdictEntry, meta jmdictMetadata) (dbTerm, bool) {
 	// Don't add "forms" terms to non-English dictionaries.
 	// Information would be duplicated if users installed more
 	// than one version.
@@ -107,7 +107,7 @@ func createFormsTerm(headword headword, entry jmdict.JmdictEntry, meta jmdictMet
 	return term, true
 }
 
-func createSearchTerm(headword headword, entry jmdict.JmdictEntry, meta jmdictMetadata) (dbTerm, bool) {
+func jmdictSearchTerm(headword headword, entry jmdict.JmdictEntry, meta jmdictMetadata) (dbTerm, bool) {
 	// Don't add "search" terms to non-English dictionaries.
 	// Information would be duplicated if users installed more
 	// than one version.
@@ -140,7 +140,7 @@ func createSearchTerm(headword headword, entry jmdict.JmdictEntry, meta jmdictMe
 	return term, true
 }
 
-func createSenseTerm(sense jmdict.JmdictSense, senseNumber int, headword headword, entry jmdict.JmdictEntry, meta jmdictMetadata) (dbTerm, bool) {
+func jmdictSenseTerm(sense jmdict.JmdictSense, senseNumber int, headword headword, entry jmdict.JmdictEntry, meta jmdictMetadata) (dbTerm, bool) {
 	if sense.RestrictedReadings != nil && !slices.Contains(sense.RestrictedReadings, headword.Reading) {
 		return dbTerm{}, false
 	}
@@ -176,12 +176,12 @@ func createSenseTerm(sense jmdict.JmdictSense, senseNumber int, headword headwor
 	return term, true
 }
 
-func extractTerms(headword headword, entry jmdict.JmdictEntry, meta jmdictMetadata) ([]dbTerm, bool) {
+func jmdictTerms(headword headword, entry jmdict.JmdictEntry, meta jmdictMetadata) ([]dbTerm, bool) {
 	if meta.seqToSenseCount[entry.Sequence] == 0 {
 		return nil, false
 	}
 	if headword.IsSearchOnly {
-		if searchTerm, ok := createSearchTerm(headword, entry, meta); ok {
+		if searchTerm, ok := jmdictSearchTerm(headword, entry, meta); ok {
 			return []dbTerm{searchTerm}, true
 		} else {
 			return nil, false
@@ -194,20 +194,20 @@ func extractTerms(headword headword, entry jmdict.JmdictEntry, meta jmdictMetada
 			// Do not increment sense number
 			continue
 		}
-		if senseTerm, ok := createSenseTerm(sense, senseNumber, headword, entry, meta); ok {
+		if senseTerm, ok := jmdictSenseTerm(sense, senseNumber, headword, entry, meta); ok {
 			terms = append(terms, senseTerm)
 		}
 		senseNumber += 1
 	}
 
-	if formsTerm, ok := createFormsTerm(headword, entry, meta); ok {
+	if formsTerm, ok := jmdictFormsTerm(headword, entry, meta); ok {
 		terms = append(terms, formsTerm)
 	}
 
 	return terms, true
 }
 
-func jmdExportDb(inputPath string, outputPath string, languageName string, title string, stride int, pretty bool) error {
+func jmdictExportDb(inputPath string, outputPath string, languageName string, title string, stride int, pretty bool) error {
 	if _, ok := langNameToCode[languageName]; !ok {
 		return errors.New("Unrecognized language parameter: " + languageName)
 	}
@@ -229,7 +229,7 @@ func jmdExportDb(inputPath string, outputPath string, languageName string, title
 	for _, entry := range dictionary.Entries {
 		headwords := extractHeadwords(entry)
 		for _, headword := range headwords {
-			if newTerms, ok := extractTerms(headword, entry, meta); ok {
+			if newTerms, ok := jmdictTerms(headword, entry, meta); ok {
 				terms = append(terms, newTerms...)
 			}
 		}

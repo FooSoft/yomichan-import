@@ -207,7 +207,7 @@ func formsExportDb(inputPath, outputPath, languageName, title string, stride int
 		headwords := extractHeadwords(entry)
 		for _, h := range headwords {
 			if h.IsSearchOnly {
-				if term, ok := createSearchTerm(h, entry, meta); ok {
+				if term, ok := jmdictSearchTerm(h, entry, meta); ok {
 					terms = append(terms, term)
 				}
 				continue

@@ -329,7 +329,7 @@ func detectFormat(path string) (string, error) {
 
 func ExportDb(inputPath, outputPath, format, language, title string, stride int, pretty bool) error {
 	handlers := map[string]func(string, string, string, string, int, bool) error{
-		"edict":     jmdExportDb,
+		"edict":     jmdictExportDb,
 		"forms":     formsExportDb,
 		"enamdict":  jmnedictExportDb,
 		"epwing":    epwingExportDb,
