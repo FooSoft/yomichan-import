@@ -162,6 +162,13 @@ func jmdictSenseTerm(sense jmdict.JmdictSense, senseNumber int, headword headwor
 		senseNumberTag := strconv.Itoa(senseNumber)
 		term.addDefinitionTags(senseNumberTag)
 	}
+
+	if len(sense.PartsOfSpeech) == 0 && meta.language != "eng" {
+		// This is a hack to provide part-of-speech info to
+		// non-English versions of JMdict.
+		sense.PartsOfSpeech = meta.seqToPartsOfSpeech[entry.Sequence]
+	}
+
 	term.addDefinitionTags(sense.PartsOfSpeech...)
 	term.addDefinitionTags(sense.Fields...)
 	term.addDefinitionTags(sense.Misc...)
