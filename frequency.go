@@ -8,14 +8,14 @@ import (
 )
 
 func frequencyTermsExportDb(inputPath, outputPath, language, title string, stride int, pretty bool) error {
-	return frequncyExportDb(inputPath, outputPath, language, title, stride, pretty, "term_meta")
+	return frequencyExportDb(inputPath, outputPath, language, title, stride, pretty, "term_meta")
 }
 
 func frequencyKanjiExportDb(inputPath, outputPath, language, title string, stride int, pretty bool) error {
-	return frequncyExportDb(inputPath, outputPath, language, title, stride, pretty, "kanji_meta")
+	return frequencyExportDb(inputPath, outputPath, language, title, stride, pretty, "kanji_meta")
 }
 
-func frequncyExportDb(inputPath, outputPath, language, title string, stride int, pretty bool, key string) error {
+func frequencyExportDb(inputPath, outputPath, language, title string, stride int, pretty bool, key string) error {
 	reader, err := os.Open(inputPath)
 	if err != nil {
 		return err
