@@ -96,39 +96,39 @@ func knownEntityTags() []dbTag {
 		// <misc> miscellaneous sense info
 		dbTag{Name: "abbr", Order: 0, Score: 0, Category: ""},              // abbreviation
 		dbTag{Name: "arch", Order: -4, Score: 0, Category: "archaism"},     // archaism
-		dbTag{Name: "char", Order: 0, Score: 0, Category: ""},              // character
+		dbTag{Name: "char", Order: 4, Score: 0, Category: "name"},          // character
 		dbTag{Name: "chn", Order: 0, Score: 0, Category: ""},               // children's language
 		dbTag{Name: "col", Order: 0, Score: 0, Category: ""},               // colloquialism
 		dbTag{Name: "company", Order: 4, Score: 0, Category: "name"},       // company name
-		dbTag{Name: "creat", Order: 0, Score: 0, Category: ""},             // creature
+		dbTag{Name: "creat", Order: 4, Score: 0, Category: "name"},         // creature
 		dbTag{Name: "dated", Order: -4, Score: 0, Category: "archaism"},    // dated term
-		dbTag{Name: "dei", Order: 0, Score: 0, Category: ""},               // deity
+		dbTag{Name: "dei", Order: 4, Score: 0, Category: "name"},           // deity
 		dbTag{Name: "derog", Order: 0, Score: 0, Category: ""},             // derogatory
-		dbTag{Name: "doc", Order: 0, Score: 0, Category: ""},               // document
+		dbTag{Name: "doc", Order: 4, Score: 0, Category: "name"},           // document
 		dbTag{Name: "euph", Order: 0, Score: 0, Category: ""},              // euphemistic
-		dbTag{Name: "ev", Order: 0, Score: 0, Category: ""},                // event
+		dbTag{Name: "ev", Order: 4, Score: 0, Category: "name"},            // event
 		dbTag{Name: "fam", Order: 0, Score: 0, Category: ""},               // familiar language
 		dbTag{Name: "fem", Order: 4, Score: 0, Category: "name"},           // female term, language, or name
-		dbTag{Name: "fict", Order: 0, Score: 0, Category: ""},              // fiction
+		dbTag{Name: "fict", Order: 4, Score: 0, Category: "name"},          // fiction
 		dbTag{Name: "form", Order: 0, Score: 0, Category: ""},              // formal or literary term
 		dbTag{Name: "given", Order: 4, Score: 0, Category: "name"},         // given name or forename, gender not specified
-		dbTag{Name: "group", Order: 0, Score: 0, Category: ""},             // group
+		dbTag{Name: "group", Order: 4, Score: 0, Category: "name"},         // group
 		dbTag{Name: "hist", Order: 0, Score: 0, Category: ""},              // historical term
 		dbTag{Name: "hon", Order: 0, Score: 0, Category: ""},               // honorific or respectful (sonkeigo) language
 		dbTag{Name: "hum", Order: 0, Score: 0, Category: ""},               // humble (kenjougo) language
 		dbTag{Name: "id", Order: -5, Score: 0, Category: "expression"},     // idiomatic expression
 		dbTag{Name: "joc", Order: 0, Score: 0, Category: ""},               // jocular, humorous term
-		dbTag{Name: "leg", Order: 0, Score: 0, Category: ""},               // legend
+		dbTag{Name: "leg", Order: 4, Score: 0, Category: "name"},           // legend
 		dbTag{Name: "m-sl", Order: 0, Score: 0, Category: ""},              // manga slang
 		dbTag{Name: "male", Order: 4, Score: 0, Category: "name"},          // male term, language, or name
 		dbTag{Name: "masc", Order: 4, Score: 0, Category: "name"},          // male term, language, or name
-		dbTag{Name: "myth", Order: 0, Score: 0, Category: ""},              // mythology
+		dbTag{Name: "myth", Order: 4, Score: 0, Category: "name"},          // mythology
 		dbTag{Name: "net-sl", Order: 0, Score: 0, Category: ""},            // Internet slang
-		dbTag{Name: "obj", Order: 0, Score: 0, Category: ""},               // object
+		dbTag{Name: "obj", Order: 4, Score: 0, Category: "name"},           // object
 		dbTag{Name: "obs", Order: -4, Score: 0, Category: "archaism"},      // obsolete term
 		dbTag{Name: "on-mim", Order: 0, Score: 0, Category: ""},            // onomatopoeic or mimetic word
 		dbTag{Name: "organization", Order: 4, Score: 0, Category: "name"},  // organization name
-		dbTag{Name: "oth", Order: 0, Score: 0, Category: ""},               // other
+		dbTag{Name: "oth", Order: 4, Score: 0, Category: "name"},           // other
 		dbTag{Name: "person", Order: 4, Score: 0, Category: "name"},        // full name of a particular person
 		dbTag{Name: "place", Order: 4, Score: 0, Category: "name"},         // place name
 		dbTag{Name: "poet", Order: 0, Score: 0, Category: ""},              // poetical term
@@ -137,10 +137,10 @@ func knownEntityTags() []dbTag {
 		dbTag{Name: "proverb", Order: 0, Score: 0, Category: "expression"}, // proverb
 		dbTag{Name: "quote", Order: 0, Score: 0, Category: "expression"},   // quotation
 		dbTag{Name: "rare", Order: -4, Score: 0, Category: "archaism"},     // rare
-		dbTag{Name: "relig", Order: 0, Score: 0, Category: ""},             // religion
+		dbTag{Name: "relig", Order: 4, Score: 0, Category: "name"},         // religion
 		dbTag{Name: "sens", Order: 0, Score: 0, Category: ""},              // sensitive
-		dbTag{Name: "serv", Order: 0, Score: 0, Category: ""},              // service
-		dbTag{Name: "ship", Order: 0, Score: 0, Category: ""},              // ship name
+		dbTag{Name: "serv", Order: 4, Score: 0, Category: "name"},          // service
+		dbTag{Name: "ship", Order: 4, Score: 0, Category: "name"},          // ship name
 		dbTag{Name: "sl", Order: 0, Score: 0, Category: ""},                // slang
 		dbTag{Name: "station", Order: 4, Score: 0, Category: "name"},       // railway station
 		dbTag{Name: "surname", Order: 4, Score: 0, Category: "name"},       // family or surname
