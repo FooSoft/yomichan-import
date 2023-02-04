@@ -44,10 +44,7 @@ func replaceIterationMarks(text string) string {
 // Returns nil if no segmentation is possible.
 func makeKanaSegments(kana string) (segments []string) {
 	hiragana := replaceIterationMarks(katakanaToHiragana(kana))
-	kanaRunes := []rune{}
-	for _, kanaRune := range hiragana {
-		kanaRunes = append(kanaRunes, kanaRune)
-	}
+	kanaRunes := []rune(hiragana)
 	kanaRuneCount := len(kanaRunes)
 	for i := 0; i < kanaRuneCount; i++ {
 		for j := 0; j < kanaRuneCount-i; j++ {
