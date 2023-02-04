@@ -8,19 +8,22 @@ import (
 )
 
 func jmnedictPublicationDate(dictionary jmdict.Jmnedict) string {
+	unknownDate := "unknown"
+	idx := len(dictionary.Entries) - 1
 	if len(dictionary.Entries) == 0 {
-		return "unknown"
+		return unknownDate
+	} else if len(dictionary.Entries[idx].Translations) == 0 {
+		return unknownDate
+	} else if len(dictionary.Entries[idx].Translations[0].Translations) == 0 {
+		return unknownDate
 	}
-	dateEntry := dictionary.Entries[len(dictionary.Entries)-1]
-	if len(dateEntry.Translations) == 0 || len(dateEntry.Translations[0].Translations) == 0 {
-		return "unknown"
-	}
+	dateGloss := dictionary.Entries[idx].Translations[0].Translations[0]
 	r := regexp.MustCompile(`\d{4}-\d{2}-\d{2}`)
-	jmnedictDate := r.FindString(dateEntry.Translations[0].Translations[0])
-	if jmnedictDate != "" {
-		return jmnedictDate
+	date := r.FindString(dateGloss)
+	if date != "" {
+		return date
 	} else {
-		return "unknown"
+		return unknownDate
 	}
 }
 

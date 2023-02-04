@@ -63,19 +63,22 @@ func doDisplaySenseNumberTag(headword headword, entry jmdict.JmdictEntry, meta j
 }
 
 func jmdictPublicationDate(dictionary jmdict.Jmdict) string {
+	unknownDate := "unknown"
+	idx := len(dictionary.Entries) - 1
 	if len(dictionary.Entries) == 0 {
-		return "unknown"
+		return unknownDate
+	} else if len(dictionary.Entries[idx].Sense) == 0 {
+		return unknownDate
+	} else if len(dictionary.Entries[idx].Sense[0].Glossary) == 0 {
+		return unknownDate
 	}
-	dateEntry := dictionary.Entries[len(dictionary.Entries)-1]
-	if len(dateEntry.Sense) == 0 || len(dateEntry.Sense[0].Glossary) == 0 {
-		return "unknown"
-	}
+	dateGloss := dictionary.Entries[idx].Sense[0].Glossary[0].Content
 	r := regexp.MustCompile(`\d{4}-\d{2}-\d{2}`)
-	jmdictDate := r.FindString(dateEntry.Sense[0].Glossary[0].Content)
-	if jmdictDate != "" {
-		return jmdictDate
+	date := r.FindString(dateGloss)
+	if date != "" {
+		return date
 	} else {
-		return "unknown"
+		return unknownDate
 	}
 }
 
