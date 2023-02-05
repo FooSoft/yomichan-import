@@ -13,6 +13,7 @@ type jmdictMetadata struct {
 	language           string
 	condensedGlosses   map[senseID]string
 	seqToSenseCount    map[sequence]int
+	seqToPartsOfSpeech map[sequence][]string
 	seqToMainHeadword  map[sequence]headword
 	expHashToReadings  map[hash][]string
 	headwordHashToSeqs map[hash][]sequence
@@ -31,7 +32,7 @@ type senseID struct {
 	number   int
 }
 
-func (meta *jmdictMetadata) CalculateEntryDepth(headwords []headword, entrySequence sequence) {
+func (meta *jmdictMetadata) CalculateEntryDepth(headwords []headword, seq sequence) {
 	// This is to ensure that terms are grouped among their
 	// entries of origin and displayed in correct sequential order
 	maxDepth := 0
@@ -48,39 +49,63 @@ func (meta *jmdictMetadata) CalculateEntryDepth(headwords []headword, entrySeque
 			}
 		}
 	}
-	meta.entryDepth[entrySequence] = maxDepth
+	meta.entryDepth[seq] = maxDepth
 }
 
-func (meta *jmdictMetadata) AddHeadword(headword headword, entry jmdict.JmdictEntry) {
-
-	// Determine how many senses are in this entry for this language
-	if _, ok := meta.seqToSenseCount[entry.Sequence]; !ok {
-		senseCount := 0
-		for _, entrySense := range entry.Sense {
-			for _, gloss := range entrySense.Glossary {
-				if glossContainsLanguage(gloss, meta.language) {
-					senseCount += 1
-					break
-				}
+func (meta *jmdictMetadata) AddEntry(entry jmdict.JmdictEntry) {
+	partsOfSpeech := []string{}
+	senseCount := 0
+	for _, sense := range entry.Sense {
+		// Only English-language senses contain part-of-speech info,
+		// but other languages need them for deinflection rules.
+		for _, pos := range sense.PartsOfSpeech {
+			if !slices.Contains(partsOfSpeech, pos) {
+				partsOfSpeech = append(partsOfSpeech, pos)
 			}
 		}
-		meta.seqToSenseCount[entry.Sequence] = senseCount
-	}
 
-	if meta.seqToSenseCount[entry.Sequence] == 0 {
+		if glossaryContainsLanguage(sense.Glossary, meta.language) {
+			senseCount += 1
+		} else {
+			continue
+		}
+
+		for _, reference := range sense.References {
+			meta.references = append(meta.references, reference)
+		}
+		for _, antonym := range sense.Antonyms {
+			meta.references = append(meta.references, antonym)
+		}
+
+		currentSenseID := senseID{entry.Sequence, senseCount}
+		glosses := []string{}
+		for _, gloss := range sense.Glossary {
+			if glossContainsLanguage(gloss, meta.language) && gloss.Type == nil {
+				glosses = append(glosses, gloss.Content)
+			}
+		}
+		meta.condensedGlosses[currentSenseID] = strings.Join(glosses, "; ")
+	}
+	meta.seqToPartsOfSpeech[entry.Sequence] = partsOfSpeech
+	meta.seqToSenseCount[entry.Sequence] = senseCount
+}
+
+func (meta *jmdictMetadata) AddHeadword(headword headword, seq sequence) {
+	if meta.seqToSenseCount[seq] == 0 {
 		return
 	}
 
 	// main headwords (first ones that are found in entries).
-	if _, ok := meta.seqToMainHeadword[entry.Sequence]; !ok {
-		meta.seqToMainHeadword[entry.Sequence] = headword
+	if _, ok := meta.seqToMainHeadword[seq]; !ok {
+		meta.seqToMainHeadword[seq] = headword
 	}
 
 	// hash the term pair so we can determine if it's used
 	// in more than one JMdict entry later.
 	headwordHash := headword.Hash()
-	if !slices.Contains(meta.headwordHashToSeqs[headwordHash], entry.Sequence) {
-		meta.headwordHashToSeqs[headwordHash] = append(meta.headwordHashToSeqs[headwordHash], entry.Sequence)
+	if !slices.Contains(meta.headwordHashToSeqs[headwordHash], seq) {
+		meta.headwordHashToSeqs[headwordHash] =
+			append(meta.headwordHashToSeqs[headwordHash], seq)
 	}
 
 	// hash the expression so that we can determine if we
@@ -88,7 +113,8 @@ func (meta *jmdictMetadata) AddHeadword(headword headword, entry jmdict.JmdictEn
 	// in reference notes later.
 	expHash := headword.ExpHash()
 	if !slices.Contains(meta.expHashToReadings[expHash], headword.Reading) {
-		meta.expHashToReadings[expHash] = append(meta.expHashToReadings[expHash], headword.Reading)
+		meta.expHashToReadings[expHash] =
+			append(meta.expHashToReadings[expHash], headword.Reading)
 	}
 
 	// e.g. for JMdict (English) we expect to end up with
@@ -100,41 +126,9 @@ func (meta *jmdictMetadata) AddHeadword(headword headword, entry jmdict.JmdictEn
 		searchHash{headword.ReadingHash(), headword.IsPriority},
 	}
 	for _, x := range searchHashes {
-		if !slices.Contains(meta.seqToSearchHashes[entry.Sequence], x) {
-			meta.seqToSearchHashes[entry.Sequence] = append(meta.seqToSearchHashes[entry.Sequence], x)
+		if !slices.Contains(meta.seqToSearchHashes[seq], x) {
+			meta.seqToSearchHashes[seq] = append(meta.seqToSearchHashes[seq], x)
 		}
-	}
-
-	currentSenseNumber := 1
-	for _, entrySense := range entry.Sense {
-		if !glossaryContainsLanguage(entrySense.Glossary, meta.language) {
-			continue
-		}
-		if entrySense.RestrictedReadings != nil && !slices.Contains(entrySense.RestrictedReadings, headword.Reading) {
-			currentSenseNumber += 1
-			continue
-		}
-		if entrySense.RestrictedKanji != nil && !slices.Contains(entrySense.RestrictedKanji, headword.Expression) {
-			currentSenseNumber += 1
-			continue
-		}
-
-		allReferences := append(entrySense.References, entrySense.Antonyms...)
-		for _, reference := range allReferences {
-			meta.references = append(meta.references, reference)
-		}
-
-		currentSense := senseID{entry.Sequence, currentSenseNumber}
-		if meta.condensedGlosses[currentSense] == "" {
-			glosses := []string{}
-			for _, gloss := range entrySense.Glossary {
-				if glossContainsLanguage(gloss, meta.language) && gloss.Type == nil {
-					glosses = append(glosses, gloss.Content)
-				}
-			}
-			meta.condensedGlosses[currentSense] = strings.Join(glosses, "; ")
-		}
-		currentSenseNumber += 1
 	}
 }
 
@@ -142,6 +136,7 @@ func newJmdictMetadata(dictionary jmdict.Jmdict, languageName string) jmdictMeta
 	meta := jmdictMetadata{
 		language:           langNameToCode[languageName],
 		seqToSenseCount:    make(map[sequence]int),
+		seqToPartsOfSpeech: make(map[sequence][]string),
 		condensedGlosses:   make(map[senseID]string),
 		seqToMainHeadword:  make(map[sequence]headword),
 		expHashToReadings:  make(map[hash][]string),
@@ -157,10 +152,11 @@ func newJmdictMetadata(dictionary jmdict.Jmdict, languageName string) jmdictMeta
 	}
 
 	for _, entry := range dictionary.Entries {
+		meta.AddEntry(entry)
 		headwords := extractHeadwords(entry)
 		formCount := 0
 		for _, headword := range headwords {
-			meta.AddHeadword(headword, entry)
+			meta.AddHeadword(headword, entry.Sequence)
 			if !headword.IsSearchOnly {
 				formCount += 1
 			}

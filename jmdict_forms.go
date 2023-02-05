@@ -8,17 +8,6 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-func kata2hira(word string) string {
-	charMap := func(character rune) rune {
-		if (character >= 'ァ' && character <= 'ヶ') || (character >= 'ヽ' && character <= 'ヾ') {
-			return character - 0x60
-		} else {
-			return character
-		}
-	}
-	return strings.Map(charMap, word)
-}
-
 func (h *headword) InfoSymbols() string {
 	infoSymbols := []string{}
 	if h.IsPriority {
@@ -93,8 +82,8 @@ func needsFormTable(headwords []headword) bool {
 		} else if h.IsKanaOnly() {
 			continue
 		} else if uniqueReading == "" {
-			uniqueReading = kata2hira(h.Reading)
-		} else if uniqueReading != kata2hira(h.Reading) {
+			uniqueReading = katakanaToHiragana(h.Reading)
+		} else if uniqueReading != katakanaToHiragana(h.Reading) {
 			return true
 		}
 	}
@@ -183,18 +172,20 @@ func formsGlossary(headwords []headword) []any {
 	return glossary
 }
 
-func baseFormsTerm(entry jmdict.JmdictEntry) dbTerm {
+func baseFormsTerm(entry jmdict.JmdictEntry, meta jmdictMetadata) dbTerm {
 	term := dbTerm{Sequence: entry.Sequence}
 	headwords := extractHeadwords(entry)
+
 	if needsFormTable(headwords) {
 		term.Glossary = formsTableGlossary(headwords)
 	} else {
 		term.Glossary = formsGlossary(headwords)
 	}
-	for _, sense := range entry.Sense {
-		rules := grammarRules(sense.PartsOfSpeech)
-		term.addRules(rules...)
-	}
+
+	partsOfSpeech := meta.seqToPartsOfSpeech[entry.Sequence]
+	rules := grammarRules(partsOfSpeech)
+	term.addRules(rules...)
+
 	return term
 }
 
@@ -214,11 +205,11 @@ func formsExportDb(inputPath, outputPath, languageName, title string, stride int
 
 	terms := dbTermList{}
 	for _, entry := range dictionary.Entries {
-		baseTerm := baseFormsTerm(entry)
+		baseTerm := baseFormsTerm(entry, meta)
 		headwords := extractHeadwords(entry)
 		for _, h := range headwords {
 			if h.IsSearchOnly {
-				if term, ok := createSearchTerm(h, entry, meta); ok {
+				if term, ok := jmdictSearchTerm(h, entry, meta); ok {
 					terms = append(terms, term)
 				}
 				continue

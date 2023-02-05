@@ -9,6 +9,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"golang.org/x/exp/slices"
 )
 
 const (
@@ -116,7 +118,7 @@ type dbKanjiList []dbKanji
 
 func (kanji *dbKanji) addTags(tags ...string) {
 	for _, tag := range tags {
-		if !hasString(tag, kanji.Tags) {
+		if !slices.Contains(kanji.Tags, tag) {
 			kanji.Tags = append(kanji.Tags, tag)
 		}
 	}
@@ -245,22 +247,12 @@ func writeDb(outputPath string, index dbIndex, recordData map[string]dbRecordLis
 
 func appendStringUnique(target []string, source ...string) []string {
 	for _, str := range source {
-		if !hasString(str, target) {
+		if !slices.Contains(target, str) {
 			target = append(target, str)
 		}
 	}
 
 	return target
-}
-
-func hasString(needle string, haystack []string) bool {
-	for _, value := range haystack {
-		if needle == value {
-			return true
-		}
-	}
-
-	return false
 }
 
 func intersection(s1, s2 []string) []string {
@@ -337,7 +329,7 @@ func detectFormat(path string) (string, error) {
 
 func ExportDb(inputPath, outputPath, format, language, title string, stride int, pretty bool) error {
 	handlers := map[string]func(string, string, string, string, int, bool) error{
-		"edict":     jmdExportDb,
+		"edict":     jmdictExportDb,
 		"forms":     formsExportDb,
 		"enamdict":  jmnedictExportDb,
 		"epwing":    epwingExportDb,
