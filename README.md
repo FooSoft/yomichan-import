@@ -1,5 +1,8 @@
 # Yomichan Import
 
+*Note: this project is no longer maintained. Please see [this
+post](https://foosoft.net/posts/sunsetting-the-yomichan-project/) for more information.*
+
 Yomichan Import allows users of the [Yomichan](https://foosoft.net/projects/yomichan) extension to import custom
 dictionary files. It currently supports the following formats:
 
